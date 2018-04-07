@@ -4,26 +4,16 @@
 #include <unistd.h>
 #include "./estructuras.h"
 
-
-void matriz_destroy(int **matriz, int filas)
-{
-	for (int filai = 0; filai < filas ; filai++) {
-		free(matriz[filai]);
-	}
-	free(matriz);
-}
-
-
 int main(int argc, char *argv[])
 {
-	char version[32];
 	/* El programa recibe 4 parametros (por ahora, despues hay que agregar el de la v3) */
 	if(argc != 5 && argc != 6)
 	{
 		printf("Modo de uso: %s <version> <file> <quantum> <queues> [<S>]\n", argv[0]);
 		return 1;
 	}
-	strcpy(version, argv[1]);
+
+	char* version = argv[1];
 
 	if(argc == 5 && (strcmp(version,"v1") != 0))
 	{
@@ -45,9 +35,12 @@ int main(int argc, char *argv[])
 		int S = atoi(argv[5]); //guardar S solo si estamos en v2 o v3
 		printf("S: %i\n", S);
 	}
-	if (!(archivo_procesos)){
+	if (!(archivo_procesos)) {
+		printf("Archivo %s no existe\n", input_file);
 		return 1;
 	}
+
+	/*
 
 	char matriz_procesos[300][255]; //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
 	int **matriz_tiempos = malloc(sizeof(float *) * 300); //lo mismo
@@ -87,7 +80,7 @@ int main(int argc, char *argv[])
 	printf("proceso 0: %s\n", matriz_procesos[0]);
 	printf("quantum: %i, queues: %i\n", quantum, queues);
 
-	matriz_destroy(matriz_tiempos, cantidad_de_procesos);
+	matriz_destroy(matriz_tiempos, cantidad_de_procesos);*/
 
 	return 0;
 }
