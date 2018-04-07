@@ -4,6 +4,15 @@
 #include <unistd.h>
 
 
+void matriz_destroy(int **matriz, int filas)
+{
+	for (int filai = 0; filai < filas ; filai++) {
+		free(matriz[filai]);
+	}
+	free(matriz);
+}
+
+
 int main(int argc, char *argv[])
 {
 	char version[32];
@@ -33,22 +42,25 @@ int main(int argc, char *argv[])
 	archivo_procesos = fopen(input_file, "r");	//leyendo archivo de input
 	if (argc == 6) {
 		int S = atoi(argv[5]); //guardar S solo si estamos en v2 o v3
+		printf("S: %i\n", S);
 	}
 	if (!(archivo_procesos)){
 		return 1;
 	}
 
-	char *matriz_procesos = malloc(sizeof(char) * 300); //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
+	char matriz_procesos[300][255]; //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
 	int **matriz_tiempos = malloc(sizeof(float *) * 300); //lo mismo
 	char linea[255];
 	char nombre_proceso[255];
 	int tiempo_inicio;
 	int cantidad_valores;
 	int valor_actual;
+	int cantidad_de_procesos;
 	int i = 0; //indice del proceso actual a guardar
 	while (fscanf(archivo_procesos, "%s", linea) != EOF) {
 		strcpy(nombre_proceso, linea);
-		matriz_procesos[i] = &nombre_proceso;
+		strcpy(matriz_procesos[i], nombre_proceso);
+		//matriz_procesos[i] = nombre_proceso;
 		printf("nombre_proceso: %s\n", nombre_proceso);
 		fscanf(archivo_procesos, "%s", linea);
 		tiempo_inicio = atoi(linea);
@@ -67,9 +79,14 @@ int main(int argc, char *argv[])
 		}
 		i += 1;
 	}
+	cantidad_de_procesos = i;
 	fclose(archivo_procesos);
 
+	printf("%i\n", matriz_tiempos[0][3]);
+	printf("proceso 0: %s\n", matriz_procesos[0]);
 	printf("quantum: %i, queues: %i\n", quantum, queues);
+
+	matriz_destroy(matriz_tiempos, cantidad_de_procesos);
 
 	return 0;
 }
