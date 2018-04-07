@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 int main(int argc, char *argv[])
@@ -26,20 +27,47 @@ int main(int argc, char *argv[])
 	}
 
 	char* input_file = argv[2];
-	char *p;
-  int quantum;
-  long conv = strtol(argv[3], &p, 10);
-  quantum = conv; //guardando quantum
-  int queues;
-  long conv2 = strtol(argv[4], &p, 10);
-  queues = conv2; //guardando queues
+  int quantum = atoi(argv[3]);
+  int queues = atoi(argv[4]);
 	FILE *archivo_procesos;
 	archivo_procesos = fopen(input_file, "r");	//leyendo archivo de input
-	if (argc == 6) { 
-		int S;
-	  long conv3 = strtol(argv[5], &p, 10);
-	  S = conv3;	//guardar S solo si estamos en v2 o v3
+	if (argc == 6) {
+		int S = atoi(argv[5]); //guardar S solo si estamos en v2 o v3
 	}
+	if (!(archivo_procesos)){
+		return 1;
+	}
+
+	char *matriz_procesos = malloc(sizeof(char) * 300); //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
+	int **matriz_tiempos = malloc(sizeof(float *) * 300); //lo mismo
+	char linea[255];
+	char nombre_proceso[255];
+	int tiempo_inicio;
+	int cantidad_valores;
+	int valor_actual;
+	int i = 0; //indice del proceso actual a guardar
+	while (fscanf(archivo_procesos, "%s", linea) != EOF) {
+		strcpy(nombre_proceso, linea);
+		matriz_procesos[i] = &nombre_proceso;
+		printf("nombre_proceso: %s\n", nombre_proceso);
+		fscanf(archivo_procesos, "%s", linea);
+		tiempo_inicio = atoi(linea);
+		printf("tiempo inicio: %i\n", tiempo_inicio);
+		fscanf(archivo_procesos, "%s", linea);
+		cantidad_valores = atoi(linea);
+		printf("N: %i\n", cantidad_valores);
+		matriz_tiempos[i] = malloc(sizeof(int) * (cantidad_valores + 2));
+		matriz_tiempos[i][0] = tiempo_inicio;
+		matriz_tiempos[i][1] = cantidad_valores;
+		for (int k = 0; k < cantidad_valores; k++) { 	//pasamos todos los A_i del procesos
+			fscanf(archivo_procesos, "%s", linea);
+			valor_actual = atoi(linea);
+			matriz_tiempos[i][k+2] = valor_actual;
+			printf("A_%i: %i\n", k, valor_actual);
+		}
+		i += 1;
+	}
+	fclose(archivo_procesos);
 
 	printf("quantum: %i, queues: %i\n", quantum, queues);
 
