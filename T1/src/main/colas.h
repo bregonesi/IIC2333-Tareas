@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <procesos.h>
+#include "procesos.h"
 
 #define TRUE  1
 #define FALSE	0
@@ -10,6 +10,8 @@ typedef struct Queue {    //cola para MLFQ
     Proceso *head;
     Proceso *tail;
     int size;
+		int prioridad;
+		struct Queue *next;
 } Queue;
 
 Queue *ConstructQueue();
