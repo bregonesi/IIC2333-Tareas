@@ -25,8 +25,8 @@ typedef enum process_status ProcessStatus;
 struct Process
 {
 	int PID;
-  int prioridad;
-	char nombre;
+  int tiempo_inicio;
+	char *nombre;
 	ProcessStatus estado;
   struct Process *next;
 	Time_Queue linea_de_tiempo;

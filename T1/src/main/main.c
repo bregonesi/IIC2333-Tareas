@@ -3,6 +3,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "procesos.h"
+
 int main(int argc, char *argv[])
 {
 	/* El programa recibe 4 parametros (por ahora, despues hay que agregar el de la v3) */
@@ -39,23 +41,30 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+
 	char nombre_proceso[255];
 	int tiempo_inicio;
 	int cantidad_valores;
 	int valor_actual;
 	int pid = 0;
 	while (fscanf(archivo_procesos, "%s", nombre_proceso) != EOF) {
-		printf("PID: %i\n", pid++);
-		printf("nombre_proceso: %s\n", nombre_proceso);
+		Proceso *proceso = malloc(sizeof(Proceso));
+
+		proceso->PID = pid++;
+		proceso->nombre = nombre_proceso;
 		fscanf(archivo_procesos, "%i", &tiempo_inicio);
-		printf("tiempo inicio: %i\n", tiempo_inicio);
+		proceso->tiempo_inicio = tiempo_inicio;
 		fscanf(archivo_procesos, "%i", &cantidad_valores);
-		printf("cantidad valores: %i\n", cantidad_valores);
+
+		Time_Queue *linea_tiempo = malloc(sizeof(Time_Queue));
+		linea_tiempo->size = cantidad_valores;
 
 		for(int i = 0; i < cantidad_valores; i++) {
 			fscanf(archivo_procesos, "%i", &valor_actual);
-			printf("valor actual: %i\n", valor_actual);
+			add_tiempo_linea_tiempo(linea_tiempo, valor_actual);
 		}
+
+		proceso->linea_de_tiempo = *linea_tiempo;
 	}
 	fclose(archivo_procesos);
 
