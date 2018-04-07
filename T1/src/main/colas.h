@@ -10,6 +10,8 @@ typedef struct Queue {    //cola para MLFQ
     Proceso *head;
     Proceso *tail;
     int size;
+		int prioridad;
+		struct Queue *next;
 } Queue;
 
 Queue *ConstructQueue();
