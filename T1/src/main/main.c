@@ -39,8 +39,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	//char matriz_procesos[300][255]; //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
-	//int **matriz_tiempos = malloc(sizeof(float *) * 300); //lo mismo
 	char nombre_proceso[255];
 	int tiempo_inicio;
 	int cantidad_valores;
