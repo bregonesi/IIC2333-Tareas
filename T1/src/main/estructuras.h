@@ -4,12 +4,21 @@
 #define TRUE  1
 #define FALSE	0
 
+/** Representa un símbolo de notación musical, ya sea nota o silencio */
+enum process_status
+{
+	RUNNING,
+	READY,
+	FINISHED
+};
+typedef enum process_status ProcessStatus;
+
 struct Process
 {
 	int PID;
   int prioridad;
 	char nombre;
-	int estado; // 1=running, 2=ready, 3=finished
+	ProcessStatus estado;
   struct Process *next;
 };
 typedef struct Process Proceso;
