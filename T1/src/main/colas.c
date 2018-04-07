@@ -1,40 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "colas.c"
+#include "colas.h"
 
 #define TRUE  1
 #define FALSE	0
-
-/** Representa un símbolo de notación musical, ya sea nota o silencio */
-enum process_status
-{
-	RUNNING,
-	READY,
-	FINISHED
-};
-typedef enum process_status ProcessStatus;
-
-struct Process
-{
-	int PID;
-  int prioridad;
-	char nombre;
-	ProcessStatus estado;
-  struct Process *next;
-};
-typedef struct Process Proceso;
-
-typedef struct Queue {    //cola para MLFQ
-    Proceso *head;
-    Proceso *tail;
-    int size;
-} Queue;
-
-Queue *ConstructQueue();
-void DestructQueue(Queue *queue);
-int Enqueue(Queue *pQueue, Proceso *item);
-Proceso *Dequeue(Queue *pQueue);
-int isEmpty(Queue* pQueue);
 
 Queue *ConstructQueue() {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
