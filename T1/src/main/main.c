@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "./estructuras.h"
 
 int main(int argc, char *argv[])
 {
@@ -40,47 +39,29 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	/*
-
-	char matriz_procesos[300][255]; //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
-	int **matriz_tiempos = malloc(sizeof(float *) * 300); //lo mismo
-	char linea[255];
+	//char matriz_procesos[300][255]; //por mientras, despues hay que hacerlo dinamico (no se sabe cuantos procesos son)
+	//int **matriz_tiempos = malloc(sizeof(float *) * 300); //lo mismo
 	char nombre_proceso[255];
 	int tiempo_inicio;
 	int cantidad_valores;
 	int valor_actual;
-	int cantidad_de_procesos;
-	int i = 0; //indice del proceso actual a guardar
-	while (fscanf(archivo_procesos, "%s", linea) != EOF) {
-		strcpy(nombre_proceso, linea);
-		strcpy(matriz_procesos[i], nombre_proceso);
-		//matriz_procesos[i] = nombre_proceso;
+	int pid = 0;
+	while (fscanf(archivo_procesos, "%s", nombre_proceso) != EOF) {
+		printf("PID: %i\n", pid++);
 		printf("nombre_proceso: %s\n", nombre_proceso);
-		fscanf(archivo_procesos, "%s", linea);
-		tiempo_inicio = atoi(linea);
+		fscanf(archivo_procesos, "%i", &tiempo_inicio);
 		printf("tiempo inicio: %i\n", tiempo_inicio);
-		fscanf(archivo_procesos, "%s", linea);
-		cantidad_valores = atoi(linea);
-		printf("N: %i\n", cantidad_valores);
-		matriz_tiempos[i] = malloc(sizeof(int) * (cantidad_valores + 2));
-		matriz_tiempos[i][0] = tiempo_inicio;
-		matriz_tiempos[i][1] = cantidad_valores;
-		for (int k = 0; k < cantidad_valores; k++) { 	//pasamos todos los A_i del procesos
-			fscanf(archivo_procesos, "%s", linea);
-			valor_actual = atoi(linea);
-			matriz_tiempos[i][k+2] = valor_actual;
-			printf("A_%i: %i\n", k, valor_actual);
+		fscanf(archivo_procesos, "%i", &cantidad_valores);
+		printf("cantidad valores: %i\n", cantidad_valores);
+
+		for(int i = 0; i < cantidad_valores; i++) {
+			fscanf(archivo_procesos, "%i", &valor_actual);
+			printf("valor actual: %i\n", valor_actual);
 		}
-		i += 1;
 	}
-	cantidad_de_procesos = i;
 	fclose(archivo_procesos);
 
-	printf("%i\n", matriz_tiempos[0][3]);
-	printf("proceso 0: %s\n", matriz_procesos[0]);
 	printf("quantum: %i, queues: %i\n", quantum, queues);
-
-	matriz_destroy(matriz_tiempos, cantidad_de_procesos);*/
 
 	return 0;
 }

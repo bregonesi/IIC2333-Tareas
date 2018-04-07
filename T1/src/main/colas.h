@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <procesos.h>
+#include "procesos.h"
 
 #define TRUE  1
 #define FALSE	0
