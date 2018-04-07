@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "./estructuras.h"
 
 
 void matriz_destroy(int **matriz, int filas)
