@@ -6,6 +6,16 @@
 #define FALSE	0
 
 
+Queue *ConstructMLFQueue(int k) { //k corresponde a la cantidad de queues para el algoritmo
+    Queue *gran_cola = ConstructQueue();
+    for (int i = 0; i < k; i++) {
+      Queue *cola_actual = ConstructQueue();
+      cola_actual->prioridad = i;
+      Queue_Enqueue(gran_cola, cola_actual);
+    }
+    return gran_cola;
+}
+
 Queue *ConstructQueue(int prioridad) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
     queue->size = 0;
@@ -84,6 +94,20 @@ int Ordered_Enqueue(Queue *pQueue, Proceso *item) { //inserta orndenado dejando 
             k = 0;
           }
         }
+    }
+    pQueue->size++;
+    return TRUE;
+}
+
+int Queue_Enqueue(Queue *pQueue, Queue *item) {
+    item->next = NULL;
+    if (pQueue->size == 0) {
+        pQueue->head = item;
+        pQueue->tail = item;
+
+    } else {
+        pQueue->tail->next = item;
+        pQueue->tail = item;
     }
     pQueue->size++;
     return TRUE;
