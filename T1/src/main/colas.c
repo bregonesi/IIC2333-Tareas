@@ -54,6 +54,20 @@ int Print_Queue(Queue *pQueue) {
     return FALSE;
 }
 
+int Queue_Print_Queue(Queue_Queue *pQueue) {
+    printf("Cola size: %i\n", pQueue->size);
+    Queue *actual;
+    actual = pQueue->head;
+    printf("----Printeando gran cola----\n");
+    while (actual != NULL) {
+      printf("Cola con prioridad: %i", actual->prioridad);
+      Print_Queue(actual);
+      actual = actual->next;
+      printf("\n");
+    }
+    return FALSE;
+}
+
 int Ordered_Enqueue(Queue *pQueue, Proceso *item) { //inserta orndenado dejando el proceso de mayor prioridad en head
     item->next = NULL;
     if (pQueue->size == 0) {
