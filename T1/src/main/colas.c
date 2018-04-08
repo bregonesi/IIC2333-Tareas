@@ -7,10 +7,9 @@
 
 
 Queue *ConstructMLFQueue(int k) { //k corresponde a la cantidad de queues para el algoritmo
-    Queue *gran_cola = ConstructQueue();
+    Queue *gran_cola = ConstructQueue(-1);
     for (int i = 0; i < k; i++) {
-      Queue *cola_actual = ConstructQueue();
-      cola_actual->prioridad = i;
+      Queue *cola_actual = ConstructQueue(i);
       Queue_Enqueue(gran_cola, cola_actual);
     }
     return gran_cola;
@@ -99,7 +98,7 @@ int Ordered_Enqueue(Queue *pQueue, Proceso *item) { //inserta orndenado dejando 
     return TRUE;
 }
 
-int Queue_Enqueue(Queue *pQueue, Queue *item) {
+int Queue_Enqueue(Queue_Queue *pQueue, Queue *item) {
     item->next = NULL;
     if (pQueue->size == 0) {
         pQueue->head = item;
