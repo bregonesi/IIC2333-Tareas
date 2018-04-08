@@ -5,6 +5,46 @@
 #define TRUE  1
 #define FALSE	0
 
+int Ejecutar_proceso(Queue_Queue *pQueue, int quantum){
+  Queue *cola_actual;
+  cola_actual = pQueue->head;
+  while (isEmpty(cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
+    cola_actual = cola_actual->next;
+    if (cola_actual == NULL) {
+      return 1; //no quedan procesos en el sistema
+    }
+  }
+  Proceso *proceso_actual;
+  proceso_actual = cola_actual->head;
+  if (proceso_actual->quantum_restante != 0) {  //vemos si le quedaba un quantum de antes
+    quantum = proceso_actual->quantum_restante;
+  }
+  Time_Queue *tiempos;
+  tiempos = proceso_actual->linea_de_tiempo;
+  Time *tiempo_actual;
+  tiempo_actual = tiempos->head;
+  int valor_actual = tiempo_actual->valor;
+  if (valor_actual>quantum) {
+    tiempo_actual->valor -= quantum;  //ejecutamos solo por el quantum
+    proceso_actual->quantum_restante = 0;
+    if (cola_actual != pQueue->tail) { //si no es la cola de menor prioridad
+      proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
+      cola_actual = cola_actual->next;  //cola de menor prioridad
+      Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola con menor prioridad que la actual
+    }
+  }
+  else{
+    proceso_actual->quantum_restante = quantum - tiempo_actual->valor;  //le sobra quantum
+    TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
+    if (TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso ya se hizo completamente
+      Dequeue(cola_actual); //sacamos al proceso de la cola
+    }
+    proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
+    Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
+  }
+  return 0;
+}
+
 
 Queue_Queue *ConstructMLFQueue(int k) { //k corresponde a la cantidad de queues para el algoritmo
     Queue_Queue *gran_cola = malloc(sizeof(Queue_Queue));
