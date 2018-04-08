@@ -25,7 +25,7 @@ struct Process
 {
 	int PID;
   int prioridad; // timepo de inicio
-	char *nombre;
+	char nombre[255];
 	ProcessStatus estado;
   struct Process *next;
 	Time_Queue *linea_de_tiempo;

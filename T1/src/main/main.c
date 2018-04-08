@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		Proceso *proceso = malloc(sizeof(Proceso));
 
 		proceso->PID = pid++;
-		proceso->nombre = nombre_proceso;
+		strcpy(proceso->nombre, nombre_proceso);
 		fscanf(archivo_procesos, "%i", &tiempo_inicio);
 		proceso->prioridad = tiempo_inicio;
 		fscanf(archivo_procesos, "%i", &cantidad_valores);
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 		Ordered_Enqueue(cola_por_nacer, proceso);
 	}
-
+	//Print_Queue(cola_por_nacer);
 	fclose(archivo_procesos);
 
 	Queue_Queue *colas = ConstructMLFQueue(queues);
@@ -76,6 +76,7 @@ int main(int argc, char *argv[])
 	int T = 0;
 	while(TRUE) {
 		if(T == 100) break;
+
 		Proceso *nacer = Born(*cola_por_nacer, T);
 		if(nacer != NULL) {
 			Dequeue(cola_por_nacer);
