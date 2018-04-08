@@ -5,7 +5,73 @@
 #define TRUE  1
 #define FALSE	0
 
-int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) {  // Scheduler
+/*
+int Ejecutar_proceso2(Queue_Queue *pQueue, int quantum) {
+  Queue *cola_actual;
+  cola_actual = pQueue->head;
+  while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
+    cola_actual = cola_actual->next;
+    if (cola_actual == NULL) {
+      return 1; //no quedan procesos en el sistema
+    }
+  }
+
+  Proceso *proceso_actual;
+  proceso_actual = cola_actual->head;
+  if (proceso_actual->quantum_restante == 0) proceso_actual->quantum_restante = quantum; // por si no ha ejecutado nada
+
+  Time_Queue *tiempos;
+  tiempos = proceso_actual->linea_de_tiempo;
+  Time *tiempo_actual;
+  tiempo_actual = tiempos->head;
+
+  int valor_actual = tiempo_actual->valor;
+
+  proceso_actual->quantum_restante--;  // disminuye solo una unidad
+  valor_actual--;  // disminuye solo una unidad
+
+  if (proceso_actual->quantum_restante == 0) {  // utilizo todo su quantom, se cambia a una cola con mayor prioridad
+    if (valor_actual == 0) {  // justo cuando se le acaba quantum tb se le acaba valor actual
+      TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
+    }
+
+    Dequeue(cola_actual); //sacamos al proceso de la cola
+
+    if (!TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso no se ha hecho completamente
+      Enqueue(cola_actual->next, proceso_actual);   // se deja en cola con menor prioridad
+    }
+  } else {  // no ha utilizado todo su quantum
+    if (valor_actual == 0) { // se acabo ese burst, se deja con quantum que le queda y pasa al final de la lista
+      TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
+      Dequeue(cola_actual); // sacamos al proceso de la cola
+
+      if (!TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso no se ha hecho completamente
+        Enqueue(cola_actual, proceso_actual);   // se deja al final de la misma cola
+      }
+    }
+  }
+
+  return 0;
+}
+*/
+
+int Aging(Queue_Queue *pQueue){
+  Queue *cola_actual;
+  Queue *cola_auxiliar;
+  Proceso *proceso_actual;
+  cola_actual = pQueue->head;
+  while (cola_actual->next != NULL) { //vamos bajando por prioridades hasta la cola
+    cola_auxiliar = cola_actual->next;
+    while (isEmpty(*cola_auxiliar) == FALSE) {
+      proceso_actual = Dequeue(cola_auxiliar);
+      Enqueue(cola_actual, proceso_actual);
+    }
+    cola_actual = cola_auxiliar;
+  }
+  return 0;
+}
+
+int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) { //Scheduler
   Queue *cola_actual;
   cola_actual = pQueue->head;
   while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
