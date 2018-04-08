@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	Queue *cola_por_llegar = ConstructQueue(-1);
+	Queue *cola_por_nacer = ConstructQueue(-1);
 
 	char nombre_proceso[255];
 	int tiempo_inicio;
@@ -66,13 +66,28 @@ int main(int argc, char *argv[])
 
 		proceso->linea_de_tiempo = linea_tiempo;
 
-		Ordered_Enqueue(cola_por_llegar, proceso);
+		Ordered_Enqueue(cola_por_nacer, proceso);
 	}
-	Print_Queue(cola_por_llegar);
 
 	fclose(archivo_procesos);
 
-	printf("quantum: %i, queues: %i\n", quantum, queues);
+	Queue_Queue *colas = ConstructMLFQueue(queues);
+
+	int T = 0;
+	while(TRUE) {
+		if(T == 100) break;
+		Proceso *nacer = Born(*cola_por_nacer, T);
+		if(nacer != NULL) {
+			Dequeue(cola_por_nacer);
+			Enqueue(colas->head, nacer);
+			printf("%i\n", nacer->prioridad);
+		}
+
+		printf("\n");
+		T++;
+	}
+
+	Queue_Print_Queue(colas);
 
 	return 0;
 }

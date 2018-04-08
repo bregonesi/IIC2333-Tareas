@@ -26,8 +26,11 @@ void DestructQueue(Queue *queue);
 int Enqueue(Queue *pQueue, Proceso *item);
 int Queue_Enqueue(Queue_Queue *pQueue, Queue *item);
 Proceso *Dequeue(Queue *pQueue);
-int isEmpty(Queue* pQueue);
+int isEmpty(Queue pQueue);
 int Print_Queue(Queue *pQueue);
 int Ordered_Enqueue(Queue *pQueue, Proceso *item);
 
 Queue_Queue *ConstructMLFQueue(int k);
+int Queue_Print_Queue(Queue_Queue *pQueue);
+
+Proceso *Born(Queue pQueue, int time);

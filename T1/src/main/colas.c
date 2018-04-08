@@ -30,7 +30,7 @@ Queue *ConstructQueue(int prioridad) {
 
 void DestructQueue(Queue *queue) {
     Proceso *pN;
-    while (!isEmpty(queue)) {
+    while (!isEmpty(*queue)) {
         pN = Dequeue(queue);
         free(pN);
     }
@@ -60,7 +60,7 @@ int Queue_Print_Queue(Queue_Queue *pQueue) {
     actual = pQueue->head;
     printf("----Printeando gran cola----\n");
     while (actual != NULL) {
-      printf("Cola con prioridad: %i", actual->prioridad);
+      printf("Cola con prioridad: %i\n", actual->prioridad);
       Print_Queue(actual);
       actual = actual->next;
       printf("\n");
@@ -146,9 +146,9 @@ int Enqueue(Queue *pQueue, Proceso *item) {
     return TRUE;
 }
 
-Proceso * Dequeue(Queue *pQueue) {  //extrae el proceso de mayor prioridad (head)
+Proceso *Dequeue(Queue *pQueue) {  //extrae el proceso de mayor prioridad (head)
     Proceso *item;
-    if (isEmpty(pQueue))
+    if (isEmpty(*pQueue))
         return NULL;
     item = pQueue->head;
     pQueue->head = (pQueue->head)->next;
@@ -156,13 +156,20 @@ Proceso * Dequeue(Queue *pQueue) {  //extrae el proceso de mayor prioridad (head
     return item;
 }
 
-int isEmpty(Queue* pQueue) {
-    if (pQueue == NULL) {
+int isEmpty(Queue pQueue) {
+    /*if (pQueue) {
         return FALSE;
-    }
-    if (pQueue->size == 0) {
+    }*/
+    if (pQueue.size == 0) {
         return TRUE;
     } else {
         return FALSE;
     }
+}
+
+Proceso *Born(Queue pQueue, int time) {
+  if(isEmpty(pQueue)) return NULL;
+  Proceso *proc = pQueue.head;
+  if(time < proc->prioridad) return NULL;
+  return proc;
 }
