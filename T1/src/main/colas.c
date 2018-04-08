@@ -5,6 +5,7 @@
 #define TRUE  1
 #define FALSE	0
 
+
 Queue *ConstructQueue() {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
     queue->size = 0;
