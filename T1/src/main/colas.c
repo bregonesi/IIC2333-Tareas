@@ -84,9 +84,9 @@ int Print_Queue(Queue *pQueue) {
     Proceso *actual;
     actual = pQueue->head;
     int i = 0;
-    printf("i | PID\n");
+    printf("--i | PID\n");
     while (actual != NULL) {
-      printf("%i: %i", i++, actual->PID);
+      printf("--%i: %i", i++, actual->PID);
       printf("\n");
       Print_Proceso(actual);
       actual = actual->next;
