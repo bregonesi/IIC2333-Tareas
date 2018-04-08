@@ -73,6 +73,21 @@ int Aging(Queue_Queue *pQueue) {
   return 0;
 }
 
+Proceso Obtener_prioritario(Queue_Queue *pQueue) {
+  Queue *cola_actual;
+  cola_actual = pQueue->head;
+  Proceso *proceso_actual;
+  while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
+    cola_actual = cola_actual->next;
+    if (cola_actual == NULL) {
+      proceso_actual = NULL;
+      return *proceso_actual; //no quedan procesos en el sistema
+    }
+  }
+  proceso_actual = cola_actual->head; //proceso de mayor prioridad
+  return *proceso_actual;
+}
+
 int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
   Queue *cola_actual;
   cola_actual = pQueue->head;
