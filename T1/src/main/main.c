@@ -2,11 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "colas.h"
 
+void stats(int sig) {
+		printf("AQUI TIENEN QUE IMPRIMIRSE LAS STATS. TAMBIEN HAY QUE VER QUE SE RETORNE 0\n");
+    //close(0);  // foo is displayed if this line is commented out
+    _Exit(0);
+}
+
 int main(int argc, char *argv[])
 {
+	signal(SIGINT, stats);  // por si se hace ctrl + c
+
 	/* El programa recibe 4 parametros (por ahora, despues hay que agregar el de la v3) */
 	if(argc != 5 && argc != 6)
 	{
@@ -86,7 +95,7 @@ int main(int argc, char *argv[])
 			Dequeue(cola_por_nacer);
 			Enqueue(colas->head, nacer);
 			nacer->estado = READY;
-			printf("Nace en t=%i\n", nacer->prioridad);
+			printf("Proceso %s nace en t = %i\n", nacer->nombre, nacer->prioridad);
 		}
 
 		Ejecutar_proceso(colas, cola_terminados);
@@ -97,10 +106,17 @@ int main(int argc, char *argv[])
 
 		T++;
 	}
+	T--; // pq hay que eliminar un t++ que no se ejecuto para estadisticas
 
-	Queue_Print_Queue(colas);
-	printf("---- Cola Terminados ---\n");
-	Print_Queue(cola_terminados);
+	printf("\n");
+	printf("Procesos terminados: %i\n", cola_terminados->size);
+	printf("Tiempo total: %i\n", T);
+	//Queue_Print_Queue(colas);
+	//printf("---- Cola Terminados ---\n");
+	//Print_Queue(cola_terminados);
+
+	sleep(10);  // eliminar esto, es solo para probar ctrl + c
+	stats(0);  // si no se hizo ctrl + c display stats
 
 	return 0;
 }

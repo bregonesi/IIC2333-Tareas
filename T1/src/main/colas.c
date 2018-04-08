@@ -95,7 +95,11 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue) { //Scheduler
 
   tiempo_actual->valor -= 1;  //ejecutamos un clock
   proceso_actual->quantum_restante -= 1;  //disminuimos el restante
-  proceso_actual->estado = RUNNING;
+
+  if(proceso_actual->estado != RUNNING) {
+    proceso_actual->estado = RUNNING;
+    printf("Scheduler ejecutando proceso: %s\n", proceso_actual->nombre);
+  }
 
   if (tiempo_actual->valor == 0) {  //ya termino el burst
     TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
