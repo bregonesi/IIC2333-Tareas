@@ -58,3 +58,28 @@ int TimeisEmpty(Time_Queue* pQueue) {
         return FALSE;
     }
 }
+
+int Print_Proceso(Proceso *proc) {
+    printf("Print de proceso\n");
+    printf("PID: %i\n", proc->PID);
+    printf("Prioridad (tiempo de inicio): %i\n", proc->prioridad);
+    printf("Nombre: %s\n", proc->nombre);
+    printf("Estado: %i\n", proc->estado);
+    Print_TimeQueue(proc->linea_de_tiempo);
+    return FALSE;
+}
+
+int Print_TimeQueue(Time_Queue *pQueue) {
+    printf("Print de time queue\n");
+    printf("Size: %i\n", pQueue->size);
+    Time *actual;
+    actual = pQueue->head;
+    int i = 0;
+    printf("i | Tiempo\n");
+    while (actual != NULL) {
+      printf("%i: %i", i++, actual->valor);
+      printf("\n");
+      actual = actual->next;
+    }
+    return FALSE;
+}

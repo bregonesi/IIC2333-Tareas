@@ -38,6 +38,7 @@ void DestructQueue(Queue *queue) {
 }
 
 int Print_Queue(Queue *pQueue) {
+    printf("Print de cola queue\n");
     printf("Cola size: %i\n", pQueue->size);
     printf("Cola prioridad: %i\n", pQueue->prioridad);
     Proceso *actual;
@@ -46,8 +47,9 @@ int Print_Queue(Queue *pQueue) {
     printf("i | PID\n");
     while (actual != NULL) {
       printf("%i: %i", i++, actual->PID);
-      actual = actual->next;
       printf("\n");
+      Print_Proceso(actual);
+      actual = actual->next;
     }
     return FALSE;
 }

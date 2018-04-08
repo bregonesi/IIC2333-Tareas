@@ -28,7 +28,7 @@ struct Process
 	char *nombre;
 	ProcessStatus estado;
   struct Process *next;
-	Time_Queue linea_de_tiempo;
+	Time_Queue *linea_de_tiempo;
 };
 typedef struct Process Proceso;
 
@@ -37,3 +37,5 @@ void DestructTimeQueue(Time_Queue *queue);
 int TimeEnqueue(Time_Queue *pQueue, int time);
 Time *TimeDequeue(Time_Queue *pQueue);
 int TimeisEmpty(Time_Queue* pQueue);
+int Print_Proceso(Proceso *proc);
+int Print_TimeQueue(Time_Queue *pQueue);

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 			TimeEnqueue(linea_tiempo, valor_actual);
 		}
 
-		proceso->linea_de_tiempo = *linea_tiempo;
+		proceso->linea_de_tiempo = linea_tiempo;
 
 		Ordered_Enqueue(cola_por_llegar, proceso);
 	}
