@@ -66,6 +66,14 @@ int Print_Proceso(Proceso *proc) {
     printf("Quantum restante: %i\n", proc->quantum_restante);
     printf("Nombre: %s\n", proc->nombre);
     printf("Estado: %i\n", proc->estado);
+
+    printf("--- Stats ---\n");
+    printf("Turnos de CPU: %i\n", proc->n_veces_cpu);
+    printf("Bloqueos: %i\n", proc->n_veces_int);
+    printf("Turnaround time: %i\n", proc->finish_time - proc->prioridad);
+    printf("Response time: %i\n", proc->response_time);
+    printf("Waiting time: %i\n", proc->waiting_time);
+
     Print_TimeQueue(proc->linea_de_tiempo);
     return FALSE;
 }

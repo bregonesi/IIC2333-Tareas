@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+
 #include "colas.h"
 
 #define TRUE  1
@@ -71,15 +73,18 @@ int Aging(Queue_Queue *pQueue) {
   return 0;
 }
 
-int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue) { //Scheduler
+int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
   Queue *cola_actual;
   cola_actual = pQueue->head;
   while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
     cola_actual = cola_actual->next;
     if (cola_actual == NULL) {
+      printf("Scheduler (t = %i): ", T);
+      printf("no encuentra proceso para ejecutar\n");
       return 1; //no quedan procesos en el sistema
     }
   }
+
 
   Proceso *proceso_actual;
   proceso_actual = cola_actual->head;
@@ -93,35 +98,60 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue) { //Scheduler
   tiempo_actual = tiempos->head;
   //int valor_actual = tiempo_actual->valor;
 
-  tiempo_actual->valor -= 1;  //ejecutamos un clock
-  proceso_actual->quantum_restante -= 1;  //disminuimos el restante
+  tiempo_actual->valor--;  //ejecutamos un clock
+  proceso_actual->quantum_restante--;  //disminuimos el restante
+
+  if(proceso_actual->response_time == 0 && !proceso_actual->response_time_setted) {
+    proceso_actual->response_time_setted = TRUE;
+    proceso_actual->response_time = T - proceso_actual->prioridad;  // seteamos response time para procesos que no parten en T=0
+  }
 
   if(proceso_actual->estado != RUNNING) {
     proceso_actual->estado = RUNNING;
-    printf("Scheduler ejecutando proceso: %s\n", proceso_actual->nombre);
+    proceso_actual->n_veces_cpu++;
+    printf("Scheduler (t = %i): ", T);
+    printf("ejecutando proceso (proceso cambia a estado running): %s\n", proceso_actual->nombre);
   }
 
   if (tiempo_actual->valor == 0) {  //ya termino el burst
+    printf("Scheduler (t = %i): ", T);
     TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
     if (TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso ya se hizo completamente
       Dequeue(cola_actual); //sacamos al proceso de la cola
+      printf("termina proceso (proceso cambia a estado finished): %s\n", proceso_actual->nombre);
       proceso_actual->estado = FINISHED;
-      Enqueue(eQueue, proceso_actual);
+      proceso_actual->finish_time = T;
+      proceso_actual->waiting_time += T;  // para que se cumpla finish_time - prioridad - sum(linea de tiempo)
+      Enqueue(eQueue, proceso_actual);  // lo metemos a la cola de finished
     } else {
       proceso_actual->estado = READY;
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
-      Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
+      if (proceso_actual->quantum_restante == 0) {  // si justo calza de que se le acaba quantum
+        printf("proceso termino tarea y ocupo todo su quantum (proceso cambia a estado ready): %s\n", proceso_actual->nombre);
+        proceso_actual->n_veces_int++;
+        if (cola_actual != pQueue->tail) { //si no es la cola de menor prioridad
+          cola_actual = cola_actual->next;  //cola de menor prioridad
+        }
+        Enqueue(cola_actual, proceso_actual);  // se mete a la siguiente cola
+      } else {
+        printf("proceso termino tarea pero no ocupo todo su quantum (proceso cambia a estado ready): %s\n", proceso_actual->nombre);
+        Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
+      }
     }
   }
 
   if (proceso_actual->quantum_restante == 0 && tiempo_actual->valor > 0) { //ya termino su quantum y tiene que bajar de cola
+    printf("Scheduler (t = %i): ", T);
     proceso_actual->estado = READY;
+    proceso_actual->n_veces_int++;
     if (cola_actual != pQueue->tail) { //si no es la cola de menor prioridad
+      printf("proceso ocupo todo su quantum y es interrumpido (proceso cambia a estado ready): %s\n", proceso_actual->nombre);
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
       cola_actual = cola_actual->next;  //cola de menor prioridad
       Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola con menor prioridad que la actual
     }
     else {
+      printf("proceso ocupo todo su quantum y es interrumpido, pero no baja de cola ya que esta en la ultima (proceso cambia a estado ready): %s\n", proceso_actual->nombre);
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
       Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
     }
