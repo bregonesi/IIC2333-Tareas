@@ -55,7 +55,7 @@ int Ejecutar_proceso2(Queue_Queue *pQueue, int quantum) {
 }
 */
 
-int Aging(Queue_Queue *pQueue){
+int Aging(Queue_Queue *pQueue) {
   Queue *cola_actual;
   Queue *cola_auxiliar;
   Proceso *proceso_actual;

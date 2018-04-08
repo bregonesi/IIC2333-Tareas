@@ -37,3 +37,4 @@ int Queue_Print_Queue(Queue_Queue *pQueue);
 Proceso *Born(Queue pQueue, int time);
 
 int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue);
+int Aging(Queue_Queue *pQueue);

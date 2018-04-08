@@ -32,8 +32,9 @@ int main(int argc, char *argv[])
   int queues = atoi(argv[4]);
 	FILE *archivo_procesos;
 	archivo_procesos = fopen(input_file, "r");	//leyendo archivo de input
+	int S;
 	if (argc == 6) {
-		int S = atoi(argv[5]); //guardar S solo si estamos en v2 o v3
+		S = atoi(argv[5]); //guardar S solo si estamos en v2 o v3
 		printf("S: %i\n", S);
 	}
 	if (!(archivo_procesos)) {
@@ -74,10 +75,11 @@ int main(int argc, char *argv[])
 
 	Queue_Queue *colas = ConstructMLFQueue(queues, quantum, !strcmp(version,"v3"));
 	Queue *cola_terminados = ConstructQueue(-1, -1);
+	int cantidad_procesos = cola_por_nacer->size;
 
 	int T = 0;
 	while(TRUE) {
-		if(T == 200) break;
+		if(cola_terminados->size >= cantidad_procesos) break;
 
 		Proceso *nacer = Born(*cola_por_nacer, T);
 		if(nacer != NULL) {
@@ -89,10 +91,9 @@ int main(int argc, char *argv[])
 
 		Ejecutar_proceso(colas, cola_terminados);
 
-		if (argc == 6) {
-			// hacer lo del S
+		if (((strcmp(version,"v2") == 0) || (strcmp(version,"v3") == 0)) && T%S == 0) {
+			Aging(colas);
 		}
-
 
 		T++;
 	}
