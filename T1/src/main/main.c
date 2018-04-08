@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	Queue *cola_por_nacer = ConstructQueue(-1);
+	Queue *cola_por_nacer = ConstructQueue(-1, -1);
 
 	char nombre_proceso[255];
 	int tiempo_inicio;
@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
 	//Print_Queue(cola_por_nacer);
 	fclose(archivo_procesos);
 
-	Queue_Queue *colas = ConstructMLFQueue(queues);
+	Queue_Queue *colas = ConstructMLFQueue(queues, quantum, !strcmp(version,"v3"));
+	Queue *cola_terminados = ConstructQueue(-1, -1);
 
 	int T = 0;
 	while(TRUE) {
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
 			printf("Nace en t=%i\n", nacer->prioridad);
 		}
 
-		Ejecutar_proceso(colas, quantum);
+		Ejecutar_proceso(colas, cola_terminados);
 
 		if (argc == 6) {
 			// hacer lo del S
@@ -97,6 +98,8 @@ int main(int argc, char *argv[])
 	}
 
 	Queue_Print_Queue(colas);
+	printf("---- Cola Terminados ---\n");
+	Print_Queue(cola_terminados);
 
 	return 0;
 }

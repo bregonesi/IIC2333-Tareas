@@ -71,7 +71,7 @@ int Aging(Queue_Queue *pQueue){
   return 0;
 }
 
-int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) { //Scheduler
+int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue) { //Scheduler
   Queue *cola_actual;
   cola_actual = pQueue->head;
   while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
@@ -84,7 +84,7 @@ int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) { //Scheduler
   Proceso *proceso_actual;
   proceso_actual = cola_actual->head;
   if (proceso_actual->quantum_restante == 0) {  //si es primera vez que se ejecuta
-    proceso_actual->quantum_restante = quantum;
+    proceso_actual->quantum_restante = cola_actual->quantum;
   }
 
   Time_Queue *tiempos;
@@ -101,7 +101,8 @@ int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) { //Scheduler
     TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
     if (TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso ya se hizo completamente
       Dequeue(cola_actual); //sacamos al proceso de la cola
-      // hay que ponerlo en proicesos terminados
+      proceso_actual->estado = FINISHED;
+      Enqueue(eQueue, proceso_actual);
     } else {
       proceso_actual->estado = READY;
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
@@ -125,23 +126,29 @@ int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) { //Scheduler
 }
 
 
-Queue_Queue *ConstructMLFQueue(int k) { //k corresponde a la cantidad de queues para el algoritmo
+Queue_Queue *ConstructMLFQueue(int k, int quantum, int v) { //k corresponde a la cantidad de queues para el algoritmo
     Queue_Queue *gran_cola = malloc(sizeof(Queue_Queue));
     gran_cola->size = 0;
     gran_cola->head = NULL;
     gran_cola->tail = NULL;
 
     for (int i = 0; i < k; i++) {
-      Queue *cola_actual = ConstructQueue(i);
+      Queue *cola_actual;
+      if (v == 1) {
+        cola_actual = ConstructQueue(i, quantum * (i + 1));
+      } else {
+        cola_actual = ConstructQueue(i, quantum);
+      }
       Queue_Enqueue(gran_cola, cola_actual);
     }
     return gran_cola;
 }
 
-Queue *ConstructQueue(int prioridad) {
+Queue *ConstructQueue(int prioridad, int quantum) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
     queue->size = 0;
     queue->prioridad = prioridad;
+    queue->quantum = quantum;
     queue->head = NULL;
     queue->tail = NULL;
     return queue;
@@ -160,6 +167,7 @@ int Print_Queue(Queue *pQueue) {
     printf("Print de cola queue\n");
     printf("Cola size: %i\n", pQueue->size);
     printf("Cola prioridad: %i\n", pQueue->prioridad);
+    printf("Cola quantum: %i\n", pQueue->quantum);
     Proceso *actual;
     actual = pQueue->head;
     int i = 0;
