@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
 		fscanf(archivo_procesos, "%i", &tiempo_inicio);
 		proceso->prioridad = tiempo_inicio;
 		fscanf(archivo_procesos, "%i", &cantidad_valores);
+		proceso->quantum_restante = 0;
 
 		Time_Queue *linea_tiempo = ConstructTimeQueue();
 
@@ -75,16 +76,19 @@ int main(int argc, char *argv[])
 
 	int T = 0;
 	while(TRUE) {
-		if(T == 100) break;
+		if(T == 200) break;
 
 		Proceso *nacer = Born(*cola_por_nacer, T);
 		if(nacer != NULL) {
 			Dequeue(cola_por_nacer);
 			Enqueue(colas->head, nacer);
-			printf("%i\n", nacer->prioridad);
+			printf("Nace en t=%i\n", nacer->prioridad);
 		}
 
-		printf("\n");
+		Ejecutar_proceso(colas, quantum);
+
+
+
 		T++;
 	}
 

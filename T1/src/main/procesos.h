@@ -25,7 +25,7 @@ struct Process
 {
 	int PID;
   int prioridad; // timepo de inicio
-	int quantum_restante = 0;
+	int quantum_restante;
 	char nombre[255];
 	ProcessStatus estado;
   struct Process *next;

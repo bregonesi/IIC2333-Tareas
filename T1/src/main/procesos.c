@@ -63,6 +63,7 @@ int Print_Proceso(Proceso *proc) {
     printf("Print de proceso\n");
     printf("PID: %i\n", proc->PID);
     printf("Prioridad (tiempo de inicio): %i\n", proc->prioridad);
+    printf("Quantum restante: %i\n", proc->quantum_restante);
     printf("Nombre: %s\n", proc->nombre);
     printf("Estado: %i\n", proc->estado);
     Print_TimeQueue(proc->linea_de_tiempo);

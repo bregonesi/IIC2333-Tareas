@@ -5,42 +5,52 @@
 #define TRUE  1
 #define FALSE	0
 
-int Ejecutar_proceso(Queue_Queue *pQueue, int quantum){
+int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) {
   Queue *cola_actual;
   cola_actual = pQueue->head;
-  while (isEmpty(cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
+  while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
     cola_actual = cola_actual->next;
     if (cola_actual == NULL) {
       return 1; //no quedan procesos en el sistema
     }
   }
+
   Proceso *proceso_actual;
   proceso_actual = cola_actual->head;
-  if (proceso_actual->quantum_restante != 0) {  //vemos si le quedaba un quantum de antes
-    quantum = proceso_actual->quantum_restante;
+  if (proceso_actual->quantum_restante == 0) {  //si es primera vez que se ejecuta
+    proceso_actual->quantum_restante = quantum;
   }
+
   Time_Queue *tiempos;
   tiempos = proceso_actual->linea_de_tiempo;
   Time *tiempo_actual;
   tiempo_actual = tiempos->head;
-  int valor_actual = tiempo_actual->valor;
-  if (valor_actual>quantum) {
-    tiempo_actual->valor -= quantum;  //ejecutamos solo por el quantum
-    proceso_actual->quantum_restante = 0;
+  //int valor_actual = tiempo_actual->valor;
+
+  tiempo_actual->valor -= 1;  //ejecutamos un clock
+  proceso_actual->quantum_restante -= 1;  //disminuimos el restante
+
+  if (tiempo_actual->valor == 0) {  //ya termino el burst
+    TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
+    if (TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso ya se hizo completamente
+      Dequeue(cola_actual); //sacamos al proceso de la cola
+      // hay que ponerlo en proicesos terminados
+    } else {
+      proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
+      Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
+    }
+  }
+
+  if (proceso_actual->quantum_restante == 0 && tiempo_actual->valor > 0) { //ya termino su quantum y tiene que bajar de cola
     if (cola_actual != pQueue->tail) { //si no es la cola de menor prioridad
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
       cola_actual = cola_actual->next;  //cola de menor prioridad
       Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola con menor prioridad que la actual
     }
-  }
-  else{
-    proceso_actual->quantum_restante = quantum - tiempo_actual->valor;  //le sobra quantum
-    TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
-    if (TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso ya se hizo completamente
-      Dequeue(cola_actual); //sacamos al proceso de la cola
+    else {
+      proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
+      Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
     }
-    proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
-    Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
   }
   return 0;
 }
