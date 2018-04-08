@@ -22,7 +22,9 @@ void DestructTimeQueue(Time_Queue *queue) {
     free(queue);
 }
 
-int TimeEnqueue(Time_Queue *pQueue, Time *item) {
+int TimeEnqueue(Time_Queue *pQueue, int time) {
+    Time *item = malloc(sizeof(Time));
+    item->valor = time;
     item->next = NULL;
     if (pQueue->size == 0) {
         pQueue->head = item;

@@ -6,8 +6,12 @@
 #define FALSE	0
 
 
-Queue *ConstructMLFQueue(int k) { //k corresponde a la cantidad de queues para el algoritmo
-    Queue *gran_cola = ConstructQueue(-1);
+Queue_Queue *ConstructMLFQueue(int k) { //k corresponde a la cantidad de queues para el algoritmo
+    Queue_Queue *gran_cola = malloc(sizeof(Queue_Queue));
+    gran_cola->size = 0;
+    gran_cola->head = NULL;
+    gran_cola->tail = NULL;
+
     for (int i = 0; i < k; i++) {
       Queue *cola_actual = ConstructQueue(i);
       Queue_Enqueue(gran_cola, cola_actual);

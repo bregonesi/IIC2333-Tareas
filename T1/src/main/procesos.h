@@ -34,6 +34,6 @@ typedef struct Process Proceso;
 
 Time_Queue *ConstructTimeQueue();
 void DestructTimeQueue(Time_Queue *queue);
-int TimeEnqueue(Time_Queue *pQueue, Time *item);
+int TimeEnqueue(Time_Queue *pQueue, int time);
 Time *TimeDequeue(Time_Queue *pQueue);
 int TimeisEmpty(Time_Queue* pQueue);

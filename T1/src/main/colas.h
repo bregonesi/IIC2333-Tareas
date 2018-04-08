@@ -15,11 +15,10 @@ typedef struct Queue {    //cola para procesos
 } Queue;
 
 typedef struct Queue_Queue {    //cola para MLFQ
-    Proceso *head;
-    Proceso *tail;
+    Queue *head;
+    Queue *tail;
     int size;
-		int prioridad;
-		struct Queue_Queue *next;
+		struct Queue *next;
 } Queue_Queue;
 
 Queue *ConstructQueue();
@@ -28,3 +27,7 @@ int Enqueue(Queue *pQueue, Proceso *item);
 int Queue_Enqueue(Queue_Queue *pQueue, Queue *item);
 Proceso *Dequeue(Queue *pQueue);
 int isEmpty(Queue* pQueue);
+int Print_Queue(Queue *pQueue);
+int Ordered_Enqueue(Queue *pQueue, Proceso *item);
+
+Queue_Queue *ConstructMLFQueue(int k);
