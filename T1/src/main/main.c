@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "procesos.h"
+#include "colas.h"
 
 int main(int argc, char *argv[])
 {
@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	Queue *cola_por_llegar = ConstructQueue(-1);
 
 	char nombre_proceso[255];
 	int tiempo_inicio;
@@ -53,19 +54,22 @@ int main(int argc, char *argv[])
 		proceso->PID = pid++;
 		proceso->nombre = nombre_proceso;
 		fscanf(archivo_procesos, "%i", &tiempo_inicio);
-		proceso->tiempo_inicio = tiempo_inicio;
+		proceso->prioridad = tiempo_inicio;
 		fscanf(archivo_procesos, "%i", &cantidad_valores);
 
-		Time_Queue *linea_tiempo = malloc(sizeof(Time_Queue));
-		linea_tiempo->size = cantidad_valores;
+		Time_Queue *linea_tiempo = ConstructTimeQueue();
 
 		for(int i = 0; i < cantidad_valores; i++) {
 			fscanf(archivo_procesos, "%i", &valor_actual);
-			add_tiempo_linea_tiempo(linea_tiempo, valor_actual);
+			TimeEnqueue(linea_tiempo, valor_actual);
 		}
 
 		proceso->linea_de_tiempo = *linea_tiempo;
+
+		Ordered_Enqueue(cola_por_llegar, proceso);
 	}
+	Print_Queue(cola_por_llegar);
+
 	fclose(archivo_procesos);
 
 	printf("quantum: %i, queues: %i\n", quantum, queues);

@@ -6,9 +6,10 @@
 #define FALSE	0
 
 
-Queue *ConstructQueue() {
+Queue *ConstructQueue(int prioridad) {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
     queue->size = 0;
+    queue->prioridad = prioridad;
     queue->head = NULL;
     queue->tail = NULL;
     return queue;
@@ -24,13 +25,16 @@ void DestructQueue(Queue *queue) {
 }
 
 int Print_Queue(Queue *pQueue) {
-    //int k = 1;
-    printf("\n");
+    printf("Cola size: %i\n", pQueue->size);
+    printf("Cola prioridad: %i\n", pQueue->prioridad);
     Proceso *actual;
     actual = pQueue->head;
+    int i = 0;
+    printf("i | PID\n");
     while (actual != NULL) {
-      printf(" %i -", actual->PID);
+      printf("%i: %i", i++, actual->PID);
       actual = actual->next;
+      printf("\n");
     }
     return FALSE;
 }
@@ -46,7 +50,7 @@ int Ordered_Enqueue(Queue *pQueue, Proceso *item) { //inserta orndenado dejando 
         Proceso *actual;
         actual = pQueue->head;
         if (actual->next == NULL) {
-          if (item->prioridad <= actual->prioridad) {
+          if (item->prioridad >= actual->prioridad) {
             actual->next = item;
             pQueue ->tail = item;
             k = 0;
@@ -57,14 +61,14 @@ int Ordered_Enqueue(Queue *pQueue, Proceso *item) { //inserta orndenado dejando 
             k = 0;
           }
         }
-        if (k == 1 && item->prioridad > pQueue->head->prioridad) {
+        if (k == 1 && item->prioridad < pQueue->head->prioridad) {
           pQueue->head = item;
           item->next = actual;
           pQueue->size++;
           return TRUE;
         }
         while (k == 1) {
-          if (item->prioridad <= actual->next->prioridad) {
+          if (item->prioridad >= actual->next->prioridad) {
             if (actual->next->next == NULL) {
               actual->next->next = item;
               pQueue ->tail = item;
