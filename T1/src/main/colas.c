@@ -5,7 +5,7 @@
 #define TRUE  1
 #define FALSE	0
 
-int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) {
+int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) {  // Scheduler
   Queue *cola_actual;
   cola_actual = pQueue->head;
   while (isEmpty(*cola_actual)==TRUE) { //vamos bajando por prioridades hasta encontrar cola con procesos
@@ -29,6 +29,7 @@ int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) {
 
   tiempo_actual->valor -= 1;  //ejecutamos un clock
   proceso_actual->quantum_restante -= 1;  //disminuimos el restante
+  proceso_actual->estado = RUNNING;
 
   if (tiempo_actual->valor == 0) {  //ya termino el burst
     TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
@@ -36,12 +37,14 @@ int Ejecutar_proceso(Queue_Queue *pQueue, int quantum) {
       Dequeue(cola_actual); //sacamos al proceso de la cola
       // hay que ponerlo en proicesos terminados
     } else {
+      proceso_actual->estado = READY;
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
       Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
     }
   }
 
   if (proceso_actual->quantum_restante == 0 && tiempo_actual->valor > 0) { //ya termino su quantum y tiene que bajar de cola
+    proceso_actual->estado = READY;
     if (cola_actual != pQueue->tail) { //si no es la cola de menor prioridad
       proceso_actual = Dequeue(cola_actual);  //se saca de la cola actual
       cola_actual = cola_actual->next;  //cola de menor prioridad

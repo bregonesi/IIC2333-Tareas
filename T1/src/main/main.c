@@ -82,11 +82,15 @@ int main(int argc, char *argv[])
 		if(nacer != NULL) {
 			Dequeue(cola_por_nacer);
 			Enqueue(colas->head, nacer);
+			nacer->estado = READY;
 			printf("Nace en t=%i\n", nacer->prioridad);
 		}
 
 		Ejecutar_proceso(colas, quantum);
 
+		if (argc == 6) {
+			// hacer lo del S
+		}
 
 
 		T++;
