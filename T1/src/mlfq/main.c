@@ -9,6 +9,8 @@
 
 int T = 0;  // variables globales para que signal lea
 Queue *cola_terminados;
+Proceso **procesos;
+int c_procesos;
 
 void stats_print() {
 		printf("\n");
@@ -16,25 +18,35 @@ void stats_print() {
 		printf("Tiempo total: %i\n", T);
 		printf("\n");
 
-		Proceso *proc = cola_terminados->head;
-		while(proc) {
-			printf("%s:\n", proc->nombre);
-	    printf("Turnos de CPU: %i\n", proc->n_veces_cpu);
-	    printf("Bloqueos: %i\n", proc->n_veces_int);
-	    printf("Turnaround time: %i\n", proc->finish_time - proc->prioridad);
-	    printf("Response time: %i\n", proc->response_time);
-	    printf("Waiting time: %i\n", proc->waiting_time);
+		Proceso *proc;
+		int procesos_print = 0;
+		for(int i = 0; i < c_procesos; i++) {
+			proc = procesos[i];
+			if(T > proc->prioridad) {  // por si no ha nacido
+				procesos_print++;
 
-			proc = proc->next;
-			if(proc) printf("\n");
+				printf("%s:\n", proc->nombre);
+		    printf("Turnos de CPU: %i\n", proc->n_veces_cpu);
+		    printf("Bloqueos: %i\n", proc->n_veces_int);
+				if(proc->estado == FINISHED) {
+		    	printf("Turnaround time: %i\n", proc->finish_time - proc->prioridad);
+				} else {
+		    	printf("Turnaround time: PROCESS NOT FINISHED\n");
+				}
+		    printf("Response time: %i\n", proc->response_time);
+		    printf("Waiting time: %i\n", proc->waiting_time);
+
+				if(proc) printf("\n");
+			}
 		}
+		if(procesos_print == 0) printf("No ha llegado ningun proceso.\n");
 
 		DestructQueue(cola_terminados);
+		free(procesos);
 }
 
 void stats(int sig) {
 		stats_print();
-		printf("AQUI TIENEN QUE IMPRIMIRSE LAS STATS. TAMBIEN HAY QUE VER QUE SE RETORNE 0 t=%i\n", T);
     //close(0);  // foo is displayed if this line is commented out
     _Exit(0);
 }
@@ -119,6 +131,15 @@ int main(int argc, char *argv[])
 	//Print_Queue(cola_por_nacer);
 	fclose(archivo_procesos);
 
+	c_procesos = cola_por_nacer->size;
+	procesos = malloc(sizeof(Proceso*) * c_procesos);
+
+	Proceso* proc_i = cola_por_nacer->head;
+	for(int i=0; i<c_procesos; i++) {
+		procesos[i] = proc_i;
+		proc_i = proc_i->next;
+	}
+
 	Queue_Queue *colas = ConstructMLFQueue(queues, quantum, !strcmp(version,"v3"));
 	//Queue *cola_terminados = ConstructQueue(-1, -1);
 	int cantidad_procesos = cola_por_nacer->size;
@@ -144,9 +165,9 @@ int main(int argc, char *argv[])
 		}
 
 		T++;
+		//usleep(100000);  // eliminar esto, es solo para probar ctrl + c
 	}
 
-	//sleep(10);  // eliminar esto, es solo para probar ctrl + c
 	stats_print();  // si no se hizo ctrl + c display stats
 
 	DestructQueue(cola_por_nacer);
