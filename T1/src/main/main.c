@@ -14,6 +14,7 @@ void stats_print() {
 		printf("\n");
 		printf("Procesos terminados: %i\n", cola_terminados->size);
 		printf("Tiempo total: %i\n", T);
+		printf("\n");
 
 		Proceso *proc = cola_terminados->head;
 		while(proc) {
@@ -138,6 +139,7 @@ int main(int argc, char *argv[])
 		Ejecutar_proceso(colas, cola_terminados, T);
 
 		if (((strcmp(version,"v2") == 0) || (strcmp(version,"v3") == 0)) && T%S == 0) {
+			printf("Ocurre preriodo S en t = %i\n", T);
 			Aging(colas);
 		}
 
