@@ -141,6 +141,7 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
 
   tiempo_actual->valor--;  //ejecutamos un clock
   proceso_actual->quantum_restante--;  //disminuimos el restante
+  //free(tiempo_actual);
 
   if(proceso_actual->response_time == 0 && !proceso_actual->response_time_setted) {
     proceso_actual->response_time_setted = TRUE;
@@ -154,10 +155,14 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
     printf("ejecutando proceso (proceso cambia a estado running): %s\n", proceso_actual->nombre);
   }
 
+  Time *time_free = NULL;
   if (tiempo_actual->valor == 0) {  //ya termino el burst
     printf("Scheduler (t = %i): ", T);
-    TimeDequeue(proceso_actual->linea_de_tiempo); //se saca el burst que ya se completo
+    time_free = TimeDequeue(proceso_actual->linea_de_tiempo);
+    //free(TimeDequeue(proceso_actual->linea_de_tiempo)); //se saca el burst que ya se completo
+
     if (TimeisEmpty(proceso_actual->linea_de_tiempo)) { //ver si el proceso ya se hizo completamente
+      //DestructTimeQueue(proceso_actual->linea_de_tiempo);
       //Dequeue(cola_actual); //sacamos al proceso de la cola
       Remove(cola_actual, proceso_actual); //sacamos al proceso de la cola
       printf("termina proceso (proceso cambia a estado finished): %s\n", proceso_actual->nombre);
@@ -201,6 +206,9 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
       Enqueue(cola_actual, proceso_actual);   //se deja al final de la cola actual
     }
   }
+
+  if(time_free != NULL) free(time_free);
+  
   return 0;
 }
 
@@ -237,7 +245,17 @@ void DestructQueue(Queue *queue) {
     Proceso *pN;
     while (!isEmpty(*queue)) {
         pN = Dequeue(queue);
+        DestructTimeQueue(pN->linea_de_tiempo);
         free(pN);
+    }
+    free(queue);
+}
+
+void DestructQueueQueue(Queue_Queue *queue) {
+    Queue *pN;
+    while (!Queue_isEmpty(*queue)) {
+        pN = Queue_Dequeue(queue);
+        DestructQueue(pN);
     }
     free(queue);
 }
@@ -338,6 +356,16 @@ int Queue_Enqueue(Queue_Queue *pQueue, Queue *item) {
     return TRUE;
 }
 
+Queue *Queue_Dequeue(Queue_Queue *pQueue) {  //extrae el proceso de mayor prioridad (head)
+    Queue *item;
+    if (Queue_isEmpty(*pQueue))
+        return NULL;
+    item = pQueue->head;
+    pQueue->head = (pQueue->head)->next;
+    pQueue->size--;
+    return item;
+}
+
 int Enqueue(Queue *pQueue, Proceso *item) {
     item->next = NULL;
     if (pQueue->size == 0) {
@@ -396,6 +424,17 @@ Proceso *Remove(Queue *pQueue, Proceso *item) {
 }
 
 int isEmpty(Queue pQueue) {
+    /*if (pQueue) {
+        return FALSE;
+    }*/
+    if (pQueue.size == 0) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
+}
+
+int Queue_isEmpty(Queue_Queue pQueue) {
     /*if (pQueue) {
         return FALSE;
     }*/

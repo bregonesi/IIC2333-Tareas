@@ -40,3 +40,7 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T);
 int Aging(Queue_Queue *pQueue);
 bool Proceso_Running(Queue_Queue pQueue);
 Proceso *Remove(Queue *pQueue, Proceso *item);
+
+void DestructQueueQueue(Queue_Queue *queue);
+Queue *Queue_Dequeue(Queue_Queue *pQueue);
+int Queue_isEmpty(Queue_Queue pQueue);

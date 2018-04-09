@@ -7,8 +7,33 @@
 
 #include "colas.h"
 
+int T = 0;  // variables globales para que signal lea
+Queue *cola_terminados;
+
+void stats_print() {
+		printf("\n");
+		printf("Procesos terminados: %i\n", cola_terminados->size);
+		printf("Tiempo total: %i\n", T);
+
+		Proceso *proc = cola_terminados->head;
+		while(proc) {
+			printf("%s:\n", proc->nombre);
+	    printf("Turnos de CPU: %i\n", proc->n_veces_cpu);
+	    printf("Bloqueos: %i\n", proc->n_veces_int);
+	    printf("Turnaround time: %i\n", proc->finish_time - proc->prioridad);
+	    printf("Response time: %i\n", proc->response_time);
+	    printf("Waiting time: %i\n", proc->waiting_time);
+
+			proc = proc->next;
+			if(proc) printf("\n");
+		}
+
+		DestructQueue(cola_terminados);
+}
+
 void stats(int sig) {
-		printf("AQUI TIENEN QUE IMPRIMIRSE LAS STATS. TAMBIEN HAY QUE VER QUE SE RETORNE 0\n");
+		stats_print();
+		printf("AQUI TIENEN QUE IMPRIMIRSE LAS STATS. TAMBIEN HAY QUE VER QUE SE RETORNE 0 t=%i\n", T);
     //close(0);  // foo is displayed if this line is commented out
     _Exit(0);
 }
@@ -51,8 +76,10 @@ int main(int argc, char *argv[])
 	}
 
 	Queue *cola_por_nacer = ConstructQueue(-1, -1);
+	cola_terminados = ConstructQueue(-1, -1);
 
 
+	//int T = 0;
 	signal(SIGINT, stats);  // por si se hace ctrl + c
 
 	char nombre_proceso[255];
@@ -67,7 +94,6 @@ int main(int argc, char *argv[])
 		strcpy(proceso->nombre, nombre_proceso);
 		fscanf(archivo_procesos, "%i", &tiempo_inicio);
 		proceso->prioridad = tiempo_inicio;
-		proceso->waiting_time = -tiempo_inicio; // para que se cumpla finish_time - prioridad - sum(linea de tiempo)
 		fscanf(archivo_procesos, "%i", &cantidad_valores);
 		proceso->quantum_restante = 0;
 
@@ -76,7 +102,6 @@ int main(int argc, char *argv[])
 		for(int i = 0; i < cantidad_valores; i++) {
 			fscanf(archivo_procesos, "%i", &valor_actual);
 			TimeEnqueue(linea_tiempo, valor_actual);
-			proceso->waiting_time -= valor_actual;  // quedara con -prioridad-sum(linea_de_tiempo)
 		}
 
 		proceso->linea_de_tiempo = linea_tiempo;
@@ -86,6 +111,7 @@ int main(int argc, char *argv[])
 		proceso->finish_time = 0;
 		proceso->response_time = 0;
 		proceso->response_time_setted = FALSE;
+		proceso->waiting_time = 0;
 
 		Ordered_Enqueue(cola_por_nacer, proceso);
 	}
@@ -93,10 +119,9 @@ int main(int argc, char *argv[])
 	fclose(archivo_procesos);
 
 	Queue_Queue *colas = ConstructMLFQueue(queues, quantum, !strcmp(version,"v3"));
-	Queue *cola_terminados = ConstructQueue(-1, -1);
+	//Queue *cola_terminados = ConstructQueue(-1, -1);
 	int cantidad_procesos = cola_por_nacer->size;
 
-	int T = 0;
 	while(TRUE) {
 		if(cola_terminados->size >= cantidad_procesos) break;
 
@@ -106,6 +131,8 @@ int main(int argc, char *argv[])
 			Enqueue(colas->head, nacer);
 			nacer->estado = READY;
 			printf("Proceso %s nace en t = %i\n", nacer->nombre, nacer->prioridad);
+		} else {
+			free(nacer);
 		}
 
 		Ejecutar_proceso(colas, cola_terminados, T);
@@ -118,15 +145,11 @@ int main(int argc, char *argv[])
 	}
 	T--; // pq hay que eliminar un t++ que no se ejecuto para estadisticas
 
-	printf("\n");
-	printf("Procesos terminados: %i\n", cola_terminados->size);
-	printf("Tiempo total: %i\n", T);
-	//Queue_Print_Queue(colas);
-	printf("---- Cola Terminados ---\n");
-	Print_Queue(cola_terminados);
-
 	//sleep(10);  // eliminar esto, es solo para probar ctrl + c
-	stats(0);  // si no se hizo ctrl + c display stats
+	stats_print();  // si no se hizo ctrl + c display stats
+
+	DestructQueue(cola_por_nacer);
+	DestructQueueQueue(colas);
 
 	return 0;
 }
