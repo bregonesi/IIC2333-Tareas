@@ -1,0 +1,8 @@
+# Ignore binary
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
