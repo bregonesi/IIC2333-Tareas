@@ -1,5 +1,11 @@
-# Ignore .o files
-*.o
+# Ignore binary
+*
 
-# Ignore .DS_Store files
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+# Ignore DSStore
 .DS_Store
