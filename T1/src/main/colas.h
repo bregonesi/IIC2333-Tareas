@@ -38,3 +38,5 @@ Proceso *Born(Queue pQueue, int time);
 
 int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T);
 int Aging(Queue_Queue *pQueue);
+bool Proceso_Running(Queue_Queue pQueue);
+Proceso *Remove(Queue *pQueue, Proceso *item);

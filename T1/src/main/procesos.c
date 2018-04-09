@@ -38,7 +38,7 @@ int TimeEnqueue(Time_Queue *pQueue, int time) {
     return TRUE;
 }
 
-Time * TimeDequeue(Time_Queue *pQueue) {  //extrae el proceso de mayor prioridad (head)
+Time *TimeDequeue(Time_Queue *pQueue) {  //extrae el proceso de mayor prioridad (head)
     Time *item;
     if (TimeisEmpty(pQueue))
         return NULL;

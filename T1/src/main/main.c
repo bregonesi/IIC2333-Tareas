@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
 	printf("---- Cola Terminados ---\n");
 	Print_Queue(cola_terminados);
 
-	sleep(10);  // eliminar esto, es solo para probar ctrl + c
+	//sleep(10);  // eliminar esto, es solo para probar ctrl + c
 	stats(0);  // si no se hizo ctrl + c display stats
 
 	return 0;
