@@ -98,14 +98,11 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
   Proceso *proceso_actual;
   proceso_actual = NULL;
 
-  printf("%i\n", Proceso_Running(*pQueue));
-  Queue_Print_Queue(pQueue);
   if(Proceso_Running(*pQueue)) {  // si hay alguno running tenemos que terminarlo sin interrumpir
     printf("Scheduler (t = %i): ", T);
     printf("ejecutando un quantum para proceso ya en running\n");
     while(cola_actual != NULL) { // recorremos todas las colas
       if(!isEmpty(*cola_actual)) {  // si tiene elementos
-        printf("not empty\n");
         proceso_actual = cola_actual->head;
 
         while(proceso_actual) {
@@ -114,8 +111,6 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
           }
           proceso_actual = proceso_actual->next;
         }
-      } else {
-        printf(" emptyyy\n");
       }
       if(proceso_actual && proceso_actual->estado == RUNNING) break;
       cola_actual = cola_actual->next;
@@ -368,42 +363,34 @@ Proceso *Dequeue(Queue *pQueue) {  //extrae el proceso de mayor prioridad (head)
 }
 
 Proceso *Remove(Queue *pQueue, Proceso *item) {
-  printf("remove\n");
     if (isEmpty(*pQueue)) {
-      printf("empty\n");
         return NULL;
       }
 
     if(item == pQueue->head) {  // si es el head
-      printf("1\n");
       pQueue->head = (pQueue->head)->next;
       pQueue->size--;
       return item;
     }
 
-    printf("2\n");
     // si no es head
     Proceso* elem; // este sera el anterior
     elem = pQueue->head;
 
     while(elem->next != item) {  // buscamos el anterior
-      printf("3\n");
       elem = elem->next;
       if (elem == NULL) return NULL;
     }
 
     if(item == pQueue->tail) { // si es el tail
-      printf("4\n");
       pQueue->tail = elem;
       pQueue->size--;
       return item;
     } else {
-      printf("5\n");
       elem->next = item->next;
       pQueue->size--;
       return item;
     }
-      printf("6\n");
 
     return NULL;
 }
