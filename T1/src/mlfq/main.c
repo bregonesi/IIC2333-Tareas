@@ -143,6 +143,7 @@ int main(int argc, char *argv[])
 	Queue_Queue *colas = ConstructMLFQueue(queues, quantum, !strcmp(version,"v3"));
 	//Queue *cola_terminados = ConstructQueue(-1, -1);
 	int cantidad_procesos = cola_por_nacer->size;
+	bool aging_pendiente = FALSE;
 
 	while(TRUE) {
 		if(cola_terminados->size >= cantidad_procesos) break;
@@ -160,8 +161,14 @@ int main(int argc, char *argv[])
 		Ejecutar_proceso(colas, cola_terminados, T);
 
 		if (((strcmp(version,"v2") == 0) || (strcmp(version,"v3") == 0)) && T%S == 0) {
-			printf("Ocurre aging de periodo S en t = %i\n", T);
+			aging_pendiente = TRUE;
+			printf("Ocurre aging de periodo S en t = %i. Queda pendiente.\n", T);
+		}
+
+		if(aging_pendiente && !Proceso_Running(*colas)) {
+			printf("Ocurre aging de pendiente periodo S en t = %i\n", T);
 			Aging(colas);
+			aging_pendiente = FALSE;
 		}
 
 		T++;
