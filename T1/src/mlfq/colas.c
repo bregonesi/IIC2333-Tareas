@@ -66,7 +66,7 @@ int Aging(Queue_Queue *pQueue) {
     cola_auxiliar = cola_actual->next;
     while (isEmpty(*cola_auxiliar) == FALSE) {
       proceso_actual = Dequeue(cola_auxiliar);
-      Enqueue(cola_actual, proceso_actual);
+      Enqueue(pQueue->head, proceso_actual);
     }
     cola_actual = cola_auxiliar;
   }
