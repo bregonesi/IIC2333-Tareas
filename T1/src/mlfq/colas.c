@@ -129,8 +129,16 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
     printf("escogiendo un nuevo proceso para ejecutar\n");
   }
 
-  if (proceso_actual->quantum_restante == 0) {  //si es primera vez que se ejecuta
+  /*if (proceso_actual->quantum_restante == 0) {  //si es primera vez que se ejecuta
     proceso_actual->quantum_restante = cola_actual->quantum;
+  }*/
+
+  if(proceso_actual->estado != RUNNING) {
+    proceso_actual->quantum_restante = cola_actual->quantum;
+    proceso_actual->estado = RUNNING;
+    proceso_actual->n_veces_cpu++;
+    printf("Scheduler (t = %i): ", T);
+    printf("ejecutando proceso (proceso cambia a estado running): %s\n", proceso_actual->nombre);
   }
 
   Time_Queue *tiempos;
@@ -146,13 +154,6 @@ int Ejecutar_proceso(Queue_Queue *pQueue, Queue *eQueue, int T) { //Scheduler
   if(proceso_actual->response_time == 0 && !proceso_actual->response_time_setted) {
     proceso_actual->response_time_setted = TRUE;
     proceso_actual->response_time = T - proceso_actual->prioridad;  // seteamos response time para procesos que no parten en T=0
-  }
-
-  if(proceso_actual->estado != RUNNING) {
-    proceso_actual->estado = RUNNING;
-    proceso_actual->n_veces_cpu++;
-    printf("Scheduler (t = %i): ", T);
-    printf("ejecutando proceso (proceso cambia a estado running): %s\n", proceso_actual->nombre);
   }
 
   // incrementar waiting de ready
