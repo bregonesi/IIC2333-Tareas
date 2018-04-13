@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
+#include "cola.h"
 
 int main(int argc, char *argv[])
 {
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
 				if(ch == '\n') {
 					for(int i = 0; i < params; i++) printf("%s\n", args[i]);
 					args[params] = NULL;
+					printf("hola\n");
 
 					// execvp(args[0], args);  // asi se ejecuta el comando
 				}
