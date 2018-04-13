@@ -7,5 +7,11 @@
 # Unignore all dirs
 !*/
 
+# Unignore makefile
+!Makefile
+
+# Ignore obj folder
+*.o
+
 # Ignore DSStore
 .DS_Store
