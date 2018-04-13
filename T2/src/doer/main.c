@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	char **args = malloc(sizeof(char*) * 2);
 	while ( ch != EOF ) {
 		if(ch != '\n') {  // vamos guardando el parametro en linea caracter por caracter
-			line[index++] = ch;
+			if((!colon_param && !(ch == ' ' || ch == '"')) || (colon_param && ch != '"')) line[index++] = ch;  // si hay espacios no funciona
     }
 
 		if(ch == '"') {  // si hay algun parametro que use comillas
@@ -46,30 +46,23 @@ int main(int argc, char *argv[])
 				params++;
 
 				if(params != 1) {  // hay que expandir args
-					printf("realloc\n");
 					args = realloc(args, sizeof(char*) * (params + 1));
 				}
 
-				printf("fds %i\n", params-1);
-				strcpy(args[params - 1], "hola\0");  // esto esta fallando
-				// strcpy(args[params - 1], line)  // aqui se pasa a una lista para que sea ejecutado por execvp
-				printf("%s\n", args[params-1]);
-
-				printf("jfldjf %s: %i\n", line, params);
+				args[params - 1] = malloc(strlen(line));
+				strcpy(args[params - 1], line);  // aqui se pasa a una lista para que sea ejecutado por execvp
 
 				if(ch == '\n') {
-					printf("fin\n");
-					for(int i = 0; i < params; i++) {
-						printf("%s\n", args[i]);
-					}
+					for(int i = 0; i < params; i++) printf("%s\n", args[i]);
 					args[params] = NULL;
-					execvp(args[0],args);
+
+					// execvp(args[0], args);  // asi se ejecuta el comando
 				}
 		}
 
 		if(ch == '\n') { // por si empieza nueva tarea
 			params = 0;
-			args = malloc(sizeof(char*) * 2);
+			args = malloc(sizeof(char*));
 		}
 
 		ch = getc(archivo_tareas);
