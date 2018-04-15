@@ -3,7 +3,11 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
+#include <sys/wait.h>
+
 #include "cola.h"
+
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
 int main(int argc, char *argv[])
 {
@@ -23,6 +27,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	int n = atoi(argv[2]);
+
+	Queue* tareas = ConstructQueue();
+
   /* Lectura de archivo */
 
 	char line[1024];
@@ -30,7 +38,8 @@ int main(int argc, char *argv[])
   int index = 0;
 	int params = 0;
 	bool colon_param = false;
-	char **args = malloc(sizeof(char*) * 2);
+	char **args = NULL;
+	// = malloc(sizeof(char*));
 	while ( ch != EOF ) {
 		if(ch != '\n') {  // vamos guardando el parametro en linea caracter por caracter
 			if((!colon_param && !(ch == ' ' || ch == '"')) || (colon_param && ch != '"')) line[index++] = ch;  // si hay espacios no funciona
@@ -41,57 +50,117 @@ int main(int argc, char *argv[])
 			else colon_param = true;
 		}
 
-		if((ch == ' ' || ch == '\n') && !colon_param) {  // guardamos nuevo parametro
-	      line[index] = '\0';
-	      index = 0;
-				params++;
+		if((ch == ' ' || ch == '\n') && !colon_param && index != 0) {  // guardamos nuevo parametro
+      line[index] = '\0';
+      index = 0;
 
-				if(params != 1) {  // hay que expandir args
-					args = realloc(args, sizeof(char*) * (params + 1));
-				}
+			if(!args) args = malloc(sizeof(char*));
 
-				args[params - 1] = malloc(strlen(line));
-				strcpy(args[params - 1], line);  // aqui se pasa a una lista para que sea ejecutado por execvp
+			if(params >= 1) {  // hay que expandir args
+				args = realloc(args, sizeof(char*) * (params + 1));
+			}
 
-				if(ch == '\n') {
-					for(int i = 0; i < params; i++) printf("%s\n", args[i]);
-					args[params] = NULL;
-					printf("hola\n");
+			args[params] = malloc(strlen(line) + 1);
+			strcpy(args[params], line);  // aqui se pasa a una lista para que sea ejecutado por execvp
 
-					// execvp(args[0], args);  // asi se ejecuta el comando
-				}
+			if(ch == '\n') {
+				//for(int i = 0; i <= params; i++) printf("%s\n", args[i]);
+
+				NODE* nodo = malloc(sizeof(NODE));
+
+				nodo->lista_args = args;
+				nodo->size = params + 1;
+				nodo->intentos = 0;
+
+				Enqueue_last(tareas, nodo);
+
+				//execvp(args[0], args);  // asi se ejecuta el comando
+			}
+			params++;
 		}
 
 		if(ch == '\n') { // por si empieza nueva tarea
 			params = 0;
-			args = malloc(sizeof(char*));
+			args = NULL;
 		}
 
 		ch = getc(archivo_tareas);
   }
+	//free(args);  // pq el ultimo args no se guarda
 
+	fclose(archivo_tareas);
 
-  /*char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
+	int m = tareas->size;
+	pid_t *procesos = calloc(MIN(n, m), sizeof(fork()));
+	NODE **en_ejecucion = malloc(sizeof(NODE*) * MIN(n, m));
+	Queue* tareas_finalizadas = ConstructQueue();
+	int i = 0;
+	int status;  // retorna status del proceso finalizado
+	while(true) {
 
-  while ((read = getline(&line, &len, archivo_tareas)) != -1) {
-    printf("Retrieved line of length %zu :\n", read);
-    printf("%s", line);
+		NODE* ejecutar = Dequeue(tareas);
 
-		// commando: find . -name "tests.txt"
-		//char *args[]={"find", ".", "-name", "tests.txt", NULL}; // este es el caso
+		if(i >= n || !ejecutar) {
+			pid_t wpid = wait(&status);  // espera hasta que termine alguno (primero que temrine)
+			printf("PARENT: Child's exit code is: %d and pid %d\n", WEXITSTATUS(status), wpid);
 
-		// commando date "+DATE: %Y-%m-%d%nTIME: %H:%M:%S"
-		char *args[]={"date", "+DATE: %Y-%m-%d%nTIME: %H:%M:%S", NULL}; // este es el caso
-		execvp(args[0],args);
-  }*/
-  /* */
+			int j = 0;
+			for( ; j < n; j++) {
+				if(procesos[j] == wpid) {  // buscamos el que termino
+					break;
+				}
+			}
 
-  //if (line) free(line);
+			if(status == 0 || en_ejecucion[j]->intentos >= 2) {  // si finalizo correctamente o no puede volver a intentar
+				Enqueue_last(tareas_finalizadas, en_ejecucion[j]);
+			} else {
+				if(en_ejecucion[j]->intentos <= 1) {
+					if(ejecutar) Enqueue_first(tareas, ejecutar); // no ejecutamos el que ibamos a ejecutar
+					ejecutar = en_ejecucion[j];
+				}
+			}
 
-  fclose(archivo_tareas);
+			if(ejecutar) {  // por si aun quedan por ejecutar
+				if((procesos[j] = fork()) == 0) {  // child here
+					printf("Hijo creado con pid %d y arg0 %s\n", getpid(), ejecutar->lista_args[0]);
+					execvp(ejecutar->lista_args[0], ejecutar->lista_args);
+					exit(1);  // por si execvp falla
+					// child no ejecuta nada mas
+				} else {
+					ejecutar->pid = procesos[j];
+					ejecutar->intentos++;
+					en_ejecucion[j] = ejecutar;
+					printf("Creando hijo con pid %d\n", procesos[j]);
+				}
+			}
 
-  printf("Este es el main de doer\n");
+		}
 
+		if(i < n && ejecutar) {
+			if(procesos[i] == 0) {
+				if((procesos[i] = fork()) == 0) {  // child here
+					printf("Hijo creado con pid %d y arg0 %s\n", getpid(), ejecutar->lista_args[0]);
+					execvp(ejecutar->lista_args[0], ejecutar->lista_args);
+					exit(1);  // por si execvp falla
+					// child no ejecuta nada mas
+				} else {
+					ejecutar->pid = procesos[i];
+					ejecutar->intentos++;
+					en_ejecucion[i] = ejecutar;
+					printf("Creando hijo con pid %d\n", procesos[i]);
+				}
+				i++;
+			}
+		}
+
+		if(tareas_finalizadas->size >= m) break;
+
+	}
+
+	DestructQueue(tareas);
+	free(procesos);
+	free(en_ejecucion);
+	DestructQueue(tareas_finalizadas);
+
+	return 0;
 }

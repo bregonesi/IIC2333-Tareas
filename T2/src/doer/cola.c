@@ -6,9 +6,8 @@
 #define FALSE	0
 
 
-Queue *ConstructQueue(int k) {
+Queue *ConstructQueue() {
     Queue *queue = (Queue*) malloc(sizeof (Queue));
-    //queue->limit = limit;
     queue->size = 0;
     queue->head = NULL;
     queue->tail = NULL;
@@ -19,6 +18,10 @@ void DestructQueue(Queue *queue) {
     NODE *pN;
     while (!isEmpty(queue)) {
         pN = Dequeue(queue);
+        if(pN) {
+          for(int i = 0; i < pN->size; i++) free(pN->lista_args[i]);
+          free(pN->lista_args);
+        }
         free(pN);
     }
     free(queue);
@@ -30,24 +33,23 @@ int Print_Queue(Queue *pQueue) {
     NODE *actual;
     actual = pQueue->head;
     while (actual != NULL) {
-      printf(" %i -", actual->id); // arreglar esto para que se vea la lista
+      printf(" %d -", actual->pid); // arreglar esto para que se vea la lista
       actual = actual->next;
     }
     return FALSE;
 }
 
 int Delete_Node(Queue *pQueue, NODE *item) {
-    //int k = 1;
     NODE *actual;
     actual = pQueue->head;
     if (actual == NULL) {
       return FALSE;
     }
-    if (actual-> id == item->id) {
+    if (actual == item) {
       pQueue->head = actual->next;
     }
     while (actual->next != NULL) {
-      if (actual->next->id == item->id) {
+      if (actual->next == item) {
         actual->next = actual->next->next;
         pQueue->size--;
         return TRUE;
@@ -55,56 +57,6 @@ int Delete_Node(Queue *pQueue, NODE *item) {
       actual = actual->next;
     }
     return FALSE;
-}
-
-int Ordered_Enqueue(Queue *pQueue, NODE *item) {  //por ahora no tiene mucho sentido, lo dejo con id por mientras
-    item->next = NULL;
-    if (pQueue->size == 0) {
-        pQueue->head = item;
-        pQueue->tail = item;
-
-    } else {
-        int k = 1;
-        NODE *actual;
-        actual = pQueue->head;
-        if (actual->next == NULL) {
-          if (item->id >= actual->id) {
-            actual->next = item;
-            pQueue ->tail = item;
-            k = 0;
-          }
-          else {
-            item->next = actual;
-            pQueue->head = item;
-            k = 0;
-          }
-        }
-        if (k == 1 && item->id < pQueue->head->id) {
-          pQueue->head = item;
-          item->next = actual;
-          pQueue->size++;
-          return TRUE;
-        }
-        while (k == 1) {
-          if (item->id >= actual->next->id) {
-            if (actual->next->next == NULL) {
-              actual->next->next = item;
-              pQueue ->tail = item;
-              k = 0;
-            }
-            else{
-              actual = actual->next;
-            }
-          }
-          else{
-            item->next = actual->next;
-            actual->next = item;
-            k = 0;
-          }
-        }
-    }
-    pQueue->size++;
-    return TRUE;
 }
 
 int Enqueue_first(Queue *pQueue, NODE *item) {
@@ -135,7 +87,7 @@ int Enqueue_last(Queue *pQueue, NODE *item) {
     return TRUE;
 }
 
-NODE * Get_first(Queue *pQueue) {
+NODE* Get_first(Queue *pQueue) {
     NODE *item;
     if (isEmpty(pQueue))  // cola vacia
         return NULL;
@@ -143,7 +95,7 @@ NODE * Get_first(Queue *pQueue) {
     return item;
 }
 
-NODE * Get_last(Queue *pQueue) {
+NODE* Get_last(Queue *pQueue) {
     NODE *item;
     if (isEmpty(pQueue))  // cola vacia
         return NULL;
@@ -151,7 +103,7 @@ NODE * Get_last(Queue *pQueue) {
     return item;
 }
 
-NODE * Dequeue(Queue *pQueue) {
+NODE* Dequeue(Queue *pQueue) {
     NODE *item;
     if (isEmpty(pQueue))  // cola vacia
         return NULL;
@@ -161,7 +113,7 @@ NODE * Dequeue(Queue *pQueue) {
     return item;
 }
 
-int isEmpty(Queue* pQueue) {   //lo dejo pasar porque problema tiene solucion siempre
+int isEmpty(Queue* pQueue) {
     if (pQueue == NULL) {
         return FALSE;
     }

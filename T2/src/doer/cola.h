@@ -8,7 +8,8 @@ typedef struct Node_t
 {
   char** lista_args;
   int size;
-  int id;
+  pid_t pid;
+  int intentos;
   struct Node_t *next;
 } NODE;
 
@@ -20,12 +21,13 @@ typedef struct Queue {    //cola para Open
     int limit;
 } Queue;
 
-Queue *ConstructQueue(int limit);
+Queue *ConstructQueue();
 void DestructQueue(Queue *queue);
-int Enqueue(Queue *pQueue, NODE *item);
-NODE *Dequeue(Queue *pQueue);
+int Enqueue_first(Queue *pQueue, NODE *item);
+NODE* Dequeue(Queue *pQueue);
 int isEmpty(Queue* pQueue);
-NODE * Get_first(Queue *pQueue);
-NODE * Get_last(Queue *pQueue);
+NODE* Get_first(Queue *pQueue);
+NODE* Get_last(Queue *pQueue);
 int Enqueue_last( Queue *pQueue, NODE *item);
 int Enqueue_first(Queue *pQueue, NODE *item);
+int Print_Queue(Queue *pQueue);
