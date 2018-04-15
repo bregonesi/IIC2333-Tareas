@@ -4,13 +4,43 @@
 #include <stdbool.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include "cola.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
+struct timeval  tv1, tv2;
+clock_t begin;
+int m;
+int n;
+
+void stats_print() {
+		printf("\n\n\n\n");
+		printf("------Estadisticas------\n");
+		clock_t end = clock();
+		gettimeofday(&tv2, NULL);
+		double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
+		printf("Valor de m: %i\n", m);
+		printf("Valor de n: %i\n", n);
+		printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
+		printf("Tiempo medido con gettime: %fs\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+         (double) (tv2.tv_sec - tv1.tv_sec));
+}
+
+void stats(int sig) {
+		stats_print();
+    //close(0);  // foo is displayed if this line is commented out
+    _Exit(0);
+}
+
 int main(int argc, char *argv[])
 {
+	begin = clock();
+	gettimeofday(&tv1, NULL);
+	signal(SIGINT, stats);  // por si se hace ctrl + c
+
   /* El programa recibe 2 parametros */
 	if(argc != 3)
 	{
@@ -27,7 +57,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	int n = atoi(argv[2]);
+	n = atoi(argv[2]);
 
 	Queue* tareas = ConstructQueue();
 
@@ -90,7 +120,7 @@ int main(int argc, char *argv[])
 
 	fclose(archivo_tareas);
 
-	int m = tareas->size;
+	m = tareas->size;
 	pid_t *procesos = calloc(MIN(n, m), sizeof(fork()));
 	NODE **en_ejecucion = malloc(sizeof(NODE*) * MIN(n, m));
 	Queue* tareas_finalizadas = ConstructQueue();
@@ -161,6 +191,9 @@ int main(int argc, char *argv[])
 	free(procesos);
 	free(en_ejecucion);
 	DestructQueue(tareas_finalizadas);
+	//sleep(2); //probando ctrl c
+
+	stats_print();
 
 	return 0;
 }
