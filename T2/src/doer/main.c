@@ -22,6 +22,7 @@ void stats_print() {
 		clock_t end = clock();
 		gettimeofday(&tv2, NULL);
 		double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
+		printf("Procesos ejecutados: %i\n", m); //por ahora esta asi hasta preguntar al ayudante
 		printf("Valor de m: %i\n", m);
 		printf("Valor de n: %i\n", n);
 		printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
