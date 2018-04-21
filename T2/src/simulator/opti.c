@@ -31,7 +31,7 @@ void optimo_2(){
   printf("----------------------------------------\n");
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("BITS NIVEL 2: %i\n", bits_2);
-  printf("ESPACIO UTILIZADO: %g B\n", (min));
+  printf("ESPACIO UTILIZADO: %g MB\n", (min*(pow(10, -6))));
   printf("----------------------------------------\n");
 }
 
@@ -62,7 +62,7 @@ void optimo_3(){
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("BITS NIVEL 2: %i\n", bits_2);
   printf("BITS NIVEL 3: %i\n", bits_3);
-  printf("ESPACIO UTILIZADO: %g B\n", (min));
+  printf("ESPACIO UTILIZADO: %g MB\n", (min*(pow(10, -6))));
   printf("----------------------------------------\n");
 }
 
@@ -100,7 +100,7 @@ void optimo_4() {
   printf("BITS NIVEL 2: %i\n", bits_2);
   printf("BITS NIVEL 3: %i\n", bits_3);
   printf("BITS NIVEL 4: %i\n", bits_4);
-  printf("ESPACIO UTILIZADO: %g B\n", (min));
+  printf("ESPACIO UTILIZADO: %g MB\n", (min*(pow(10, -6))));
   printf("----------------------------------------\n");
 }
 
@@ -145,36 +145,46 @@ void optimo_5() {
   printf("BITS NIVEL 3: %i\n", bits_3);
   printf("BITS NIVEL 4: %i\n", bits_4);
   printf("BITS NIVEL 5: %i\n", bits_5);
-  printf("ESPACIO UTILIZADO: %g B\n", (min));
+  printf("ESPACIO UTILIZADO: %g MB\n", (min*(pow(10, -6))));
   printf("----------------------------------------\n");
 }
 
 double T_2(int i) {
   double k1 = powf(2, i) * ((20.0 - i) / 8.0);
-  double k2 = powf(2, 20.0 - i) * (11.0 / 8.0);
-  return (k1 + k2);
+  double cantidad_t1 = powf(2, i);
+  double k2 = powf(2, 20.0 - i) * (11.0 / 8.0); //tamaño de 1 pag en 2nivel
+  return (k1 + (k2*cantidad_t1));
 }
 
 double T_3(int i, int j) {
   double k1 = powf(2, i) * ((20.0 - i) / 8.0);
+  double cantidad_t1 = powf(2, i);
   double k2 = powf(2, 20.0 - i - j) * (j / 8.0);
+  double cantidad_t2 = cantidad_t1 * powf(2, 20.0 - i - j);
   double k3 = powf(2, j) * (11.0 / 8.0);
-  return (k1 + k2 + k3);
+  return (k1 + (k2*cantidad_t1) + (k3*cantidad_t2));
 }
 
 double T_4(int i, int j, int p) {
   double k1 = powf(2, i) * ((20.0 - i) / 8.0);
+  double cantidad_t1 = powf(2, i);
   double k2 = powf(2, 20.0 - i - j) * (j / 8.0);
+  double cantidad_t2 = cantidad_t1 * powf(2, 20.0 - i - j);
   double k3 = powf(2, j - p) * (p / 8.0);
+  double cantidad_t3 = cantidad_t2 * powf(2, j-p);
   double k4 = powf(2, p) * (11.0 / 8.0);
-  return (k1 + k2 + k3 + k4);
+  return (k1 + (k2*cantidad_t1) + (k3*cantidad_t2) +(k4*cantidad_t3));
 }
 
 double T_5(int i, int j, int p, int q) {
   double k1 = powf(2, i) * ((20.0 - i) / 8.0);
+  double cantidad_t1 = powf(2, i);
   double k2 = powf(2, 20.0 - i - j) * (j / 8.0);
+  double cantidad_t2 = cantidad_t1 * powf(2, 20.0 - i - j);
   double k3 = powf(2, j - p) * (p / 8.0);
+  double cantidad_t3 = cantidad_t2 * powf(2, j-p);
   double k4 = powf(2, p - q) * (q / 8.0);
+  double cantidad_t4 = cantidad_t3 * powf(2, p-q);
   double k5 = powf(2, q) * (11.0 / 8.0);
-  return (k1 + k2 + k3 + k4 + k5);
+  return (k1 + (k2*cantidad_t1) + (k3*cantidad_t2) + (k4*cantidad_t3) + (k5*cantidad_t4));
 }
