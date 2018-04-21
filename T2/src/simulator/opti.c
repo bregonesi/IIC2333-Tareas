@@ -3,6 +3,12 @@
 #include <math.h>
 #include "opti.h"
 
+int bits_1 = 0;
+int bits_2 = 0;
+int bits_3 = 0;
+int bits_4 = 0;
+int bits_5 = 0;
+
 
 void optimo_1() {
   int bits_1 = 20;
@@ -14,8 +20,6 @@ void optimo_1() {
 }
 
 void optimo_2(){
-  int bits_1;
-  int bits_2;
   int i_min;
   double min = +INFINITY;
   double T_actual;
@@ -36,9 +40,6 @@ void optimo_2(){
 }
 
 void optimo_3(){
-  int bits_1;
-  int bits_2;
-  int bits_3;
   int i_min;
   int j_min;
   double min = +INFINITY;
@@ -67,10 +68,6 @@ void optimo_3(){
 }
 
 void optimo_4() {
-  int bits_1;
-  int bits_2;
-  int bits_3;
-  int bits_4;
   int i_min;
   int j_min;
   int p_min;
@@ -105,11 +102,6 @@ void optimo_4() {
 }
 
 void optimo_5() {
-  int bits_1;
-  int bits_2;
-  int bits_3;
-  int bits_4;
-  int bits_5;
   int i_min;
   int j_min;
   int p_min;
