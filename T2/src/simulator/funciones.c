@@ -35,3 +35,13 @@ char* fill_binario(char* binario, int cantidad) {
 
 	return final;
 }
+
+char* cut_string(char* string, int inicio, int final) {
+	char* string_final = malloc(sizeof(char) * 20);
+	for(int i = 0; i < (final - inicio); i++) {
+		string_final[i] = string[inicio + i];
+	}
+	string_final[final - inicio] = '\0';
+
+	return string_final;
+}

@@ -8,8 +8,8 @@ char*** crear_TLB() {
   TLB = malloc(sizeof(char***) * 64);
   for (int i = 0; i < 64; i++) {
     TLB[i] = malloc(sizeof(char**) * 2);
-    TLB[i][0] = "-";  //
-    TLB[i][1] = "-";
+    TLB[i][0] = "-";  //frame
+    TLB[i][1] = "-";  //time
   }
   return TLB;
 };
