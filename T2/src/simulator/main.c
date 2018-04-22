@@ -61,45 +61,35 @@ int main(int argc, char *argv[])
     int pag3 = 0;
     int pag4 = 0;
     int pag5 = 0;
+    int offset = 0;
 
     cut_binary = cut_string(binario, 0, info.b1);
-    char pag1_c[28];
-    itoa(atoi(cut_binary), pag1_c, 10);
-    pag1 = atoi(pag1_c);
+    pag1 = bin_to_dec(cut_binary);
 
     if (info.b2 != 0) {
       cut_binary = cut_string(binario, info.b1, info.b1 + info.b2);
-
-      char pag2_c[28];
-      itoa(atoi(cut_binary), pag2_c, 10);
-      pag1 = atoi(pag2_c);
+      pag2 = bin_to_dec(cut_binary);
     }
     if (info.b3 != 0) {
       cut_binary = cut_string(binario, info.b1 + info.b2, info.b1 + info.b2 + info.b3);
-
-      char pag3_c[28];
-      itoa(atoi(cut_binary), pag3_c, 10);
-      pag1 = atoi(pag3_c);
+      pag3 = bin_to_dec(cut_binary);
     }
     if (info.b4 != 0) {
       cut_binary = cut_string(binario, info.b1 + info.b2 + info.b3, info.b1 + info.b2 + info.b3 + info.b4);
-
-      char pag4_c[28];
-      itoa(atoi(cut_binary), pag4_c, 10);
-      pag1 = atoi(pag4_c);
+      pag4 = bin_to_dec(cut_binary);
     }
     if (info.b5 != 0) {
       cut_binary = cut_string(binario, info.b1 + info.b2 + info.b3 + info.b4, info.b1 + info.b2 + info.b3 + info.b4 + info.b5);
-
-      char pag5_c[28];
-      itoa(atoi(cut_binary), pag5_c, 10);
-      pag1 = atoi(pag5_c);
+      pag5 = bin_to_dec(cut_binary);
     }
 
-    pagina = tabla[pag1][pag2][pag3][pag4][pag5];
-    offset = linea[info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8];
-    offset = bin_to_int(offset);
-    if (pagina == "-") {
+    char* pagina = tabla[pag1][pag2][pag3][pag4][pag5];
+
+    char* offset_c = malloc(sizeof(char) * 20);  // se que el offset es de 8, pero cut_string retorna string de 20
+    offset_c = cut_string(binario, info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8);
+    offset = bin_to_dec(offset_c);
+
+    if(strcmp(pagina, "-") == 0) {
       page_fault += 1;
       //ir a buscar a .bin y dejarlo en RAM, despues asignar el frame a esta pag y dejar seteado los extras
       char frame[255];
