@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 
   int tiempo = 0; //contador para el LRU
   double page_fault = 0;
-  int tlb_hit = 0;
+  double tlb_hit = 0;
 
   struct info_bits info;
   char****** tabla = NULL;
@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
   }  // aqui termina el while
   printf("----------------------------------------\n");
   printf("PORCENTAJE_PAGE_FAULTS = %g%\n", (page_fault/tiempo)*100);
+  printf("PORCENTAJE_TLB_HITS = %g%\n", (tlb_hit/tiempo)*100);
   // aca printear la TLB //
   printf("----------------------------------------\n");
   return 0;

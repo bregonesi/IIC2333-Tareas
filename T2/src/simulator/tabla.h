@@ -15,3 +15,4 @@ int* crear_tlb_tiempos();
 char** crear_TLB();
 int* crear_tlb_frames();
 int indice_tlb(char* direccion_bin_pag, char** TLB);
+int insertar_en_tlb(char** TLB, char* frame, int tiempo, int* TLB_tiempos, int* TLB_frames, int direccion_frame);
