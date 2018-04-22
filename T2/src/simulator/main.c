@@ -12,20 +12,16 @@ int main(int argc, char *argv[])
 		printf("Modo de uso: %s <n> <file>\n", argv[0]);
 		return 1;
 	}
-  char* input_file = argv[2];
-	FILE *archivo_tareas;
-	archivo_tareas = fopen(input_file, "r");	// leyendo archivo de input
 
-	if (!(archivo_tareas)) {
-		printf("Archivo %s no existe.\n", input_file);
-		return 1;
-	}
+  char* input_file = argv[2];
+
   int n;
 	n = atoi(argv[1]);
   if (n!=1 && n!=2 && n!=3 && n!=4 && n!=5) {
     printf("n debe ser un numero entre 1 y 5\n");
     return 1;
   }
+
   struct info_bits info;
   char****** tabla = NULL;
   char*** TLB;
@@ -37,12 +33,22 @@ int main(int argc, char *argv[])
   tabla = crear_tabla_paginas(info.b1, info.b2, info.b3, info.b4, info.b5, n);
   TLB = crear_TLB();
 
+  FILE *archivo_input;
+  archivo_input = fopen(input_file, "r");	// leyendo archivo de input
 
-  int a=54325;
-  char buffer[20];
-  itoa(a,buffer,2);   // here 2 means binary
-  printf("Binary value = %s\n", buffer);
+  if (!(archivo_input)) {
+    printf("Archivo %s no existe.\n", input_file);
+    return 1;
+  }
 
+  char instruccion[10];
+	while (fscanf(archivo_input, "%s", instruccion) != EOF) {
+    char* binario = malloc(sizeof(char) * 28);
+    itoa(atoi(instruccion), binario, 2);
+
+    binario = fill_binario(binario, 28);
+    printf("%s: %s\n", instruccion, binario);
+  }
 
   return 0;
 }

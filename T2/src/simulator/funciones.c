@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include "funciones.h"
 
 char* itoa(int value, char* result, int base) {
@@ -26,3 +27,11 @@ char* itoa(int value, char* result, int base) {
 		}
 		return result;
 	}
+
+char* fill_binario(char* binario, int cantidad) {
+	char* final = malloc(sizeof(char) * cantidad);
+	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
+	strcat(final, binario);
+
+	return final;
+}
