@@ -64,7 +64,6 @@ char* cut_string(char* string, int inicio, int final) {
 char* leer_bin(char *filename, int pos) {
   FILE* fp;
   char* frame = malloc(sizeof(char) * 256);
-
   fp = fopen(filename, "rb");
   fseek(fp, pos * 256, SEEK_SET);
   fread(frame, 1, 256, fp);
