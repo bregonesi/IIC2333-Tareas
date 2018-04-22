@@ -5,6 +5,7 @@
 #include "opti.h"
 #include "tabla.h"
 #include "funciones.h"
+#include "ram.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,6 +31,7 @@ int main(int argc, char *argv[])
   struct info_bits info;
   char****** tabla = NULL;
   char*** TLB;
+  char*** RAM;
   if (n == 1) info = optimo_1();
   else if (n == 2) info = optimo_2();
   else if (n == 3) info = optimo_3();
@@ -37,6 +39,7 @@ int main(int argc, char *argv[])
   else if (n == 5) info = optimo_5();
   tabla = crear_tabla_paginas(info.b1, info.b2, info.b3, info.b4, info.b5, n);
   TLB = crear_TLB();
+  RAM = crear_ram();
 
   FILE *archivo_input;
   archivo_input = fopen(input_file, "r");	// leyendo archivo de input
@@ -96,17 +99,18 @@ int main(int argc, char *argv[])
       pag1 = atoi(pag5_c);
     }
 
-    pagina = tabla[pag1][pag2][pag3][pag4][pag5];
+    char* pagina = tabla[pag1][pag2][pag3][pag4][pag5];
     offset = linea[info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8];
     offset = bin_to_int(offset);
     if (pagina == "-") {
       page_fault += 1;
       //ir a buscar a .bin y dejarlo en RAM, despues asignar el frame a esta pag y dejar seteado los extras
-      char frame[255];
+      char frame[256];
       frame = leer_bin(linea[0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5]);  //leer del .bin
-      int n_frame = insertar_en_ram(frame); //inserta en RAM con LRU y devuelve el slot que ocupa
+      int n_frame = insertar_en_ram(RAM, frame, tiempo); //inserta en RAM con LRU y devuelve el slot que ocupa
       n_frame = int_to_bin(n_frame);
       direccion = concat_bins(n_frame, int_to_bin(offset));
+      tabla[pag1][pag2][pag3][pag4][pag5] = concat_bins(bin(n_frame), bin(000));  //ese ultimo tiene que ser largo 3
       printf("-%i-\n", bin_to_int(linea));  //direccion virtual
       printf("direccion fisica: %i\n", bin_to_int(direccion));
       printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
@@ -116,10 +120,12 @@ int main(int argc, char *argv[])
       int bits_extras = pagina[8,11];
       int ram_o_disco = bits_extras[0]; // 0 = ram, 1 = disco
       if (ram_o_disco == 1) { //significa que esta en disco
+        page_fault += 1;
         frame = leer_bin(linea[0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5]);  //leer del .bin
-        int n_frame = insertar_en_ram(frame); //inserta en RAM con LRU y devuelve el slot que ocupa
+        int n_frame = insertar_en_ram(RAM, frame, tiempo); //inserta en RAM con LRU y devuelve el slot que ocupa
         n_frame = int_to_bin(n_frame);
         direccion = concat_bins(n_frame, int_to_bin(offset));
+        tabla[pag1][pag2][pag3][pag4][pag5] = concat_bins(bin(n_frame), bin(000));  //ese ultimo tiene que ser largo 3
         printf("-%i-\n", bin_to_int(linea));  //direccion virtual
         printf("direccion fisica: %i\n", bin_to_int(direccion));
         printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
