@@ -104,10 +104,13 @@ int main(int argc, char *argv[])
     char* frame = malloc(sizeof(char) * 256);
 
     char* direccion_bin_pag = cut_string(binario, 0, 20);
-    int i_tlb = indice_tlb(direccion_bin_pag);
-
-    if(esta en tlb) {
-
+    int i_tlb = indice_tlb(direccion_bin_pag, TLB);
+    if(i_tlb != -1) {
+      int n_frame = TLB_frames[i_tlb];
+      frame = RAM[n_frame][0];
+      TLB_tiempos[i_tlb] = tiempo;
+      RAM_tiempos[n_frame] = tiempo;
+      tlb_hit += 1;
     }
     else {
       if(strcmp(pagina, "-") == 0) {  //pagina vacia
@@ -169,7 +172,7 @@ int main(int argc, char *argv[])
           direccion_fisica_dec = bin_to_dec(direccion);
         }
       } // end del else not tlb
-      insertar_en_tlb_cuando_no_esta_en_tlb
+      insertar_en_tlb(TLB, direccion_bin_pag, tiempo, TLB_tiempos, TLB_frames, direccion_fisica_dec);
     }  // aqui termina el insert
     // printeando actual //
     printf("-%s-\n", instruccion);  //direccion virtual

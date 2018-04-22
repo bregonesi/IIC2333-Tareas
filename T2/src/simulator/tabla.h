@@ -14,3 +14,4 @@ char****** crear_tabla_paginas(int b1, int b2, int b3, int b4, int b5, int n);
 int* crear_tlb_tiempos();
 char** crear_TLB();
 int* crear_tlb_frames();
+int indice_tlb(char* direccion_bin_pag, char** TLB);
