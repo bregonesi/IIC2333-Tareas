@@ -3,4 +3,4 @@
 #include <math.h>
 
 char*** crear_ram();
-void insertar_en_ram(char*** RAM, char frame[256], int tiempo);
+int insertar_en_ram(char*** RAM, char frame[256], int tiempo);
