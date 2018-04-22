@@ -72,25 +72,45 @@ int main(int argc, char *argv[])
       pag1 = atoi(pag5_c);
     }
     pagina = tabla[pag1][pag2][pag3][pag4][pag5];
+    offset = linea[info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8];
+    offset = bin_to_int(offset);
     if (pagina == "-") {
       page_fault += 1;
       //ir a buscar a .bin y dejarlo en RAM, despues asignar el frame a esta pag y dejar seteado los extras
-      // print fisica y contenido
+      char frame[255];
+      frame = leer_bin(linea[0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5]);  //leer del .bin
+      int n_frame = insertar_en_ram(frame); //inserta en RAM con LRU y devuelve el slot que ocupa
+      n_frame = int_to_bin(n_frame);
+      direccion = concat_bins(n_frame, int_to_bin(offset));
+      printf("-%i-\n", bin_to_int(linea));  //direccion virtual
+      printf("direccion fisica: %i\n", bin_to_int(direccion));
+      printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
     }
     else {
       int frame = pagina[0,8];
       int bits_extras = pagina[8,11];
       int ram_o_disco = bits_extras[0]; // 0 = ram, 1 = disco
-      if (ram_o_disco == 1) {
-        // buscar a disco y dejar en RAM con LRU
-        // print fisica y contenido
+      if (ram_o_disco == 1) { //significa que esta en disco
+        frame = leer_bin(linea[0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5]);  //leer del .bin
+        int n_frame = insertar_en_ram(frame); //inserta en RAM con LRU y devuelve el slot que ocupa
+        n_frame = int_to_bin(n_frame);
+        direccion = concat_bins(n_frame, int_to_bin(offset));
+        printf("-%i-\n", bin_to_int(linea));  //direccion virtual
+        printf("direccion fisica: %i\n", bin_to_int(direccion));
+        printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
       }
       else {
         frame = bin_to_int(frame);
-        char* arreglo = RAM[frame];
-        // print fisica y contenido
+        char* arreglo = RAM[frame][0];
+        RAM[frame][1] = tiempo;
+        n_frame = int_to_bin(n_frame);
+        direccion = concat_bins(n_frame, int_to_bin(offset));
+        printf("-%i-\n", bin_to_int(linea));  //direccion virtual
+        printf("direccion fisica: %i\n", bin_to_int(direccion));
+        printf("contenido: %i\n", arreglo[offset]);
       }
     }
+    tiempo += 1;
   }
 
   return 0;
