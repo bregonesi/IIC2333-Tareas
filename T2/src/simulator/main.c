@@ -107,9 +107,11 @@ int main(int argc, char *argv[])
 
       int n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
       printf("insertado en frame: %i de la ram en tiempo %i\n", n_frame, tiempo);
-      char* n_frame_bin = malloc(sizeof(char) * 21);
+
+      char* n_frame_bin = malloc(sizeof(char) * 9);
       itoa(n_frame, n_frame_bin, 2);
       n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
+
       char direccion[20] = "";
       strcat(direccion, n_frame_bin);
       strcat(direccion, offset_bin);
