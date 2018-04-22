@@ -3,6 +3,7 @@
 #include <math.h>
 #include "opti.h"
 #include "tabla.h"
+#include "funciones.h"
 
 int main(int argc, char *argv[])
 {
@@ -26,8 +27,8 @@ int main(int argc, char *argv[])
     return 1;
   }
   struct info_bits info;
-  char***** tabla = NULL;
-  char* TLB;
+  char****** tabla = NULL;
+  char*** TLB;
   if (n == 1) info = optimo_1();
   else if (n == 2) info = optimo_2();
   else if (n == 3) info = optimo_3();
@@ -35,5 +36,13 @@ int main(int argc, char *argv[])
   else if (n == 5) info = optimo_5();
   tabla = crear_tabla_paginas(info.b1, info.b2, info.b3, info.b4, info.b5, n);
   TLB = crear_TLB();
+
+
+  int a=54325;
+  char buffer[20];
+  itoa(a,buffer,2);   // here 2 means binary
+  printf("Binary value = %s\n", buffer);
+
+
   return 0;
 }
