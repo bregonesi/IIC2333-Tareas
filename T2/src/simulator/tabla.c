@@ -3,16 +3,22 @@
 #include <math.h>
 #include "tabla.h"
 
-char*** crear_TLB() {
-  char ***TLB;
-  TLB = malloc(sizeof(char***) * 64);
+int* crear_tlb_tiempos() {
+  int* TLB_tiempos;
+  TLB_tiempos = malloc(sizeof(int*) * 64);
+  for(int i = 0; i < 64; i++) TLB_tiempos[i] = 0;
+  return TLB_tiempos;
+}
+
+char** crear_TLB() {
+  char **TLB;
+  TLB = malloc(sizeof(char**) * 64);
   for (int i = 0; i < 64; i++) {
-    TLB[i] = malloc(sizeof(char**) * 2);
-    TLB[i][0] = "-";  //frame
-    TLB[i][1] = "-";  //time
+    TLB[i] = malloc(sizeof(char*));
+    TLB[i] = "-";  //frame
   }
   return TLB;
-};
+}
 
 char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
   char ******tabla = NULL;

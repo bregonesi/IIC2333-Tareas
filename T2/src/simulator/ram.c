@@ -5,6 +5,54 @@
 #include "funciones.h"
 #include "ram.h"
 
+void asociar(char** RAM_asociaciones, char* cut_binary, int n_frame){
+  RAM_asociaciones[n_frame] = cut_binary;
+}
+
+void hacer_swap(char** RAM_asociaciones, int n_frame, char****** tabla, int b1, int b2, int b3, int b4, int b5){
+  char* binario = RAM_asociaciones[n_frame];
+  char* cut_binary;
+  int pag1 = 0;
+  int pag2 = 0;
+  int pag3 = 0;
+  int pag4 = 0;
+  int pag5 = 0;
+  cut_binary = cut_string(binario, 0, b1);
+  pag1 = bin_to_dec(cut_binary);
+  if (b2 != 0) {
+    cut_binary = cut_string(binario, b1, b1 + b2);
+    pag2 = bin_to_dec(cut_binary);
+  }
+  if (b3 != 0) {
+    cut_binary = cut_string(binario, b1 + b2, b1 + b2 + b3);
+    pag3 = bin_to_dec(cut_binary);
+  }
+  if (b4 != 0) {
+    cut_binary = cut_string(binario, b1 + b2 + b3, b1 + b2 + b3 + b4);
+    pag4 = bin_to_dec(cut_binary);
+  }
+  if (b5 != 0) {
+    cut_binary = cut_string(binario, b1 + b2 + b3 + b4, b1 + b2 + b3 + b4 + b5);
+    pag5 = bin_to_dec(cut_binary);
+  }
+  char* pagina = tabla[pag1][pag2][pag3][pag4][pag5];
+  if(strcmp(pagina, "-") != 0) {  //entonces ya habia uno asignado
+    char* frame = malloc(sizeof(char) * 9);
+    frame = cut_string(pagina, 0, 8); //sacamos solo los del frame
+    char PTE[12] = "";
+    strcat(PTE, frame);
+    strcat(PTE, "100"); //le decimos que ahora esta en HDD
+    tabla[pag1][pag2][pag3][pag4][pag5] = PTE;
+  }
+}
+
+char** crear_ram_asociaciones(){
+  char** RAM_asociaciones;
+  RAM_asociaciones = malloc(sizeof(char*) * 256);
+  for(int i = 0; i < 256; i++) RAM_asociaciones[i] = "-";
+  return RAM_asociaciones;
+}
+
 int* crear_ram_tiempos(){
   int* RAM_tiempos;
   RAM_tiempos = malloc(sizeof(int*) * 256);
@@ -16,12 +64,10 @@ char*** crear_ram() {
   char ***RAM;
   RAM = malloc(sizeof(char***) * 256);
   for(int i = 0; i < 256; i++) {
-    RAM[i] = malloc(sizeof(char**) * 2);
-    RAM[i][0] = malloc(sizeof(char*) * 20);
+    RAM[i] = malloc(sizeof(char**));
+    RAM[i][0] = malloc(sizeof(char*));
     RAM[i][0] = "-";  //frame completo
-    RAM[i][1] = malloc(sizeof(char) * 21);  // hay que determinar cuantos chars es el tiempo
-    //RAM[i][1] = '\0';  // hay que inicializar
-    RAM[i][1] = "-";  //time
+    // arreglar aqui
   }
   return RAM;
 };
