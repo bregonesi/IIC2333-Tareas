@@ -5,6 +5,15 @@
 
 #include "tabla.h"
 
+int indice_tlb(char* direccion_bin_pag, char** TLB){
+  for (int j = 0; j < 64; j++) {
+    if (strcmp(TLB[j], direccion_bin_pag) == 0) {
+      return j;
+    }
+  }
+  return -1;
+}
+
 int* crear_tlb_frames() {
   int* TLB_frames;
   TLB_frames = malloc(sizeof(int*) * 64);
