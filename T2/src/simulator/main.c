@@ -30,9 +30,11 @@ int main(int argc, char *argv[])
 
   struct info_bits info;
   char****** tabla = NULL;
-  char*** TLB;
+  char** TLB;
   char*** RAM;
   int* RAM_tiempos;
+  int *TLB_tiempos;
+  int* TLB_frames;
   char** RAM_asociaciones;
   if (n == 1) info = optimo_1();
   else if (n == 2) info = optimo_2();
@@ -41,6 +43,8 @@ int main(int argc, char *argv[])
   else if (n == 5) info = optimo_5();
   tabla = crear_tabla_paginas(info.b1, info.b2, info.b3, info.b4, info.b5, n);
   TLB = crear_TLB();
+  TLB_tiempos = crear_tlb_tiempos();
+  TLB_frames = crear_tlb_frames();
   RAM = crear_ram();
   RAM_tiempos = crear_ram_tiempos();
   RAM_asociaciones = crear_ram_asociaciones();
@@ -98,6 +102,9 @@ int main(int argc, char *argv[])
     int offset = bin_to_dec(offset_bin);
     int direccion_fisica_dec = -1;
     char* frame = malloc(sizeof(char) * 256);
+
+    char* direccion_bin_pag = cut_string(binario, 0, 20);
+    int i_tlb = indice_tlb(direccion_bin_pag);
 
     if(esta en tlb) {
 
