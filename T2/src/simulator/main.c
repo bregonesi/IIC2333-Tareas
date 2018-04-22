@@ -54,8 +54,10 @@ int main(int argc, char *argv[])
     char* binario = malloc(sizeof(char) * 28);
     itoa(atoi(instruccion), binario, 2);
 
-    binario = fill_binario(binario, 28);
+    strcpy(binario, fill_binario(binario, 28, 28));
+
     printf("%s: %s\n", instruccion, binario);
+    
     char* cut_binary = malloc(sizeof(char) * 20);
 
     int pag1 = 0;
@@ -86,9 +88,9 @@ int main(int argc, char *argv[])
 
     char* pagina = tabla[pag1][pag2][pag3][pag4][pag5];
 
-    char* offset_c = malloc(sizeof(char) * 20);  // se que el offset es de 8, pero cut_string retorna string de 20
-    offset_c = cut_string(binario, info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8);
-    int offset = bin_to_dec(offset_c);
+    char* offset_bin = malloc(sizeof(char) * 20);  // se que el offset es de 8, pero cut_string retorna string de 20
+    offset_bin = cut_string(binario, info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8);
+    int offset = bin_to_dec(offset_bin);
 
     if(strcmp(pagina, "-") == 0) {
       page_fault += 1;
@@ -101,13 +103,25 @@ int main(int argc, char *argv[])
       frame = leer_bin("data.bin", frame_start);  //leer del .bin
 
       int n_frame = insertar_en_ram(RAM, frame, tiempo); //inserta en RAM con LRU y devuelve el slot que ocupa
-      n_frame = int_to_bin(n_frame);
-      direccion = concat_bins(n_frame, int_to_bin(offset));
-      tabla[pag1][pag2][pag3][pag4][pag5] = concat_bins(bin(n_frame), bin(000));  //ese ultimo tiene que ser largo 3
+
+      char* n_frame_bin = malloc(sizeof(char) * 20);
+      itoa(n_frame, n_frame_bin, 2);
+      strcpy(n_frame_bin, fill_binario(n_frame_bin, 20, 20));
+      //n_frame_bin = fill_binario(n_frame_bin, 20);
+
+      //char direccion[20] = "";
+      //strcat(direccion, n_frame_bin);
+      //printf("flksdjfkl\n");
+      //strcat(direccion, offset_bin);
+      //printf("%s\n", direccion);
+
+      /*tabla[pag1][pag2][pag3][pag4][pag5] = concat_bins(bin(n_frame), bin(000));  //ese ultimo tiene que ser largo 3
       printf("-%i-\n", bin_to_int(linea));  //direccion virtual
       printf("direccion fisica: %i\n", bin_to_int(direccion));
       printf("contenido: %i\n", frame[offset]);
-    } else {
+      */
+    }
+    /* else {
       int frame = pagina[0,8];
       int bits_extras = pagina[8,11];
       int ram_o_disco = bits_extras[0]; // 0 = ram, 1 = disco
@@ -131,8 +145,8 @@ int main(int argc, char *argv[])
         printf("direccion fisica: %i\n", bin_to_int(direccion));
         printf("contenido: %i\n", arreglo[offset]);
       }
-    }
-    tiempo += 1;
+    }*/
+    //tiempo += 1;
   }
 
   return 0;

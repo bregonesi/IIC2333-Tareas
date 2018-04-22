@@ -41,7 +41,7 @@ int bin_to_dec(char* bin) {
 	return dec;
 }
 
-char* fill_binario(char* binario, int cantidad) {
+char* fill_binario(char* binario, int cantidad, int cantidad_malloc) {
 	char* final = malloc(sizeof(char) * cantidad);
 	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
 	strcat(final, binario);
