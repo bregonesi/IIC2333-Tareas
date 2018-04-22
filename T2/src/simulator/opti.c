@@ -11,21 +11,29 @@ int bits_5 = 0;
 double espacio = 0;
 
 
-void optimo_1() {
+struct info_bits optimo_1() {
   int bits_1 = 20;
+  struct info_bits info;
   double tamano1 = (pow(2,20) * 1.375);
+  info.b1 = 20;
+  info.b2 = 0;
+  info.b3 = 0;
+  info.b4 = 0;
+  info.b5 = 0;
   printf("----------------------------------------\n");
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("ESPACIO UTILIZADO: %g MB\n", (tamano1*(pow(10, -6))));
   printf("----------------------------------------\n");
+  return info;
 }
 
-void optimo_2(){
+struct info_bits optimo_2(){
   int i_min;
   double min = +INFINITY;
   double espacio;
   double T_actual;
   struct Tuple t;
+  struct info_bits info;
   for (int i = 1; i < 20; i++) {
     t = T_2(i);
     T_actual = t.espacio_direccion;
@@ -37,16 +45,23 @@ void optimo_2(){
   }
   bits_1 = i_min;
   bits_2 = 20 - i_min;
+  info.b1 = bits_1;
+  info.b2 = bits_2;
+  info.b3 = 0;
+  info.b4 = 0;
+  info.b5 = 0;
   printf("----------------------------------------\n");
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("BITS NIVEL 2: %i\n", bits_2);
   printf("ESPACIO UTILIZADO: %g MB\n", (espacio*(pow(10, -6))));
   printf("----------------------------------------\n");
+  return info;
 }
 
-void optimo_3(){
+struct info_bits optimo_3(){
   int i_min;
   int j_min;
+  struct info_bits info;
   double min = +INFINITY;
   double espacio;
   double T_actual;
@@ -68,18 +83,25 @@ void optimo_3(){
   bits_1 = i_min;
   bits_2 = 20 - i_min - j_min;
   bits_3 = j_min;
+  info.b1 = bits_1;
+  info.b2 = bits_2;
+  info.b3 = bits_3;
+  info.b4 = 0;
+  info.b5 = 0;
   printf("----------------------------------------\n");
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("BITS NIVEL 2: %i\n", bits_2);
   printf("BITS NIVEL 3: %i\n", bits_3);
   printf("ESPACIO UTILIZADO: %g MB\n", (espacio*(pow(10, -6))));
   printf("----------------------------------------\n");
+  return info;
 }
 
-void optimo_4() {
+struct info_bits optimo_4() {
   int i_min;
   int j_min;
   int p_min;
+  struct info_bits info;
   double min = +INFINITY;
   double T_actual;
   double espacio;
@@ -105,6 +127,11 @@ void optimo_4() {
   bits_2 = 20 - i_min - j_min;
   bits_3 = j_min - p_min;
   bits_4 = p_min;
+  info.b1 = bits_1;
+  info.b2 = bits_2;
+  info.b3 = bits_3;
+  info.b4 = bits_4;
+  info.b5 = 0;
   printf("----------------------------------------\n");
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("BITS NIVEL 2: %i\n", bits_2);
@@ -112,13 +139,15 @@ void optimo_4() {
   printf("BITS NIVEL 4: %i\n", bits_4);
   printf("ESPACIO UTILIZADO: %g MB\n", (espacio*(pow(10, -6))));
   printf("----------------------------------------\n");
+  return info;
 }
 
-void optimo_5() {
+struct info_bits optimo_5() {
   int i_min;
   int j_min;
   int p_min;
   int q_min;
+  struct info_bits info;
   double min = +INFINITY;
   double T_actual;
   double espacio;
@@ -148,6 +177,11 @@ void optimo_5() {
   bits_3 = j_min - p_min;
   bits_4 = p_min- q_min;
   bits_5 = q_min;
+  info.b1 = bits_1;
+  info.b2 = bits_2;
+  info.b3 = bits_3;
+  info.b4 = bits_4;
+  info.b5 = bits_5;
   printf("----------------------------------------\n");
   printf("BITS NIVEL 1: %i\n", bits_1);
   printf("BITS NIVEL 2: %i\n", bits_2);
@@ -156,6 +190,7 @@ void optimo_5() {
   printf("BITS NIVEL 5: %i\n", bits_5);
   printf("ESPACIO UTILIZADO: %g MB\n", (espacio*(pow(10, -6))));
   printf("----------------------------------------\n");
+  return info;
 }
 
 struct Tuple T_2 (int i) {

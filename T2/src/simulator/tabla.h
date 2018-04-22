@@ -2,17 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 
-struct Tuple {
-    double espacio_total;
-    double espacio_direccion;
+struct PTE {
+  int direccion;
 };
 
-void optimo_1();
-void optimo_2();
-void optimo_3();
-void optimo_4();
-void optimo_5();
-struct Tuple T_2(int i);
-struct Tuple T_3(int i, int j);
-struct Tuple T_4(int i, int j, int p);
-struct Tuple T_5(int i, int j, int p, int q);
+struct Direcciones {  //separadas porque mas adelante hay que diferenciar en algunos atributos
+  int direccion;
+};
+
+char***** crear_tabla_paginas(int b1, int b2, int b3, int b4, int b5, int n);
+char* crear_TLB();

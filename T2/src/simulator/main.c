@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "opti.h"
-
+#include "tabla.h"
 
 int main(int argc, char *argv[])
 {
@@ -25,19 +25,15 @@ int main(int argc, char *argv[])
     printf("n debe ser un numero entre 1 y 5\n");
     return 1;
   }
-  if (n == 1) {
-    optimo_1();
-  }
-  else if (n == 2) {
-    optimo_2();
-  }
-  else if (n == 3) {
-    optimo_3();
-  }
-  else if (n == 4) {
-    optimo_4();
-  }
-  else if (n == 5) {
-    optimo_5();
-  }
+  struct info_bits info;
+  char***** tabla = NULL;
+  char* TLB;
+  if (n == 1) info = optimo_1();
+  else if (n == 2) info = optimo_2();
+  else if (n == 3) info = optimo_3();
+  else if (n == 4) info = optimo_4();
+  else if (n == 5) info = optimo_5();
+  tabla = crear_tabla_paginas(info.b1, info.b2, info.b3, info.b4, info.b5, n);
+  TLB = crear_TLB();
+  return 0;
 }
