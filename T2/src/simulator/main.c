@@ -106,8 +106,7 @@ int main(int argc, char *argv[])
       tabla[pag1][pag2][pag3][pag4][pag5] = concat_bins(bin(n_frame), bin(000));  //ese ultimo tiene que ser largo 3
       printf("-%i-\n", bin_to_int(linea));  //direccion virtual
       printf("direccion fisica: %i\n", bin_to_int(direccion));
-      printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
-
+      printf("contenido: %i\n", frame[offset]);
     } else {
       int frame = pagina[0,8];
       int bits_extras = pagina[8,11];
@@ -121,9 +120,8 @@ int main(int argc, char *argv[])
         tabla[pag1][pag2][pag3][pag4][pag5] = concat_bins(bin(n_frame), bin(000));  //ese ultimo tiene que ser largo 3
         printf("-%i-\n", bin_to_int(linea));  //direccion virtual
         printf("direccion fisica: %i\n", bin_to_int(direccion));
-        printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
-      }
-      else {
+        printf("contenido: %i\n", frame[offset]);
+      } else {
         frame = bin_to_int(frame);
         char* arreglo = RAM[frame][0];
         RAM[frame][1] = tiempo;
