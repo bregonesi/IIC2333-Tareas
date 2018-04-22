@@ -58,13 +58,11 @@ int main(int argc, char *argv[])
     printf("%s: %s\n", instruccion, binario);
     char* cut_binary = malloc(sizeof(char) * 20);
 
-    //a = linea; //tranformado a 28 bits_2
     int pag1 = 0;
     int pag2 = 0;
     int pag3 = 0;
     int pag4 = 0;
     int pag5 = 0;
-    int offset = 0;
 
     cut_binary = cut_string(binario, 0, info.b1);
     pag1 = bin_to_dec(cut_binary);
@@ -90,13 +88,18 @@ int main(int argc, char *argv[])
 
     char* offset_c = malloc(sizeof(char) * 20);  // se que el offset es de 8, pero cut_string retorna string de 20
     offset_c = cut_string(binario, info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8);
-    offset = bin_to_dec(offset_c);
+    int offset = bin_to_dec(offset_c);
 
     if(strcmp(pagina, "-") == 0) {
       page_fault += 1;
+
       //ir a buscar a .bin y dejarlo en RAM, despues asignar el frame a esta pag y dejar seteado los extras
-      char frame[256];
-      frame = leer_bin(linea[0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5]);  //leer del .bin
+      cut_binary = cut_string(binario, 0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5);
+      int frame_start = bin_to_dec(cut_binary);
+
+      char* frame = malloc(sizeof(char) * 256);
+      frame = leer_bin("data.bin", frame_start);  //leer del .bin
+
       int n_frame = insertar_en_ram(RAM, frame, tiempo); //inserta en RAM con LRU y devuelve el slot que ocupa
       n_frame = int_to_bin(n_frame);
       direccion = concat_bins(n_frame, int_to_bin(offset));
@@ -104,8 +107,8 @@ int main(int argc, char *argv[])
       printf("-%i-\n", bin_to_int(linea));  //direccion virtual
       printf("direccion fisica: %i\n", bin_to_int(direccion));
       printf("contenido: %i\n", frame[info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + offset]);
-    }
-    else {
+
+    } else {
       int frame = pagina[0,8];
       int bits_extras = pagina[8,11];
       int ram_o_disco = bits_extras[0]; // 0 = ram, 1 = disco

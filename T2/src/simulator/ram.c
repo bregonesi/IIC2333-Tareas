@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "funciones.h"
 #include "ram.h"
 
 char*** crear_ram() {
@@ -15,12 +16,12 @@ char*** crear_ram() {
   return TLB;
 };
 
-void insertar_en_ram(char*** RAM, char frame[256], int tiempo) {
+void insertar_en_ram(char*** RAM, char* frame, int tiempo) {
   int insertado = 0;
   for (int i = 0; i < 64; i++) {
     if (strcmp(RAM[i][0], "-")) { //ver si esta vacio
       RAM[i][0] = frame;
-      RAM[i][1] = int_to_string(tiempo);
+      itoa(tiempo, RAM[i][1], 10);
       insertado = 1;
     }
   }
@@ -37,6 +38,6 @@ void insertar_en_ram(char*** RAM, char frame[256], int tiempo) {
     }
     //hacer swap out de RAM[i_min] y marcarlo en su PTE con 100
     RAM[i_min][0] = frame;
-    RAM[i_min][1] = int_to_string(tiempo);
+    itoa(tiempo, RAM[i_min][1], 10);
   }
 }

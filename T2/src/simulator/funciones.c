@@ -31,7 +31,7 @@ char* itoa(int value, char* result, int base) {
 int bin_to_dec(char* bin) {
 	int dec = 0;
 	char c;
-	
+
 	for(int i = 0; i < strlen(bin); i++) {
 		c = bin[i];
 		if(c == '1') dec = dec * 2 + 1;
@@ -57,4 +57,16 @@ char* cut_string(char* string, int inicio, int final) {
 	string_final[final - inicio] = '\0';
 
 	return string_final;
+}
+
+char* leer_bin(char *filename, int pos) {
+  FILE* fp;
+  char* frame = malloc(sizeof(char) * 256);
+
+  fp = fopen(filename, "rb");
+  fseek(fp, pos * 256, SEEK_SET);
+  fread(frame, 1, 256, fp);
+  fclose(fp);
+
+	return frame;
 }
