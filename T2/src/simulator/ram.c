@@ -8,9 +8,12 @@
 char*** crear_ram() {
   char ***TLB;
   TLB = malloc(sizeof(char***) * 64);
-  for (int i = 0; i < 256; i++) {
+  for(int i = 0; i < 64; i++) {
     TLB[i] = malloc(sizeof(char**) * 2);
+    TLB[i][0] = malloc(sizeof(char*) * 256);
     TLB[i][0] = "-";  //frame completo
+
+    TLB[i][1] = malloc(sizeof(char*));  // hay que determinar cuantos chars es el tiempo
     TLB[i][1] = "-";  //time
   }
   return TLB;
@@ -19,15 +22,16 @@ char*** crear_ram() {
 int insertar_en_ram(char*** RAM, char* frame, int tiempo) {
   int insertado = 0;
   int n_frame = 0;
-  for (int i = 0; i < 64; i++) {
-    if (strcmp(RAM[i][0], "-")) { //ver si esta vacio
+  for(int i = 0; i < 64; i++) {
+    if(strcmp(RAM[i][0], "-") == 0) { //ver si esta vacio
       RAM[i][0] = frame;
       itoa(tiempo, RAM[i][1], 10);
       insertado = 1;
       n_frame = i;
     }
   }
-  if (insertado == 0) { //todos ocupados
+  
+  if(insertado == 0) { //todos ocupados
     double min = +INFINITY;
     int valor;
     int i_min;

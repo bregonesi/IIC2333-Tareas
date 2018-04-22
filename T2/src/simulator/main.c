@@ -49,22 +49,22 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  char instruccion[10];
+  char instruccion[11];
 	while (fscanf(archivo_input, "%s", instruccion) != EOF) {
-    char* binario = malloc(sizeof(char) * 28);
+    char* binario = malloc(sizeof(char) * (28 + 1));
     itoa(atoi(instruccion), binario, 2);
 
-    strcpy(binario, fill_binario(binario, 28, 28));
+    binario = fill_binario(binario, 28);
 
     printf("%s: %s\n", instruccion, binario);
-    
-    char* cut_binary = malloc(sizeof(char) * 20);
 
     int pag1 = 0;
     int pag2 = 0;
     int pag3 = 0;
     int pag4 = 0;
     int pag5 = 0;
+
+    char* cut_binary;
 
     cut_binary = cut_string(binario, 0, info.b1);
     pag1 = bin_to_dec(cut_binary);
@@ -88,8 +88,9 @@ int main(int argc, char *argv[])
 
     char* pagina = tabla[pag1][pag2][pag3][pag4][pag5];
 
-    char* offset_bin = malloc(sizeof(char) * 20);  // se que el offset es de 8, pero cut_string retorna string de 20
+    char* offset_bin = malloc(sizeof(char) * 9);
     offset_bin = cut_string(binario, info.b1 + info.b2 + info.b3 + info.b4 + info.b5, info.b1 + info.b2 + info.b3 + info.b4 + info.b5 + 8);
+    offset_bin = fill_binario(offset_bin, 8);
     int offset = bin_to_dec(offset_bin);
 
     if(strcmp(pagina, "-") == 0) {
@@ -104,10 +105,9 @@ int main(int argc, char *argv[])
 
       int n_frame = insertar_en_ram(RAM, frame, tiempo); //inserta en RAM con LRU y devuelve el slot que ocupa
 
-      char* n_frame_bin = malloc(sizeof(char) * 20);
+      char* n_frame_bin = malloc(sizeof(char) * 21);
       itoa(n_frame, n_frame_bin, 2);
-      strcpy(n_frame_bin, fill_binario(n_frame_bin, 20, 20));
-      //n_frame_bin = fill_binario(n_frame_bin, 20);
+      n_frame_bin = fill_binario(n_frame_bin, 20);
 
       //char direccion[20] = "";
       //strcat(direccion, n_frame_bin);

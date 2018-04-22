@@ -41,8 +41,10 @@ int bin_to_dec(char* bin) {
 	return dec;
 }
 
-char* fill_binario(char* binario, int cantidad, int cantidad_malloc) {
-	char* final = malloc(sizeof(char) * cantidad);
+char* fill_binario(char* binario, int cantidad) {
+	char* final = malloc(sizeof(char) * (cantidad + 1));
+	for(int i = 0; i < cantidad; i++) final[i] = '\0';  // hay que inicializar
+
 	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
 	strcat(final, binario);
 
@@ -50,7 +52,7 @@ char* fill_binario(char* binario, int cantidad, int cantidad_malloc) {
 }
 
 char* cut_string(char* string, int inicio, int final) {
-	char* string_final = malloc(sizeof(char) * 20);
+	char* string_final = malloc(sizeof(char) * (final - inicio + 1));
 	for(int i = 0; i < (final - inicio); i++) {
 		string_final[i] = string[inicio + i];
 	}
