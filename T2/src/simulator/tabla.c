@@ -7,9 +7,7 @@
 
 int indice_tlb(char* direccion_bin_pag, char** TLB){
   for (int j = 0; j < 64; j++) {
-    if (strcmp(TLB[j], direccion_bin_pag) == 0) {
-      return j;
-    }
+    if(strcmp(TLB[j], direccion_bin_pag) == 0) return j;
   }
   return -1;
 }
@@ -24,7 +22,7 @@ int* crear_tlb_frames() {
 int* crear_tlb_tiempos() {
   int* TLB_tiempos;
   TLB_tiempos = malloc(sizeof(int*) * 64);
-  for(int i = 0; i < 64; i++) TLB_tiempos[i] = 0;
+  for(int i = 0; i < 64; i++) TLB_tiempos[i] = -1;
   return TLB_tiempos;
 }
 
@@ -41,7 +39,7 @@ char** crear_TLB() {
 int insertar_en_tlb(char** TLB, char* frame, int tiempo, int* TLB_tiempos, int* TLB_frames, int direccion_frame) {
   double min = +INFINITY;
   int valor;
-  int n_frame;
+  int n_frame = 0;
 
   for (int i = 0; i < 64; i++) {  // busco el minimo
     valor = TLB_tiempos[i];
@@ -67,6 +65,8 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
       tabla[i][0] = malloc(sizeof(char***));
       tabla[i][0][0] = malloc(sizeof(char**));
       tabla[i][0][0][0] = malloc(sizeof(char*));
+      tabla[i][0][0][0][0] = malloc(sizeof(char) * 29);
+
       tabla[i][0][0][0][0] = "-";
     }
   }
@@ -78,6 +78,7 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
         tabla[i][i2] = malloc(sizeof(char***));
         tabla[i][i2][0] = malloc(sizeof(char**));
         tabla[i][i2][0][0] = malloc(sizeof(char*));
+        tabla[i][i2][0][0][0] = malloc(sizeof(char) * 29);
         tabla[i][i2][0][0][0] = "-";
       }
     }
@@ -91,6 +92,7 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
         for (int i3 = 0; i3 < (int) pow(2, b3); i3++) {
           tabla[i][i2][i3] = malloc(sizeof(char**));
           tabla[i][i2][i3][0] = malloc(sizeof(char*));
+          tabla[i][i2][i3][0][0] = malloc(sizeof(char) * 29);
           tabla[i][i2][i3][0][0] = "-";
         }
       }
@@ -106,6 +108,7 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
           tabla[i][i2][i3] = malloc(sizeof(char**) * (int) pow(2, b4));
           for (int i4 = 0; i4 < (int) pow(2, b4); i4++) {
             tabla[i][i2][i3][i4] = malloc(sizeof(char*));
+            tabla[i][i2][i3][i4][0] = malloc(sizeof(char) * 29);
             tabla[i][i2][i3][i4][0] = "-";
           }
         }
@@ -123,6 +126,8 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
           for (int i4 = 0; i4 < (int) pow(2, b4); i4++) {
             tabla[i][i2][i3][i4] = malloc(sizeof(char*) * (int) pow(2, b5));
             for (int i5 = 0; i5 < (int) pow(2, b5); i5++) {
+              //tabla[i][i2][i3][i4][i5] = calloc(29, sizeof(char));
+              //strcpy(tabla[i][i2][i3][i4][i5], "-");
               tabla[i][i2][i3][i4][i5] = "-";
             }
           }
@@ -131,4 +136,4 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
     }
   }
   return tabla;
-};
+}

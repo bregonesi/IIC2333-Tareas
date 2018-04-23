@@ -11,6 +11,7 @@ void asociar(char** RAM_asociaciones, char* cut_binary, int n_frame){
 
 void hacer_swap(char** RAM_asociaciones, int n_frame, char****** tabla, int b1, int b2, int b3, int b4, int b5){
   char* binario = RAM_asociaciones[n_frame];
+  printf("binario dentro de swap %s\n", binario);
   char* cut_binary;
   int pag1 = 0;
   int pag2 = 0;
@@ -35,52 +36,64 @@ void hacer_swap(char** RAM_asociaciones, int n_frame, char****** tabla, int b1, 
     cut_binary = cut_string(binario, b1 + b2 + b3 + b4, b1 + b2 + b3 + b4 + b5);
     pag5 = bin_to_dec(cut_binary);
   }
-  char* pagina = tabla[pag1][pag2][pag3][pag4][pag5];
+
+  char* pagina = calloc(29, sizeof(char));
+
+  pagina = tabla[pag1][pag2][pag3][pag4][pag5];
   if(strcmp(pagina, "-") != 0) {  //entonces ya habia uno asignado
-    char* frame = malloc(sizeof(char) * 9);
-    frame = cut_string(pagina, 0, 8); //sacamos solo los del frame
-    char PTE[12] = "";
+    char* frame = cut_string(pagina, 0, 8); //sacamos solo los del frame
+    char* PTE = calloc(12, sizeof(char));
+    //char PTE[12] = "";
     strcat(PTE, frame);
     strcat(PTE, "100"); //le decimos que ahora esta en HDD
     tabla[pag1][pag2][pag3][pag4][pag5] = PTE;
   }
 }
 
-char** crear_ram_asociaciones(){
+char** crear_ram_asociaciones() {
   char** RAM_asociaciones;
   RAM_asociaciones = malloc(sizeof(char*) * 256);
-  for(int i = 0; i < 256; i++) RAM_asociaciones[i] = "-";
+  for(int i = 0; i < 256; i++) {
+    RAM_asociaciones[i] = malloc(sizeof(char*));
+    RAM_asociaciones[i] = "-";
+    //strcpy(RAM_asociaciones[i], "-");
+  }
   return RAM_asociaciones;
 }
 
 int* crear_ram_tiempos(){
   int* RAM_tiempos;
-  RAM_tiempos = malloc(sizeof(int*) * 256);
-  for(int i = 0; i < 256; i++) RAM_tiempos[i] = 0;
+  RAM_tiempos = malloc(sizeof(int) * 256);
+  for(int i = 0; i < 256; i++) RAM_tiempos[i] = -1;
   return RAM_tiempos;
 }
 
-char*** crear_ram() {
-  char ***RAM;
-  RAM = malloc(sizeof(char***) * 256);
+char** crear_ram() {
+  char **RAM;
+  RAM = malloc(sizeof(char*) * 256);
   for(int i = 0; i < 256; i++) {
-    RAM[i] = malloc(sizeof(char**));
-    RAM[i][0] = malloc(sizeof(char*));
-    RAM[i][0] = "-";  //frame completo
+    RAM[i] = calloc(257, sizeof(char));
+    //RAM[i] = malloc(sizeof(char*));
+    //RAM[i] = calloc(257, sizeof(char));
+    strcpy(RAM[i], "-");
+    //RAM[i] = "-";  //frame completo
     // arreglar aqui
   }
   return RAM;
-};
+}
 
-int insertar_en_ram(char*** RAM, char* frame, int tiempo, int* RAM_tiempos) {
+int insertar_en_ram(char** RAM, char* frame, int tiempo, int* RAM_tiempos) {
   int insertado = 0;
   int n_frame = 0;
   for(int i = 0; i < 256; i++) {
-    if(strcmp(RAM[i][0], "-") == 0 && insertado == 0) { //ver si esta vacio
-      RAM[i][0] = frame;
+    if(strcmp(RAM[i], "-") == 0 && insertado == 0) { //ver si esta vacio
+      strcpy(RAM[i], frame);
+      //RAM[i] = frame;
       RAM_tiempos[i] = tiempo;
       insertado = 1;
       n_frame = i;
+
+      printf("pritenado insert ram%s\n", RAM[i]);
     }
   }
   if(insertado == 0) { //todos ocupados
@@ -95,9 +108,11 @@ int insertar_en_ram(char*** RAM, char* frame, int tiempo, int* RAM_tiempos) {
       }
     }
     //hacer swap out de RAM[i_min] y marcarlo en su PTE con 100 <-- falta marcar en el PTE
-    RAM[i_min][0] = frame;
+    RAM[i_min] = frame;
     RAM_tiempos[i_min] = tiempo;
     n_frame = i_min;
+
+    printf("pritenado insert ram%s\n", RAM[i_min]);
   }
   return n_frame;
 }

@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
   struct info_bits info;
   char****** tabla = NULL;
   char** TLB;
-  char*** RAM;
+  char** RAM;
   int* RAM_tiempos;
   int *TLB_tiempos;
   int* TLB_frames;
@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
   }
 
   char instruccion[100];
+  char* frame;
 	while (fscanf(archivo_input, "%s", instruccion) != EOF) {
     char* binario = malloc(sizeof(char) * (28 + 1));
     itoa(atoi(instruccion), binario, 2);
@@ -101,39 +102,57 @@ int main(int argc, char *argv[])
     offset_bin = fill_binario(offset_bin, 8);
     int offset = bin_to_dec(offset_bin);
     int direccion_fisica_dec = -1;
-    char* frame = malloc(sizeof(char) * 256);
+    frame = NULL;
+  //  char* frame = malloc(sizeof(char) * 256);
+  //  for(int i = 0; i < 256; i++) frame[i] = '\0';
 
     char* direccion_bin_pag = cut_string(binario, 0, 20);
     int i_tlb = indice_tlb(direccion_bin_pag, TLB);
+
     if(i_tlb != -1) {
       int n_frame = TLB_frames[i_tlb];
-      frame = RAM[n_frame][0];
+      //strcpy(frame, RAM[n_frame][0]);
+      printf("print antes\n");
+      printf("nframe %i\n", n_frame);
+      printf("jkljkl %s\n", RAM[n_frame]);
+      frame = RAM[n_frame];
       TLB_tiempos[i_tlb] = tiempo;
       RAM_tiempos[n_frame] = tiempo;
       tlb_hit += 1;
     }
     else {
+      char* n_frame_bin = malloc(sizeof(char) * 9);
       if(strcmp(pagina, "-") == 0) {  //pagina vacia
         page_fault += 1;
         //ir a buscar a .bin y dejarlo en RAM, despues asignar el frame a esta pag y dejar seteado los extras
         cut_binary = cut_string(binario, 0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5); //direccion de la pagina
         int frame_start = bin_to_dec(cut_binary);
         frame = leer_bin("data.bin", frame_start);  //leer del .bin y obtener el frame completo
+        printf("printeando frame %s\n", frame);
         int n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
-        hacer_swap(RAM_asociaciones, n_frame, tabla, info.b1, info.b2, info.b3, info.b4, info.b5); //dejar 100 en pag vinculada anterior
+        //printf("antes de swap\n");
+        //printf("klsdjflkdslfjlds2 %s\n", tabla[pag1][pag2][pag3][pag4][pag5]);
+        //printf("vals %i %i %i %i %i\n", pag1, pag2, pag3, pag4, pag5);
+        if(strcmp(RAM_asociaciones[n_frame], "-") != 0)
+          hacer_swap(RAM_asociaciones, n_frame, tabla, info.b1, info.b2, info.b3, info.b4, info.b5); //dejar 100 en pag vinculada anterior
         asociar(RAM_asociaciones, cut_binary, n_frame);
-        char* n_frame_bin = malloc(sizeof(char) * 9);
         itoa(n_frame, n_frame_bin, 2);
         n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
 
-        char direccion[20] = "";
+        //char direccion[20] = "";
+        char* direccion = calloc(20, sizeof(char));
         strcat(direccion, n_frame_bin);
         strcat(direccion, offset_bin);
+
         direccion_fisica_dec = bin_to_dec(direccion);
-        char PTE[20] = "";
+
+        char* PTE = calloc(12, sizeof(char));
         strcat(PTE, n_frame_bin);
         strcat(PTE, "000"); //porque esta en RAM
+        //printf("pte2 %s\n", PTE);
         tabla[pag1][pag2][pag3][pag4][pag5] = PTE;  //ese ultimo tiene que ser largo 3
+        //strcpy(tabla[pag1][pag2][pag3][pag4][pag5], PTE);
+        //printf("klsdjflkdslfjlds2 %s\n", tabla[pag1][pag2][pag3][pag4][pag5]);
       }
       else {
         char* frame_pag = cut_string(pagina, 0, 8); //numero del frame de la RAM asociado
@@ -144,41 +163,50 @@ int main(int argc, char *argv[])
           cut_binary = cut_string(binario, 0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5); //direccion de la pagina
           int frame_start = bin_to_dec(cut_binary);
           frame = leer_bin("data.bin", frame_start);  //leer del .bin y obtener el frame completo
+          printf("printeando el frame 2 %s\n", frame);
           int n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
           hacer_swap(RAM_asociaciones, n_frame, tabla, info.b1, info.b2, info.b3, info.b4, info.b5); //dejar 100 en pag vinculada anterior
           asociar(RAM_asociaciones, cut_binary, n_frame);
-          char* n_frame_bin = malloc(sizeof(char) * 21);
+
           itoa(n_frame, n_frame_bin, 2);
           n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
           char direccion[20] = "";
           strcat(direccion, n_frame_bin);
           strcat(direccion, offset_bin);
           direccion_fisica_dec = bin_to_dec(direccion);
-          char PTE[20] = "";
+
+          char* PTE = calloc(12, sizeof(char));
           strcat(PTE, n_frame_bin);
           strcat(PTE, "000"); //porque esta en RAM
+          //printf("pte2 %s\n", PTE);
+          //strcpy(tabla[pag1][pag2][pag3][pag4][pag5], PTE);
           tabla[pag1][pag2][pag3][pag4][pag5] = PTE;  //ese ultimo tiene que ser largo 3
+          //printf("klsdjflkdslfjlds2 %s\n", tabla[pag1][pag2][pag3][pag4][pag5]);
         }
         else {  //esta en RAM, bits_extras = 000
           int n_frame = atoi(frame_pag);
-          frame = RAM[n_frame][0];
+          printf("printeando frame de ram\n");
+          frame = RAM[n_frame];
           RAM_tiempos[n_frame] = tiempo;
-          char* n_frame_bin = malloc(sizeof(char) * 21);
+
           itoa(n_frame, n_frame_bin, 2);
           n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
+
           char direccion[20] = "";
           strcat(direccion, n_frame_bin);
           strcat(direccion, offset_bin);
           direccion_fisica_dec = bin_to_dec(direccion);
         }
       } // end del else not tlb
-      insertar_en_tlb(TLB, direccion_bin_pag, tiempo, TLB_tiempos, TLB_frames, direccion_fisica_dec);
+      printf("direccion fisica %i\n", direccion_fisica_dec);
+      insertar_en_tlb(TLB, direccion_bin_pag, tiempo, TLB_tiempos, TLB_frames, bin_to_dec(n_frame_bin));
+      printf("DIRECCION FISICA SIN OFFSET: %i\n", bin_to_dec(n_frame_bin));
     }  // aqui termina el insert
     // printeando actual //
     printf("-%s-\n", instruccion);  //direccion virtual
     printf("DIRECCION FISICA: %i\n", direccion_fisica_dec);
     printf("CONTENIDO: %i\n", frame[offset]);
-    tiempo += 1;
+    tiempo++;
   }  // aqui termina el while
   printf("----------------------------------------\n");
   printf("PORCENTAJE_PAGE_FAULTS = %g%\n", (page_fault/tiempo)*100);

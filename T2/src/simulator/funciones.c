@@ -42,8 +42,9 @@ int bin_to_dec(char* bin) {
 }
 
 char* fill_binario(char* binario, int cantidad) {
-	char* final = malloc(sizeof(char) * (cantidad + 1));
-	for(int i = 0; i < cantidad; i++) final[i] = '\0';  // hay que inicializar
+	//char* final = malloc(sizeof(char) * (cantidad + 1));
+	//for(int i = 0; i < cantidad; i++) final[i] = '\0';  // hay que inicializar
+	char* final = calloc(cantidad + 1, sizeof(char));
 
 	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
 	strcat(final, binario);
@@ -63,11 +64,13 @@ char* cut_string(char* string, int inicio, int final) {
 
 char* leer_bin(char *filename, int pos) {
   FILE* fp;
-  char* frame = malloc(sizeof(char) * 256);
+  char* frame = calloc(257, sizeof(char));
   fp = fopen(filename, "rb");
   fseek(fp, pos * 256, SEEK_SET);
   fread(frame, 1, 256, fp);
   fclose(fp);
+
+	frame[256] = '\0';
 
 	return frame;
 }
