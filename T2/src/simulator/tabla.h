@@ -16,3 +16,4 @@ char** crear_TLB();
 int* crear_tlb_frames();
 int indice_tlb(char* direccion_bin_pag, char** TLB);
 int insertar_en_tlb(char** TLB, char* frame, int tiempo, int* TLB_tiempos, int* TLB_frames, int direccion_frame);
+void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* TLB_frames);
