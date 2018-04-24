@@ -56,7 +56,7 @@ char** crear_ram_asociaciones(){
 int* crear_ram_tiempos(){
   int* RAM_tiempos;
   RAM_tiempos = malloc(sizeof(int*) * 256);
-  for(int i = 0; i < 256; i++) RAM_tiempos[i] = 0;
+  for(int i = 0; i < 256; i++) RAM_tiempos[i] = -1;
   return RAM_tiempos;
 }
 
@@ -65,7 +65,8 @@ char*** crear_ram() {
   RAM = malloc(sizeof(char***) * 256);
   for(int i = 0; i < 256; i++) {
     RAM[i] = malloc(sizeof(char**));
-    RAM[i][0] = malloc(sizeof(char*));
+    RAM[i][0] = malloc(sizeof(char*) * 256);
+    //RAM[i][0] = calloc(256, sizeof(char*));
     RAM[i][0] = "-";  //frame completo
     // arreglar aqui
   }
@@ -77,6 +78,8 @@ int insertar_en_ram(char*** RAM, char* frame, int tiempo, int* RAM_tiempos) {
   int n_frame = 0;
   for(int i = 0; i < 256; i++) {
     if(strcmp(RAM[i][0], "-") == 0 && insertado == 0) { //ver si esta vacio
+      printf("insertando en %i\n", i);
+      //strcpy(RAM[i][0], frame);
       RAM[i][0] = frame;
       RAM_tiempos[i] = tiempo;
       insertado = 1;

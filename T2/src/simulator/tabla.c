@@ -24,7 +24,7 @@ int* crear_tlb_frames() {
 int* crear_tlb_tiempos() {
   int* TLB_tiempos;
   TLB_tiempos = malloc(sizeof(int*) * 64);
-  for(int i = 0; i < 64; i++) TLB_tiempos[i] = 0;
+  for(int i = 0; i < 64; i++) TLB_tiempos[i] = -1;
   return TLB_tiempos;
 }
 

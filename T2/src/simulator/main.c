@@ -101,13 +101,17 @@ int main(int argc, char *argv[])
     offset_bin = fill_binario(offset_bin, 8);
     int offset = bin_to_dec(offset_bin);
     int direccion_fisica_dec = -1;
-    char* frame = malloc(sizeof(char) * 256);
-
+    char* frame = malloc(sizeof(char) * 257);
+    int n_frame;
+    char* n_frame_bin = malloc(sizeof(char) * 9);
+    for (int i = 0; i < 257; i++) frame[i] = '\0';
     char* direccion_bin_pag = cut_string(binario, 0, 20);
     int i_tlb = indice_tlb(direccion_bin_pag, TLB);
     if(i_tlb != -1) {
       int n_frame = TLB_frames[i_tlb];
       frame = RAM[n_frame][0];
+      printf("asdausdfayusfduyatsfdasd\n");
+      //strcpy(frame, RAM[n_frame][0]);
       TLB_tiempos[i_tlb] = tiempo;
       RAM_tiempos[n_frame] = tiempo;
       tlb_hit += 1;
@@ -119,10 +123,9 @@ int main(int argc, char *argv[])
         cut_binary = cut_string(binario, 0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5); //direccion de la pagina
         int frame_start = bin_to_dec(cut_binary);
         frame = leer_bin("data.bin", frame_start);  //leer del .bin y obtener el frame completo
-        int n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
+        n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
         hacer_swap(RAM_asociaciones, n_frame, tabla, info.b1, info.b2, info.b3, info.b4, info.b5); //dejar 100 en pag vinculada anterior
         asociar(RAM_asociaciones, cut_binary, n_frame);
-        char* n_frame_bin = malloc(sizeof(char) * 9);
         itoa(n_frame, n_frame_bin, 2);
         n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
 
@@ -144,10 +147,9 @@ int main(int argc, char *argv[])
           cut_binary = cut_string(binario, 0, info.b1 + info.b2 + info.b3 + info.b4 + info.b5); //direccion de la pagina
           int frame_start = bin_to_dec(cut_binary);
           frame = leer_bin("data.bin", frame_start);  //leer del .bin y obtener el frame completo
-          int n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
+          n_frame = insertar_en_ram(RAM, frame, tiempo, RAM_tiempos); //inserta en RAM con LRU y devuelve el slot que ocupa
           hacer_swap(RAM_asociaciones, n_frame, tabla, info.b1, info.b2, info.b3, info.b4, info.b5); //dejar 100 en pag vinculada anterior
           asociar(RAM_asociaciones, cut_binary, n_frame);
-          char* n_frame_bin = malloc(sizeof(char) * 21);
           itoa(n_frame, n_frame_bin, 2);
           n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
           char direccion[20] = "";
@@ -160,10 +162,9 @@ int main(int argc, char *argv[])
           tabla[pag1][pag2][pag3][pag4][pag5] = PTE;  //ese ultimo tiene que ser largo 3
         }
         else {  //esta en RAM, bits_extras = 000
-          int n_frame = atoi(frame_pag);
+          n_frame = atoi(frame_pag);
           frame = RAM[n_frame][0];
           RAM_tiempos[n_frame] = tiempo;
-          char* n_frame_bin = malloc(sizeof(char) * 21);
           itoa(n_frame, n_frame_bin, 2);
           n_frame_bin = fill_binario(n_frame_bin, 8); //es 8 porque estamos hablando del frame fisico
           char direccion[20] = "";
@@ -172,7 +173,7 @@ int main(int argc, char *argv[])
           direccion_fisica_dec = bin_to_dec(direccion);
         }
       } // end del else not tlb
-      insertar_en_tlb(TLB, direccion_bin_pag, tiempo, TLB_tiempos, TLB_frames, direccion_fisica_dec);
+      insertar_en_tlb(TLB, direccion_bin_pag, tiempo, TLB_tiempos, TLB_frames, n_frame);
     }  // aqui termina el insert
     // printeando actual //
     printf("-%s-\n", instruccion);  //direccion virtual
@@ -182,8 +183,12 @@ int main(int argc, char *argv[])
   }  // aqui termina el while
   printf("----------------------------------------\n");
   printf("PORCENTAJE_PAGE_FAULTS = %g%\n", (page_fault/tiempo)*100);
+  printf("tlb_hit: %g\n", tlb_hit);
   printf("PORCENTAJE_TLB_HITS = %g%\n", (tlb_hit/tiempo)*100);
   // aca printear la TLB //
   printf("----------------------------------------\n");
+  //for (int i = 0; i < 64; i++) {
+  //  printf("%s\n", TLB[i]);
+  //}
   return 0;
 }
