@@ -170,6 +170,7 @@ int main(int argc, char *argv[])
   printf("PORCENTAJE_PAGE_FAULTS = %g\n", (page_fault/tiempo)*100);
   //printf("tlb_hit: %g\n", tlb_hit);
   printf("PORCENTAJE_TLB_HITS = %g\n", (tlb_hit/tiempo)*100);
+  print_TLB(TLB, info.b1, info.b2, info.b3, info.b4, info.b5, n, TLB_frames);
   // aca printear la TLB //
   printf("----------------------------------------\n");
   //for (int i = 0; i < 64; i++) {
