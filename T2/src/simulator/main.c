@@ -209,8 +209,8 @@ int main(int argc, char *argv[])
     tiempo++;
   }  // aqui termina el while
   printf("----------------------------------------\n");
-  printf("PORCENTAJE_PAGE_FAULTS = %g%\n", (page_fault/tiempo)*100);
-  printf("PORCENTAJE_TLB_HITS = %g%\n", (tlb_hit/tiempo)*100);
+  printf("PORCENTAJE_PAGE_FAULTS = %g\n", (page_fault/tiempo)*100);
+  printf("PORCENTAJE_TLB_HITS = %g\n", (tlb_hit/tiempo)*100);
   // aca printear la TLB //
   printf("----------------------------------------\n");
   return 0;
