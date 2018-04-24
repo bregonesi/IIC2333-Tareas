@@ -6,24 +6,22 @@
 #include "tabla.h"
 
 int indice_tlb(char* direccion_bin_pag, char** TLB){
-  for (int j = 0; j < 64; j++) {
-    if (strcmp(TLB[j], direccion_bin_pag) == 0) {
-      return j;
-    }
-  }
+  for (int j = 0; j < 64; j++)
+    if(strcmp(TLB[j], direccion_bin_pag) == 0) return j;
+
   return -1;
 }
 
 int* crear_tlb_frames() {
   int* TLB_frames;
-  TLB_frames = malloc(sizeof(int*) * 64);
+  TLB_frames = malloc(sizeof(int) * 64);
   for(int i = 0; i < 64; i++) TLB_frames[i] = 0;
   return TLB_frames;
 }
 
 int* crear_tlb_tiempos() {
   int* TLB_tiempos;
-  TLB_tiempos = malloc(sizeof(int*) * 64);
+  TLB_tiempos = malloc(sizeof(int) * 64);
   for(int i = 0; i < 64; i++) TLB_tiempos[i] = -1;
   return TLB_tiempos;
 }
@@ -31,10 +29,7 @@ int* crear_tlb_tiempos() {
 char** crear_TLB() {
   char **TLB;
   TLB = malloc(sizeof(char**) * 64);
-  for (int i = 0; i < 64; i++) {
-    TLB[i] = malloc(sizeof(char*));
-    TLB[i] = "-";  //frame
-  }
+  for (int i = 0; i < 64; i++) TLB[i] = "-";  //frame
   return TLB;
 }
 
@@ -131,4 +126,4 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
     }
   }
   return tabla;
-};
+}

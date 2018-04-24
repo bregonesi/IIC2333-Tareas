@@ -42,8 +42,7 @@ int bin_to_dec(char* bin) {
 }
 
 char* fill_binario(char* binario, int cantidad) {
-	char* final = malloc(sizeof(char) * (cantidad + 1));
-	for(int i = 0; i < cantidad; i++) final[i] = '\0';  // hay que inicializar
+	char* final = calloc(cantidad + 1, sizeof(char));  // calloc por que hay q inicializar
 
 	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
 	strcat(final, binario);
