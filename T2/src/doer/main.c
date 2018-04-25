@@ -15,6 +15,9 @@ struct timeval  tv1, tv2;
 clock_t begin;
 int m;
 int n;
+pid_t *procesos;
+Queue* tareas;
+Queue* tareas_finalizadas;
 
 void stats_print() {
 		printf("\n\n\n\n");
@@ -22,7 +25,8 @@ void stats_print() {
 		clock_t end = clock();
 		gettimeofday(&tv2, NULL);
 		double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
-		printf("Procesos ejecutados: %i\n", m); //por ahora esta asi hasta preguntar al ayudante
+		//printf("Procesos ejecutados: %i\n", m-tareas->size); //por ahora esta asi hasta preguntar al ayudante
+		printf("Procesos ejecutados: %i\n", tareas_finalizadas->size);
 		printf("Valor de m: %i\n", m);
 		printf("Valor de n: %i\n", n);
 		printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
@@ -31,16 +35,25 @@ void stats_print() {
 }
 
 void stats(int sig) {
+		for(int i = 0; i < n; i++) {
+			if(procesos[i] && kill(procesos[i], SIGTERM) != -1)  // killeamos
+				printf("Prceso %d finished\n", procesos[i]);
+			//kill(procesos[i], SIGTERM)
+		}
 		stats_print();
     //close(0);  // foo is displayed if this line is commented out
     _Exit(0);
+}
+
+void child_interruption(int sig) {
+	printf("Proceso %d auto-finished\n", getpid());
+	_Exit(0);
 }
 
 int main(int argc, char *argv[])
 {
 	begin = clock();
 	gettimeofday(&tv1, NULL);
-	signal(SIGINT, stats);  // por si se hace ctrl + c
 
   /* El programa recibe 2 parametros */
 	if(argc != 3)
@@ -60,7 +73,7 @@ int main(int argc, char *argv[])
 
 	n = atoi(argv[2]);
 
-	Queue* tareas = ConstructQueue();
+	tareas = ConstructQueue();
 
   /* Lectura de archivo */
 
@@ -84,30 +97,31 @@ int main(int argc, char *argv[])
 		if((ch == ' ' || ch == '\n') && !colon_param && index != 0) {  // guardamos nuevo parametro
       line[index] = '\0';
       index = 0;
+			params++;
 
-			if(!args) args = malloc(sizeof(char*));
+			if(!args) args = malloc(sizeof(char*) * 2);
 
-			if(params >= 1) {  // hay que expandir args
+			if(params > 1) {  // hay que expandir args
 				args = realloc(args, sizeof(char*) * (params + 1));
 			}
 
-			args[params] = malloc(strlen(line) + 1);
-			strcpy(args[params], line);  // aqui se pasa a una lista para que sea ejecutado por execvp
+			args[params - 1] = calloc(strlen(line) + 1, sizeof(char));
+			strcpy(args[params - 1], line);  // aqui se pasa a una lista para que sea ejecutado por execvp
 
 			if(ch == '\n') {
 				//for(int i = 0; i <= params; i++) printf("%s\n", args[i]);
+				args[params] = NULL;
 
 				NODE* nodo = malloc(sizeof(NODE));
 
 				nodo->lista_args = args;
-				nodo->size = params + 1;
+				nodo->size = params;
 				nodo->intentos = 0;
 
 				Enqueue_last(tareas, nodo);
 
 				//execvp(args[0], args);  // asi se ejecuta el comando
 			}
-			params++;
 		}
 
 		if(ch == '\n') { // por si empieza nueva tarea
@@ -122,11 +136,14 @@ int main(int argc, char *argv[])
 	fclose(archivo_tareas);
 
 	m = tareas->size;
-	pid_t *procesos = calloc(MIN(n, m), sizeof(fork()));
+ 	procesos = calloc(MIN(n, m), sizeof(fork()));
 	NODE **en_ejecucion = malloc(sizeof(NODE*) * MIN(n, m));
-	Queue* tareas_finalizadas = ConstructQueue();
+	tareas_finalizadas = ConstructQueue();
 	int i = 0;
 	int status;  // retorna status del proceso finalizado
+
+	signal(SIGINT, stats);  // por si se hace ctrl + c
+
 	while(true) {
 
 		NODE* ejecutar = Dequeue(tareas);
@@ -136,7 +153,7 @@ int main(int argc, char *argv[])
 			printf("PARENT: Child's exit code is: %d and pid %d\n", WEXITSTATUS(status), wpid);
 
 			int j = 0;
-			for( ; j < n; j++) {
+			for( ; j < MIN(n, m); j++) {
 				if(procesos[j] == wpid) {  // buscamos el que termino
 					break;
 				}
@@ -153,6 +170,7 @@ int main(int argc, char *argv[])
 
 			if(ejecutar) {  // por si aun quedan por ejecutar
 				if((procesos[j] = fork()) == 0) {  // child here
+					signal(SIGINT, child_interruption);
 					printf("Hijo creado con pid %d y arg0 %s\n", getpid(), ejecutar->lista_args[0]);
 					execvp(ejecutar->lista_args[0], ejecutar->lista_args);
 					exit(1);  // por si execvp falla
@@ -167,9 +185,10 @@ int main(int argc, char *argv[])
 
 		}
 
-		if(i < n && ejecutar) {
+		if(i < MIN(n, m) && ejecutar) {
 			if(procesos[i] == 0) {
 				if((procesos[i] = fork()) == 0) {  // child here
+					signal(SIGINT, child_interruption);
 					printf("Hijo creado con pid %d y arg0 %s\n", getpid(), ejecutar->lista_args[0]);
 					execvp(ejecutar->lista_args[0], ejecutar->lista_args);
 					exit(1);  // por si execvp falla
@@ -188,13 +207,12 @@ int main(int argc, char *argv[])
 
 	}
 
+	stats_print();
+
 	DestructQueue(tareas);
 	free(procesos);
 	free(en_ejecucion);
 	DestructQueue(tareas_finalizadas);
-	//sleep(2); //probando ctrl c
-
-	stats_print();
 
 	return 0;
 }

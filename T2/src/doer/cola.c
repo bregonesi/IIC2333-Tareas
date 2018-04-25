@@ -19,7 +19,7 @@ void DestructQueue(Queue *queue) {
     while (!isEmpty(queue)) {
         pN = Dequeue(queue);
         if(pN) {
-          for(int i = 0; i < pN->size; i++) free(pN->lista_args[i]);
+          for(int i = 0; i < pN->size; i++) if(pN->lista_args[i]) free(pN->lista_args[i]);
           free(pN->lista_args);
         }
         free(pN);
