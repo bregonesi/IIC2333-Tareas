@@ -17,7 +17,7 @@ int indice_tlb(char* direccion_bin_pag, char** TLB){
 int* crear_tlb_frames() {
   int* TLB_frames;
   TLB_frames = malloc(sizeof(int) * 64);
-  for(int i = 0; i < 64; i++) TLB_frames[i] = 0;
+  for(int i = 0; i < 64; i++) TLB_frames[i] = -1;
   return TLB_frames;
 }
 
@@ -80,7 +80,10 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
       pag5 = bin_to_dec(cut_binary);
       free(cut_binary);
       n_frame = TLB_frames[i];
-      printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, pag4, pag5, n_frame);
+      if (n_frame == -1) {
+        printf("%-2d\t %-6s\t\t %-6s\t\t %-6s\t\t %-6s\t\t %-6s\t\t %-6s\n", i, "-", "-", "-", "-", "-", "-");
+      }
+      else printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, pag4, pag5, n_frame);
     }
   }
   else if (n == 4) {
@@ -100,8 +103,12 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
       pag4 = bin_to_dec(cut_binary);
       free(cut_binary);
       n_frame = TLB_frames[i];
-      printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, pag4, n_frame);
-    }
+      if (n_frame == -1) {
+        printf("%-2d\t %-6s\t\t %-6s\t\t %-6s\t\t %-6s\t\t %-6s\n", i, "-", "-", "-", "-", "-");
+      }
+      else printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, pag4, n_frame);
+
+      }
   }
   else if (n == 3) {
     printf("%-2s\t %-6s\t %-6s\t %-6s\t %-6s\n", "i", "n1_number", "n2_number", "n3_number", "frame_number");
@@ -117,7 +124,10 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
       pag3 = bin_to_dec(cut_binary);
       free(cut_binary);
       n_frame = TLB_frames[i];
-      printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, n_frame);
+      if (n_frame == -1) {
+        printf("%-2d\t %-6s\t\t %-6s\t\t %-6s\t\t %-6s\n", i, "-", "-", "-", "-");
+      }
+      else printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, n_frame);
     }
   }
   else if (n == 2) {
@@ -131,7 +141,11 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
       pag2 = bin_to_dec(cut_binary);
       free(cut_binary);
       n_frame = TLB_frames[i];
-      printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, n_frame);
+      if (n_frame == -1) {
+        printf("%-2d\t %-6s\t\t %-6s\t\t %-6s\n", i, "-", "-", "-");
+      }
+      else printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, n_frame);
+
     }
   }
   else if (n == 1) {
@@ -142,7 +156,11 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
       pag1 = bin_to_dec(cut_binary);
       free(cut_binary);
       n_frame = TLB_frames[i];
-      printf("%-2d\t %-6d\t\t %-6d\n", i, pag1, n_frame);
+      if (n_frame == -1) {
+        printf("%-2d\t %-6s\t\t %-6s\n", i, "-", "-");
+      }
+      else printf("%-2d\t %-6d\t\t %-6d\n", i, pag1, n_frame);
+
     }
   }
 }

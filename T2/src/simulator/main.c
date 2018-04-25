@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
       pagina = tabla[pag1][pag2][pag3][pag4][pag5];
 
       char* bits_extra = cut_string(pagina, 8, 11);
-      if(strcmp(pagina, "-") == 0 || strcmp(bits_extra, "100") == 0) {  //pagina vacia
+      if(strcmp(pagina, "-") == 0 || strcmp(bits_extra, "100") == 0) {  //pagina vacia o en disco
         page_fault += 1;
 
         //ir a buscar a .bin y dejarlo en RAM, despues asignar el frame a esta pag y dejar seteado los extras
@@ -194,9 +194,9 @@ int main(int argc, char *argv[])
   fclose(archivo_input);
 
   printf("----------------------------------------\n");
-  printf("PORCENTAJE_PAGE_FAULTS = %g\n", (page_fault/tiempo)*100);
+  printf("PORCENTAJE_PAGE_FAULTS = %g%%\n", (page_fault/tiempo)*100);
   //printf("tlb_hit: %g\n", tlb_hit);
-  printf("PORCENTAJE_TLB_HITS = %g\n", (tlb_hit/tiempo)*100);
+  printf("PORCENTAJE_TLB_HITS = %g%%\n", (tlb_hit/tiempo)*100);
   print_TLB(TLB, info.b1, info.b2, info.b3, info.b4, info.b5, n, TLB_frames);
   // aca printear la TLB //
   printf("----------------------------------------\n");
