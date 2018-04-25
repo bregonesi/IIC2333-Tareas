@@ -7,6 +7,9 @@
 #include <time.h>
 #include <sys/time.h>
 
+#include <sys/stat.h>
+#include <fcntl.h>
+
 #include "cola.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -20,18 +23,32 @@ Queue* tareas;
 Queue* tareas_finalizadas;
 
 void stats_print() {
-		printf("\n\n\n\n");
-		printf("------Estadisticas------\n");
-		clock_t end = clock();
-		gettimeofday(&tv2, NULL);
-		double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
-		//printf("Procesos ejecutados: %i\n", m-tareas->size); //por ahora esta asi hasta preguntar al ayudante
-		printf("Procesos ejecutados: %i\n", tareas_finalizadas->size);
-		printf("Valor de m: %i\n", m);
-		printf("Valor de n: %i\n", n);
-		printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
-		printf("Tiempo medido con gettime: %fs\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
-         (double) (tv2.tv_sec - tv1.tv_sec));
+	printf("\n\n");
+	printf("------Outputs------\n");
+	int c;
+	FILE *file;
+	file = fopen("tmp.txt", "r");
+	if (file) {
+		while ((c = getc(file)) != EOF) {
+			printf("%c", c);
+	    //putchar(c);
+		}
+	  fclose(file);
+	}
+	unlink("tmp.txt");
+
+	printf("\n\n");
+	printf("------Estadisticas------\n");
+	clock_t end = clock();
+	gettimeofday(&tv2, NULL);
+	double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
+	//printf("Procesos ejecutados: %i\n", m-tareas->size); //por ahora esta asi hasta preguntar al ayudante
+	printf("Procesos ejecutados: %i\n", tareas_finalizadas->size);
+	printf("Valor de m: %i\n", m);
+	printf("Valor de n: %i\n", n);
+	printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
+	printf("Tiempo medido con gettime: %fs\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+       (double) (tv2.tv_sec - tv1.tv_sec));
 }
 
 void stats(int sig) {
@@ -144,6 +161,12 @@ int main(int argc, char *argv[])
 
 	signal(SIGINT, stats);  // por si se hace ctrl + c
 
+	int fdout;
+	if((fdout = open("tmp.txt", O_CREAT|O_TRUNC|O_WRONLY, 0644)) < 0) {
+		perror("tmp.txt");   /* open failed */
+		exit(1);
+	}
+
 	while(true) {
 
 		NODE* ejecutar = Dequeue(tareas);
@@ -172,6 +195,8 @@ int main(int argc, char *argv[])
 				if((procesos[j] = fork()) == 0) {  // child here
 					signal(SIGINT, child_interruption);
 					printf("Hijo creado con pid %d y arg0 %s\n", getpid(), ejecutar->lista_args[0]);
+
+					dup2(fdout, 1);
 					execvp(ejecutar->lista_args[0], ejecutar->lista_args);
 					exit(1);  // por si execvp falla
 					// child no ejecuta nada mas
@@ -190,6 +215,8 @@ int main(int argc, char *argv[])
 				if((procesos[i] = fork()) == 0) {  // child here
 					signal(SIGINT, child_interruption);
 					printf("Hijo creado con pid %d y arg0 %s\n", getpid(), ejecutar->lista_args[0]);
+
+					dup2(fdout, 1);
 					execvp(ejecutar->lista_args[0], ejecutar->lista_args);
 					exit(1);  // por si execvp falla
 					// child no ejecuta nada mas
