@@ -45,7 +45,7 @@ LIB=$(MTH)
 COMMON=
 
 # Directorios que serán compilados a un programa
-PROGRAMS=doer simulator
+PROGRAMS=simulator
 
 # Todos los directorios que contienen archivos de código
 SRCDIR=$(COMMON) $(PROGRAMS)
