@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <stdbool.h>
+
 #include "funciones.h"
 #include "tabla.h"
 
@@ -19,6 +21,10 @@ int* crear_tlb_frames() {
   return TLB_frames;
 }
 
+void free_tlb_frames(int* TLB_frames) {
+  free(TLB_frames);
+}
+
 int* crear_tlb_tiempos() {
   int* TLB_tiempos;
   TLB_tiempos = malloc(sizeof(int) * 64);
@@ -26,11 +32,22 @@ int* crear_tlb_tiempos() {
   return TLB_tiempos;
 }
 
+void free_tlb_tiempos(int* TLB_tiempos) {
+  free(TLB_tiempos);
+}
+
 char** crear_TLB() {
   char **TLB;
-  TLB = malloc(sizeof(char**) * 64);
+  TLB = malloc(sizeof(char*) * 64);
   for (int i = 0; i < 64; i++) TLB[i] = "-";  //frame
   return TLB;
+}
+
+void free_TLB(char** TLB) {
+  for(int i = 0; i < 64; i++)
+    if(strcmp(TLB[i], "-") != 0)
+      free(TLB[i]);
+  free(TLB);
 }
 
 void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* TLB_frames){
@@ -42,21 +59,26 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
   int pag4;
   int pag5;
   int n_frame;
+  char* cut_binary = NULL;
   if (n == 5) {
     printf("%-2s\t %-6s\t %-6s\t %-6s\t %-6s\t %-6s\t %-6s\n", "i", "n1_number", "n2_number", "n3_number", "n4_number", "n5_number", "frame_number");
     for (int i = 0; i < 64; i++) {
       direccion_bin_pag = TLB[i];
-      char* cut_binary;
       cut_binary = cut_string(direccion_bin_pag, 0, b1);
       pag1 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1, b1 + b2);
       pag2 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1 + b2, b1 + b2 + b3);
       pag3 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1 + b2 + b3, b1 + b2 + b3 + b4);
       pag4 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1 + b2 + b3 + b4, b1 + b2 + b3 + b4 + b5);
       pag5 = bin_to_dec(cut_binary);
+      free(cut_binary);
       n_frame = TLB_frames[i];
       printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, pag4, pag5, n_frame);
     }
@@ -65,15 +87,18 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
     printf("%-2s\t %-6s\t %-6s\t %-6s\t %-6s\t %-6s\n", "i", "n1_number", "n2_number", "n3_number", "n4_number", "frame_number");
     for (int i = 0; i < 64; i++) {
       direccion_bin_pag = TLB[i];
-      char* cut_binary;
       cut_binary = cut_string(direccion_bin_pag, 0, b1);
       pag1 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1, b1 + b2);
       pag2 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1 + b2, b1 + b2 + b3);
       pag3 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1 + b2 + b3, b1 + b2 + b3 + b4);
       pag4 = bin_to_dec(cut_binary);
+      free(cut_binary);
       n_frame = TLB_frames[i];
       printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, pag4, n_frame);
     }
@@ -82,13 +107,15 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
     printf("%-2s\t %-6s\t %-6s\t %-6s\t %-6s\n", "i", "n1_number", "n2_number", "n3_number", "frame_number");
     for (int i = 0; i < 64; i++) {
       direccion_bin_pag = TLB[i];
-      char* cut_binary;
       cut_binary = cut_string(direccion_bin_pag, 0, b1);
       pag1 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1, b1 + b2);
       pag2 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1 + b2, b1 + b2 + b3);
       pag3 = bin_to_dec(cut_binary);
+      free(cut_binary);
       n_frame = TLB_frames[i];
       printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, pag3, n_frame);
     }
@@ -97,11 +124,12 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
     printf("%-2s\t %-6s\t %-6s\t %-6s\n", "i", "n1_number", "n2_number", "frame_number");
     for (int i = 0; i < 64; i++) {
       direccion_bin_pag = TLB[i];
-      char* cut_binary;
       cut_binary = cut_string(direccion_bin_pag, 0, b1);
       pag1 = bin_to_dec(cut_binary);
+      free(cut_binary);
       cut_binary = cut_string(direccion_bin_pag, b1, b1 + b2);
       pag2 = bin_to_dec(cut_binary);
+      free(cut_binary);
       n_frame = TLB_frames[i];
       printf("%-2d\t %-6d\t\t %-6d\t\t %-6d\n", i, pag1, pag2, n_frame);
     }
@@ -110,14 +138,13 @@ void print_TLB(char** TLB, int b1, int b2, int b3, int b4, int b5, int n, int* T
     printf("%-2s\t %-6s\t %-6s\n", "i", "n1_number", "frame_number");
     for (int i = 0; i < 64; i++) {
       direccion_bin_pag = TLB[i];
-      char* cut_binary;
       cut_binary = cut_string(direccion_bin_pag, 0, b1);
       pag1 = bin_to_dec(cut_binary);
+      free(cut_binary);
       n_frame = TLB_frames[i];
       printf("%-2d\t %-6d\t\t %-6d\n", i, pag1, n_frame);
     }
   }
-return;
 }
 
 int insertar_en_tlb(char** TLB, char* frame, int tiempo, int* TLB_tiempos, int* TLB_frames, int direccion_frame) {
@@ -133,6 +160,7 @@ int insertar_en_tlb(char** TLB, char* frame, int tiempo, int* TLB_tiempos, int* 
     }
   }
 
+  if(strcmp(TLB[n_frame], "-") != 0) free(TLB[n_frame]);
   TLB[n_frame] = frame;
   TLB_tiempos[n_frame] = tiempo;
   TLB_frames[n_frame] = direccion_frame;
@@ -140,7 +168,7 @@ int insertar_en_tlb(char** TLB, char* frame, int tiempo, int* TLB_tiempos, int* 
   return n_frame;
 }
 
-char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
+char****** crear_tabla_paginas(int b1, int b2, int b3, int b4, int b5, int n) {
   char ******tabla = NULL;
   if (n == 1) {
     tabla = malloc(sizeof(char*****) * (int) pow(2, 20));
@@ -213,4 +241,78 @@ char****** crear_tabla_paginas(int b1,int b2,int b3,int b4,int b5,int n) {
     }
   }
   return tabla;
+}
+
+void free_tabla(char****** tabla, int b1, int b2, int b3, int b4, int b5, int n) {
+  if (n == 1) {
+    for (int i = 0; i < (int) pow(2, b1); i++) {
+      if(strcmp(tabla[i][0][0][0][0], "-") != 0)
+        free(tabla[i][0][0][0][0]);
+      free(tabla[i][0][0][0]);
+      free(tabla[i][0][0]);
+      free(tabla[i][0]);
+      free(tabla[i]);
+    }
+  }
+  else if (n == 2) {
+    for (int i = 0; i < (int) pow(2, b1); i++) {
+      for (int i2 = 0; i2 < (int) pow(2, b2); i2++) {
+        if(strcmp(tabla[i][i2][0][0][0], "-") != 0)
+          free(tabla[i][i2][0][0][0]);
+        free(tabla[i][i2][0][0]);
+        free(tabla[i][i2][0]);
+        free(tabla[i][i2]);
+      }
+      free(tabla[i]);
+    }
+  }
+  else if (n == 3) {
+    for (int i = 0; i < (int) pow(2, b1); i++) {
+      for (int i2 = 0; i2 < (int) pow(2, b2); i2++) {
+        for (int i3 = 0; i3 < (int) pow(2, b3); i3++) {
+          if(strcmp(tabla[i][i2][i3][0][0], "-") != 0)
+            free(tabla[i][i2][i3][0][0]);
+          free(tabla[i][i2][i3][0]);
+          free(tabla[i][i2][i3]);
+        }
+        free(tabla[i][i2]);
+      }
+      free(tabla[i]);
+    }
+  }
+  else if (n == 4) {
+    for (int i = 0; i < (int) pow(2, b1); i++) {
+      for (int i2 = 0; i2 < (int) pow(2, b2); i2++) {
+        for (int i3 = 0; i3 < (int) pow(2, b3); i3++) {
+          for (int i4 = 0; i4 < (int) pow(2, b4); i4++) {
+            if(strcmp(tabla[i][i2][i3][i4][0], "-") != 0)
+              free(tabla[i][i2][i3][i4][0]);
+            free(tabla[i][i2][i3][i4]);
+          }
+          free(tabla[i][i2][i3]);
+        }
+        free(tabla[i][i2]);
+      }
+      free(tabla[i]);
+    }
+  }
+  else if (n == 5) {
+    for (int i = 0; i < (int) pow(2, b1); i++) {
+      for (int i2 = 0; i2 < (int) pow(2, b2); i2++) {
+        for (int i3 = 0; i3 < (int) pow(2, b3); i3++) {
+          for (int i4 = 0; i4 < (int) pow(2, b4); i4++) {
+            for (int i5 = 0; i5 < (int) pow(2, b5); i5++) {
+              if(strcmp(tabla[i][i2][i3][i4][i5], "-") != 0)
+                free(tabla[i][i2][i3][i4][i5]);
+            }
+            free(tabla[i][i2][i3][i4]);
+          }
+          free(tabla[i][i2][i3]);
+        }
+        free(tabla[i][i2]);
+      }
+      free(tabla[i]);
+    }
+  }
+  free(tabla);
 }
