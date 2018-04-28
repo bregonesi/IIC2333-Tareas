@@ -10,6 +10,8 @@ typedef struct Node_t
   int size;
   pid_t pid;
   int intentos;
+  float t_intento1;
+  float t_intento2;
   struct Node_t *next;
 } NODE;
 

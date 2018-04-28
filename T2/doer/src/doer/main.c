@@ -18,6 +18,7 @@ struct timeval  tv1, tv2;
 clock_t begin;
 int m;
 int n;
+int m_exec = 0;
 pid_t *procesos;
 Queue* tareas;
 Queue* tareas_finalizadas;
@@ -43,16 +44,28 @@ void stats_print() {
 	gettimeofday(&tv2, NULL);
 	double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
 	//printf("Procesos ejecutados: %i\n", m-tareas->size); //por ahora esta asi hasta preguntar al ayudante
-	printf("Procesos ejecutados: %i\n", tareas_finalizadas->size);
+	printf("Procesos ejecutados: %i\n", m_exec);
 	printf("Valor de m: %i\n", m);
 	printf("Valor de n: %i\n", n);
 	printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
 	printf("Tiempo medido con gettime: %fs\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
        (double) (tv2.tv_sec - tv1.tv_sec));
+
+	printf("Tiempo real (tiempo paralelo): %fs\n", tiempo_paralelo);
+
+	float t_total = 0;
+	NODE* proc = tareas_finalizadas->head;
+	while(proc) {
+		t_total += proc->t_intento1;
+		t_total += proc->t_intento2;
+		proc = proc->next;
+	}
+
+	printf("Tiempo total (tiempo secuencial): %fs\n", t_total);
 }
 
 void stats(int sig) {
-		for(int i = 0; i < n; i++) {
+		for(int i = 0; i < m; i++) {
 			if(procesos[i] && kill(procesos[i], SIGTERM) != -1)  // killeamos
 				printf("Prceso %d finished\n", procesos[i]);
 			//kill(procesos[i], SIGTERM)
@@ -134,6 +147,8 @@ int main(int argc, char *argv[])
 				nodo->lista_args = args;
 				nodo->size = params;
 				nodo->intentos = 0;
+				nodo->t_intento1 = 0;
+				nodo->t_intento2 = 0;
 
 				Enqueue_last(tareas, nodo);
 
@@ -182,7 +197,19 @@ int main(int argc, char *argv[])
 				}
 			}
 
+			char* exit_string = calloc(256, sizeof(char));
+			sprintf(exit_string, "The exit code of pid %d (arg0 %s) is %d\n", wpid, en_ejecucion[j]->lista_args[0], WEXITSTATUS(status));
+			write(fdout, exit_string, 256);
+			free(exit_string);
+
 			if(status == 0 || en_ejecucion[j]->intentos >= 2) {  // si finalizo correctamente o no puede volver a intentar
+
+				if(en_ejecucion[j]->intentos == 1)  // ahora calculamos el delta que demoro en ejecutarse
+					en_ejecucion[j]->t_intento1 -= 2.44324;  // hay que reemplazar 1 por lahora
+				else
+					en_ejecucion[j]->t_intento2 -= 3.6432424;  // hay que reemplazar 1 por lahora
+
+
 				Enqueue_last(tareas_finalizadas, en_ejecucion[j]);
 			} else {
 				if(en_ejecucion[j]->intentos <= 1) {
@@ -201,8 +228,15 @@ int main(int argc, char *argv[])
 					exit(1);  // por si execvp falla
 					// child no ejecuta nada mas
 				} else {
+					m_exec++;
 					ejecutar->pid = procesos[j];
 					ejecutar->intentos++;
+
+					if(ejecutar->intentos == 1)
+						ejecutar->t_intento1 = 10;  // hay que reemplazar 10 por lahora
+					else
+						ejecutar->t_intento2 = 10;  // hay que reemplazar 10 por lahora
+
 					en_ejecucion[j] = ejecutar;
 					printf("Creando hijo con pid %d\n", procesos[j]);
 				}
@@ -221,8 +255,15 @@ int main(int argc, char *argv[])
 					exit(1);  // por si execvp falla
 					// child no ejecuta nada mas
 				} else {
+					m_exec++;
 					ejecutar->pid = procesos[i];
 					ejecutar->intentos++;
+
+					if(ejecutar->intentos == 1)
+						ejecutar->t_intento1 = 10;  // hay que reemplazar 10 por lahora
+					else
+						ejecutar->t_intento2 = 10;  // hay que reemplazar 10 por lahora
+
 					en_ejecucion[i] = ejecutar;
 					printf("Creando hijo con pid %d\n", procesos[i]);
 				}
