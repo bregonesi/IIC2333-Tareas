@@ -14,8 +14,7 @@
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 
-struct timeval  tv1, tv2;
-clock_t begin;
+struct timeval  tv1, tv2, tvtemp;
 int m;
 int n;
 int m_exec = 0;
@@ -40,24 +39,22 @@ void stats_print() {
 
 	printf("\n\n");
 	printf("------Estadisticas------\n");
-	clock_t end = clock();
 	gettimeofday(&tv2, NULL);
-	double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
+	//double tiempo_paralelo = (double)(end - begin) / CLOCKS_PER_SEC;
 	//printf("Procesos ejecutados: %i\n", m-tareas->size); //por ahora esta asi hasta preguntar al ayudante
 	printf("Procesos ejecutados: %i\n", m_exec);
 	printf("Valor de m: %i\n", m);
 	printf("Valor de n: %i\n", n);
-	printf("Tiempo medido con clocks: %fs\n", tiempo_paralelo);
-	printf("Tiempo medido con gettime: %fs\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
+	printf("Tiempo real (tiempo paralelo): %fs\n", (double) (tv2.tv_usec - tv1.tv_usec) / 1000000 +
        (double) (tv2.tv_sec - tv1.tv_sec));
 
-	printf("Tiempo real (tiempo paralelo): %fs\n", tiempo_paralelo);
-
-	float t_total = 0;
+	double t_total = 0;
 	NODE* proc = tareas_finalizadas->head;
 	while(proc) {
 		t_total += proc->t_intento1;
 		t_total += proc->t_intento2;
+		//printf("t1: %fs\n", proc->t_intento1);
+		//printf("t2: %fs\n", proc->t_intento2);
 		proc = proc->next;
 	}
 
@@ -82,7 +79,6 @@ void child_interruption(int sig) {
 
 int main(int argc, char *argv[])
 {
-	begin = clock();
 	gettimeofday(&tv1, NULL);
 
   /* El programa recibe 2 parametros */
@@ -203,16 +199,23 @@ int main(int argc, char *argv[])
 			free(exit_string);
 
 			if(status == 0 || en_ejecucion[j]->intentos >= 2) {  // si finalizo correctamente o no puede volver a intentar
-
+				gettimeofday(&tvtemp, NULL);
 				if(en_ejecucion[j]->intentos == 1)  // ahora calculamos el delta que demoro en ejecutarse
-					en_ejecucion[j]->t_intento1 -= 2.44324;  // hay que reemplazar 1 por lahora
+					en_ejecucion[j]->t_intento1 = (double) (tvtemp.tv_usec - en_ejecucion[j]->tv1.tv_usec) / 1000000 +
+				       (double) (tvtemp.tv_sec - en_ejecucion[j]->tv1.tv_sec);
 				else
-					en_ejecucion[j]->t_intento2 -= 3.6432424;  // hay que reemplazar 1 por lahora
+					en_ejecucion[j]->t_intento2 = (double) (tvtemp.tv_usec - en_ejecucion[j]->tv2.tv_usec) / 1000000 +
+				       (double) (tvtemp.tv_sec - en_ejecucion[j]->tv2.tv_sec);
 
 
 				Enqueue_last(tareas_finalizadas, en_ejecucion[j]);
 			} else {
 				if(en_ejecucion[j]->intentos <= 1) {
+					if (en_ejecucion[j]->intentos == 1) {
+						gettimeofday(&tvtemp, NULL);
+						en_ejecucion[j]->t_intento1 = (double) (tvtemp.tv_usec - en_ejecucion[j]->tv1.tv_usec) / 1000000 +
+					       (double) (tvtemp.tv_sec - en_ejecucion[j]->tv1.tv_sec);
+					}
 					if(ejecutar) Enqueue_first(tareas, ejecutar); // no ejecutamos el que ibamos a ejecutar
 					ejecutar = en_ejecucion[j];
 				}
@@ -233,9 +236,9 @@ int main(int argc, char *argv[])
 					ejecutar->intentos++;
 
 					if(ejecutar->intentos == 1)
-						ejecutar->t_intento1 = 10;  // hay que reemplazar 10 por lahora
+						gettimeofday(&ejecutar->tv1, NULL);
 					else
-						ejecutar->t_intento2 = 10;  // hay que reemplazar 10 por lahora
+						gettimeofday(&ejecutar->tv2, NULL);
 
 					en_ejecucion[j] = ejecutar;
 					printf("Creando hijo con pid %d\n", procesos[j]);
@@ -260,9 +263,9 @@ int main(int argc, char *argv[])
 					ejecutar->intentos++;
 
 					if(ejecutar->intentos == 1)
-						ejecutar->t_intento1 = 10;  // hay que reemplazar 10 por lahora
+						gettimeofday(&ejecutar->tv1, NULL);
 					else
-						ejecutar->t_intento2 = 10;  // hay que reemplazar 10 por lahora
+						gettimeofday(&ejecutar->tv2, NULL);
 
 					en_ejecucion[i] = ejecutar;
 					printf("Creando hijo con pid %d\n", procesos[i]);

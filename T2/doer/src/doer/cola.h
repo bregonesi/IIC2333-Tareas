@@ -12,6 +12,7 @@ typedef struct Node_t
   int intentos;
   float t_intento1;
   float t_intento2;
+  struct timeval tv1, tv2;
   struct Node_t *next;
 } NODE;
 
