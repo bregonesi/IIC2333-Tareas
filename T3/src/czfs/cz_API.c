@@ -64,8 +64,8 @@ czFILE* cz_open(char* filename, char mode) {
 int cz_exists(char* filename) {
   FILE* fp = fopen(ruta_bin, "rb");
 
-  int i = 1023*9; //primeros 9 no son archivos
-  while(i < 65536000) { //total de bytes en el archivo
+  int i = 0;
+  while(i < 1024) {  // 1024 son de directorio
     char valid[1];
     fread(valid, 1, 1, fp);
     char name[11];
@@ -73,12 +73,12 @@ int cz_exists(char* filename) {
     char indice[4];
     fread(indice, 4, 1, fp);
 
-    if(atoi(valid) && strcmp(name, filename) == 0) {  // falta chequear si el bitmap esta ocupado
+    if(atoi(valid) && strcmp(name, filename) == 0 && 1) {  // falta chequear si el bitmap esta ocupado
       fclose(fp);
       return 1;
     }
 
-    i += 1023; //avanza al siguiente bloque
+    i += 16; //avanza al siguiente bloque
   }
 
   fclose(fp);
@@ -113,7 +113,7 @@ void cz_ls() {
 int bitmap_get_free() {
   FILE* fp = fopen(ruta_bin, "rb+");
   char* b = calloc(2, sizeof(char));
-  for(int i = 1023; i < 1024 * 8; i++) {
+  for(int i = 1024; i < 1024 * 8; i++) {
     fseek(fp, i, SEEK_SET);
     unsigned char byte[1];
     int byte_dec;
@@ -131,7 +131,7 @@ int bitmap_get_free() {
         free(filled_byte_bin);
         fclose(fp);
         free(b);
-        return (i - 1023) * 8 + j + 1023;
+        return (i - 1024) * 8 + j + 1024;
       }
     }
     free(filled_byte_bin);
@@ -145,7 +145,7 @@ int bitmap_set_first() {
   FILE* fp = fopen(ruta_bin, "rb+");
   char* b = calloc(2, sizeof(char));
 
-  for(int i = 1023; i < 1024 * 8; i++) {
+  for(int i = 1024; i < 1024 * 8; i++) {
     fseek(fp, i, SEEK_SET);
 
     unsigned char byte[1];
@@ -173,7 +173,7 @@ int bitmap_set_first() {
         fclose(fp);
         free(b);
 
-        return ((i - 1023) * 8) + j + 1023;
+        return ((i - 1024) * 8) + j + 1024;
       }
     }
     free(filled_byte_bin);
@@ -185,8 +185,8 @@ int bitmap_set_first() {
 }
 
 bool bitmap_is_free(int pos) {  // pos corresponde a una posicion en el disco
-  if(pos >= 1023 && pos <= 1024*8 - 1) {
-    int offset = pos % 1023;
+  if(pos >= 1024 && pos < 1024*8) {
+    int offset = pos % 1024;
     int bloque = pos - offset;
     //printf("bloque %i offset %i\n", bloque, offset);
 
