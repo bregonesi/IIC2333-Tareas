@@ -23,18 +23,21 @@ fwrite("1", 1, 1, fp);
 char a[4] = "hola";
 fwrite(a, sizeof(char), 4, fp);
 fclose(fp);*/
-  cz_ls();
+cz_ls();
+printf("existe 'input.txt'?: %i\n", cz_exists("input.txt"));
 
-char* b = calloc(2, sizeof(char));
+//char* b = calloc(2, sizeof(char));
 for(int k = 0; k < 129; k++) {
   FILE* fp = fopen(ruta_bin, "rb+");
   fseek(fp, 1023 , SEEK_SET);
-  b[0] = k;
-  fwrite(b, 1, 1, fp);
+  //b[0] = k;
+  //fwrite(b, 1, 1, fp);
   fclose(fp);
-  printf("posiciion; %i\n", bitmap_get_free());
+  int posicion_fisica_des = bitmap_set_first();
+  printf("bit fisico ocupado: %i\n", posicion_fisica_des);
+  printf("numero de bloque ocupado: %i\n", posicion_fisica_des - 1023 );
 }
-free(b);
+//free(b);
 
 printf("%i\n", bitmap_is_free(1023));
 printf("%i\n", bitmap_is_free(1024));

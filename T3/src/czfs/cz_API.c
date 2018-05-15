@@ -1,5 +1,6 @@
 #include "cz_API.h"
 
+/* Funciones de tarea */
 czFILE* cz_open(char* filename, char mode) {
   czFILE* file = NULL;
   if(mode == 'r') {
@@ -63,8 +64,8 @@ czFILE* cz_open(char* filename, char mode) {
 int cz_exists(char* filename) {
   FILE* fp = fopen(ruta_bin, "rb");
 
-  int i = 0;
-  while(i < 1024) {
+  int i = 1023*9; //primeros 9 no son archivos
+  while(i < 65536000) { //total de bytes en el archivo
     char valid[1];
     fread(valid, 1, 1, fp);
     char name[11];
@@ -77,7 +78,7 @@ int cz_exists(char* filename) {
       return 1;
     }
 
-    i += 16;
+    i += 1023; //avanza al siguiente bloque
   }
 
   fclose(fp);
@@ -108,46 +109,45 @@ void cz_ls() {
 }
 
 
-
 /* Funciones de bitmap */
-char* itoa(int value, char* result, int base) {
-	// check that the base if valid
-	if (base < 2 || base > 36) { *result = '\0'; return result; }
-
-	char* ptr = result, *ptr1 = result, tmp_char;
-	int tmp_value;
-
-	do {
-		tmp_value = value;
-		value /= base;
-		*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
-	} while ( value );
-
-	// Apply negative sign
-	if (tmp_value < 0) *ptr++ = '-';
-	*ptr-- = '\0';
-	while(ptr1 < ptr) {
-		tmp_char = *ptr;
-		*ptr--= *ptr1;
-		*ptr1++ = tmp_char;
-	}
-	return result;
-}
-
-char* fill_binario(char* binario, int cantidad) {
-	char* final = calloc(cantidad + 1, sizeof(char));  // calloc por que hay q inicializar
-
-	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
-	strcat(final, binario);
-
-	return final;
-}
-
 int bitmap_get_free() {
   FILE* fp = fopen(ruta_bin, "rb+");
+  char* b = calloc(2, sizeof(char));
+  for(int i = 1023; i < 1024 * 8; i++) {
+    fseek(fp, i, SEEK_SET);
+    unsigned char byte[1];
+    int byte_dec;
+    fread(byte, 1, 1, fp);
+    byte_dec = byte[0];
+    char byte_bin[8];
+    itoa(byte_dec, byte_bin, 2);
+
+    char* filled_byte_bin;
+    filled_byte_bin = fill_binario(byte_bin, 8);
+    //printf("%s\n", filled_byte_bin);
+
+    for(int j = 0; j < 8; j++) {
+      if(filled_byte_bin[j] == '0') {
+        free(filled_byte_bin);
+        fclose(fp);
+        free(b);
+        return (i - 1023) * 8 + j + 1023;
+      }
+    }
+    free(filled_byte_bin);
+  }
+  free(b);
+  fclose(fp);
+  return 0;
+}
+
+int bitmap_set_first() {
+  FILE* fp = fopen(ruta_bin, "rb+");
+  char* b = calloc(2, sizeof(char));
 
   for(int i = 1023; i < 1024 * 8; i++) {
     fseek(fp, i, SEEK_SET);
+
     unsigned char byte[1];
     int byte_dec;
     fread(byte, 1, 1, fp);
@@ -158,20 +158,29 @@ int bitmap_get_free() {
 
     char* filled_byte_bin;
     filled_byte_bin = fill_binario(byte_bin, 8);
-    printf("%s\n", filled_byte_bin);
 
     for(int j = 0; j < 8; j++) {
       if(filled_byte_bin[j] == '0') {
+        filled_byte_bin[j] = '1';
+
+        int x = bin_to_dec(filled_byte_bin);
+        b[0] = x;
+
+        fseek(fp, i, SEEK_SET);
+        fwrite(b, 1, 1, fp);
+
         free(filled_byte_bin);
         fclose(fp);
-        return (i - 1023) * 8 + j + 1023;
+        free(b);
+
+        return ((i - 1023) * 8) + j + 1023;
       }
     }
-
     free(filled_byte_bin);
   }
-
+  free(b);
   fclose(fp);
+  
   return 0;
 }
 
@@ -205,4 +214,52 @@ bool bitmap_is_free(int pos) {
       return false;
   }
   return false;
+}
+
+
+/* Manejo de numeros */
+char* itoa(int value, char* result, int base) {
+	// check that the base if valid
+	if (base < 2 || base > 36) { *result = '\0'; return result; }
+
+	char* ptr = result, *ptr1 = result, tmp_char;
+	int tmp_value;
+
+	do {
+		tmp_value = value;
+		value /= base;
+		*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+	} while ( value );
+
+	// Apply negative sign
+	if (tmp_value < 0) *ptr++ = '-';
+	*ptr-- = '\0';
+	while(ptr1 < ptr) {
+		tmp_char = *ptr;
+		*ptr--= *ptr1;
+		*ptr1++ = tmp_char;
+	}
+	return result;
+}
+
+char* fill_binario(char* binario, int cantidad) {
+	char* final = calloc(cantidad + 1, sizeof(char));  // calloc por que hay q inicializar
+
+	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
+	strcat(final, binario);
+
+	return final;
+}
+
+int bin_to_dec(char* bin) {
+	int dec = 0;
+	char c;
+
+	for(int i = 0; i < strlen(bin); i++) {
+		c = bin[i];
+		if(c == '1') dec = dec * 2 + 1;
+		else if(c == '0') dec *= 2;
+	}
+
+	return dec;
 }

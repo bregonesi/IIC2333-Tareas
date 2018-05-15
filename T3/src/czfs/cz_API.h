@@ -18,11 +18,16 @@ typedef struct cz_FILE {
 	char modo;  // 'r' o 'w' dependiendo del modo de lectura
 } czFILE;
 
+/* Funciones de tarea */
 int cz_exists(char* filename);
 void cz_ls();
 
 /* Funciones de bitmap */
+int bitmap_get_free();
+bool bitmap_is_free(int pos);  // pos corresponde a una posicion en el disco
+int bitmap_set_first();
+
+/* Manejo de numeros */
 char* itoa(int value, char* result, int base);
 char* fill_binario(char* binario, int cantidad);
-int bitmap_get_free();
-bool bitmap_is_free(int pos);
+int bin_to_dec(char* bin);
