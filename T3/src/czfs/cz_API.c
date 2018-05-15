@@ -144,30 +144,31 @@ char* fill_binario(char* binario, int cantidad) {
 }
 
 int bitmap_get_free() {
-  FILE* fp = fopen(ruta_bin, "rb");
+  FILE* fp = fopen(ruta_bin, "rb+");
 
-  for (int i = 1024; i < (1024*8); i++) {
+  for(int i = 1023; i < 1024 * 8; i++) {
     fseek(fp, i, SEEK_SET);
-    char occupied[1];
-    fread(occupied, 1, 1, fp);
-    printf("%i\n", occupied[0]);
+    unsigned char byte[1];
+    int byte_dec;
+    fread(byte, 1, 1, fp);
+    byte_dec = byte[0];
 
-    char* occupied_bin = calloc(9, sizeof(char));
-    itoa(atoi(occupied), occupied_bin, 2);
-    char* fill_occupied = fill_binario(occupied_bin, 8);
-    printf("%i: %s\n", i, fill_occupied);
-    free(occupied_bin);
+    char byte_bin[8];
+    itoa(byte_dec, byte_bin, 2);
+    printf("%s\n", byte_bin);
 
-    /*for(int j = 7; j >= 0; j--) {
-      //printf("%c\n", fill_occupied[j]);
-      if(fill_occupied[j] == '0') {
-        free(fill_occupied);
+    char* filled_byte_bin;
+    filled_byte_bin = fill_binario(byte_bin, 8);
+
+    for(int j = 0; j < 8; j++) {
+      if(filled_byte_bin[j] == '0') {
+        free(filled_byte_bin);
         fclose(fp);
-        return ((i - 1024) * 8) + j + 1024;  // esta es la pos del disco duro
+        return (i - 1023) * 8 + j + 1023;
       }
-    }*/
-    if(i == 1026) break;
-    //free(fill_occupied);
+    }
+
+    free(filled_byte_bin);
   }
 
   fclose(fp);

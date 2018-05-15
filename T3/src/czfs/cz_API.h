@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 char* ruta_bin;
 unsigned int T;  // tiempo del sistema

@@ -26,32 +26,16 @@ fclose(fp);*/
   cz_ls();
 
 char* b = calloc(2, sizeof(char));
-FILE* fp = fopen(ruta_bin, "rb+");
-for(int k = 0; k < 1; k++) {
-  fseek(fp, 0 + k, SEEK_SET);
-  b[0] = 1;
-  printf("b %s, %i\n", b, b[0]);
+for(int k = 0; k < 256; k++) {
+  FILE* fp = fopen(ruta_bin, "rb+");
+  fseek(fp, 1023 , SEEK_SET);
+  b[0] = k;
   fwrite(b, 1, 1, fp);
-  printf("%i\n", bitmap_get_free());
-  b[0] = 3;
-  fwrite(b, 1, 1, fp);
-  printf("b %s, %i\n", b, b[0]);
-  printf("%i\n", bitmap_get_free());
-  b[0] = 5;
-  fwrite(b, 1, 1, fp);
-  printf("b %s, %i\n", b, b[0]);
-  printf("%i\n", bitmap_get_free());
-  b[0] = 13;
-  fwrite(b, 1, 1, fp);
-  printf("b %s, %i\n", b, b[0]);
-  printf("%i\n", bitmap_get_free());
+  fclose(fp);
+  printf("posiciion; %i\n", bitmap_get_free());
 }
-printf("printeando\n");
-char ll[4];
-fseek(fp, 0, SEEK_SET);
-fread(ll, 4, 1, fp);
-printf("%i,%i,%i,%i\n", ll[0],ll[1],ll[2],ll[3]);
+free(b);
 
-fclose(fp);
+
   return 0;
 }
