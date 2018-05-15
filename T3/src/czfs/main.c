@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <string.h>
+#include "cz_API.h"
+
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +9,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-  char* disco_file = argv[2];
+  ruta_bin = argv[1];
 
   return 0;
 }
