@@ -25,16 +25,16 @@ fwrite(a, sizeof(char), 4, fp);
 fclose(fp);*/
   cz_ls();
 
-char* b = calloc(2, sizeof(char));
+//char* b = calloc(2, sizeof(char));
 for(int k = 0; k < 256; k++) {
   FILE* fp = fopen(ruta_bin, "rb+");
   fseek(fp, 1023 , SEEK_SET);
-  b[0] = k;
-  fwrite(b, 1, 1, fp);
+  //b[0] = k;
+  //fwrite(b, 1, 1, fp);
   fclose(fp);
   printf("posiciion; %i\n", bitmap_get_free());
 }
-free(b);
+//free(b);
 
 
   return 0;

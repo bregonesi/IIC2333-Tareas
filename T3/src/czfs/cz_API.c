@@ -143,9 +143,22 @@ char* fill_binario(char* binario, int cantidad) {
 	return final;
 }
 
+int bin_to_dec(char* bin) {
+	int dec = 0;
+	char c;
+
+	for(int i = 0; i < strlen(bin); i++) {
+		c = bin[i];
+		if(c == '1') dec = dec * 2 + 1;
+		else if(c == '0') dec *= 2;
+	}
+
+	return dec;
+}
+
 int bitmap_get_free() {
   FILE* fp = fopen(ruta_bin, "rb+");
-
+  char* b = calloc(2, sizeof(char));
   for(int i = 1023; i < 1024 * 8; i++) {
     fseek(fp, i, SEEK_SET);
     unsigned char byte[1];
@@ -153,24 +166,40 @@ int bitmap_get_free() {
     fread(byte, 1, 1, fp);
     byte_dec = byte[0];
 
+    //b[0] = k;
+    //fwrite(b, 1, 1, fp);
+
     char byte_bin[8];
     itoa(byte_dec, byte_bin, 2);
-    printf("%s\n", byte_bin);
+    //printf("byte bin: %s\n", byte_bin);
 
     char* filled_byte_bin;
     filled_byte_bin = fill_binario(byte_bin, 8);
 
+    //printf("filled byte bin: %s\n", filled_byte_bin);
+
     for(int j = 0; j < 8; j++) {
       if(filled_byte_bin[j] == '0') {
+        filled_byte_bin[j] = '1';
+        //printf("filled byte bin after: %s\n", filled_byte_bin);
+        int x = bin_to_dec(filled_byte_bin);
+        //if (x >= 128) {
+        //  x -= 256;
+        //}
+        //printf("int del byte: %i\n", x);
+        b[0] = x;
+        fseek(fp, i, SEEK_SET);
+        fwrite(b, 1, 1, fp);
         free(filled_byte_bin);
         fclose(fp);
+        free(b);
         return (i - 1023) * 8 + j + 1023;
       }
     }
 
     free(filled_byte_bin);
   }
-
+  free(b);
   fclose(fp);
   return 0;
 }
