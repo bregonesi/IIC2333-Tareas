@@ -180,11 +180,11 @@ int bitmap_set_first() {
   }
   free(b);
   fclose(fp);
-  
+
   return 0;
 }
 
-bool bitmap_is_free(int pos) {
+bool bitmap_is_free(int pos) {  // pos corresponde a una posicion en el disco
   if(pos >= 1023 && pos <= 1024*8 - 1) {
     int offset = pos % 1023;
     int bloque = pos - offset;
