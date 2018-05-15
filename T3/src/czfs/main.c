@@ -12,6 +12,6 @@ int main(int argc, char *argv[])
   ruta_bin = argv[1];
 
   cz_ls();
-  
+
   return 0;
 }
