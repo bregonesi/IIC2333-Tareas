@@ -14,8 +14,9 @@ czFILE* cz_open(char* filename, char mode) {
       fread(name, 11, 1, fp);
       char indice[4];
       fread(indice, 4, 1, fp);
+      int bitmap = bitmap_de_bloque(atoi(indice));
 
-      if(atoi(valid) && strcmp(name, filename) == 0) {  // falta chequear si el bitmap esta ocupado // si existe
+      if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_is_free(bitmap)) { // si existe
         file = malloc(sizeof(czFILE));
 
         file->direccion_directorio = i;
@@ -72,9 +73,11 @@ int cz_exists(char* filename) {
     fread(name, 11, 1, fp);
     char indice[4];
     fread(indice, 4, 1, fp);
+    int bitmap = bitmap_de_bloque(atoi(indice));
 
-    if(atoi(valid) && strcmp(name, filename) == 0 && 1) {  // falta chequear si el bitmap esta ocupado
+    if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_is_free(bitmap)) {
       fclose(fp);
+
       return 1;
     }
 
@@ -98,8 +101,9 @@ void cz_ls() {
     fread(name, 11, 1, fp);
     char indice[4];
     fread(indice, 4, 1, fp);
+    int bitmap = bitmap_de_bloque(atoi(indice));
 
-    if(atoi(valid))
+    if(atoi(valid) && !bitmap_is_free(bitmap))
       printf("%s\n", name);
 
     i += 16;
@@ -119,6 +123,7 @@ int bitmap_get_free() {
     int byte_dec;
     fread(byte, 1, 1, fp);
     byte_dec = byte[0];
+
     char byte_bin[8];
     itoa(byte_dec, byte_bin, 2);
 
@@ -131,6 +136,7 @@ int bitmap_get_free() {
         free(filled_byte_bin);
         fclose(fp);
         free(b);
+
         return (i - 1024) * 8 + j + 1024;
       }
     }
@@ -138,6 +144,7 @@ int bitmap_get_free() {
   }
   free(b);
   fclose(fp);
+
   return 0;
 }
 
@@ -216,6 +223,12 @@ bool bitmap_is_free(int pos) {  // pos corresponde a una posicion en el disco
   return false;
 }
 
+int bitmap_de_bloque(int bloque) {
+  int bloque_inicio = bloque - bloque%1024;
+  int n_bloque = bloque_inicio/1024;
+
+  return 1024 + n_bloque;
+}
 
 /* Manejo de numeros */
 char* itoa(int value, char* result, int base) {
