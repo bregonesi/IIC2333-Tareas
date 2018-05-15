@@ -155,10 +155,10 @@ int bitmap_get_free() {
 
     char byte_bin[8];
     itoa(byte_dec, byte_bin, 2);
-    printf("%s\n", byte_bin);
 
     char* filled_byte_bin;
     filled_byte_bin = fill_binario(byte_bin, 8);
+    printf("%s\n", filled_byte_bin);
 
     for(int j = 0; j < 8; j++) {
       if(filled_byte_bin[j] == '0') {
@@ -173,4 +173,36 @@ int bitmap_get_free() {
 
   fclose(fp);
   return 0;
+}
+
+bool bitmap_is_free(int pos) {
+  if(pos >= 1023 && pos <= 1024*8 - 1) {
+    int offset = pos % 1023;
+    int bloque = pos - offset;
+    //printf("bloque %i offset %i\n", bloque, offset);
+
+    FILE* fp = fopen(ruta_bin, "rb+");
+    fseek(fp, bloque, SEEK_SET);
+    unsigned char byte[1];
+    int byte_dec;
+    fread(byte, 1, 1, fp);
+    byte_dec = byte[0];
+    fclose(fp);
+
+    char byte_bin[8];
+    itoa(byte_dec, byte_bin, 2);
+
+    char* filled_byte_bin;
+    filled_byte_bin = fill_binario(byte_bin, 8);
+    //printf("%s\n", filled_byte_bin);
+
+    char val = filled_byte_bin[offset];
+    free(filled_byte_bin);
+
+    if(val == '1')
+      return true;
+    else
+      return false;
+  }
+  return false;
 }

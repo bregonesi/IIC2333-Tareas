@@ -26,7 +26,7 @@ fclose(fp);*/
   cz_ls();
 
 char* b = calloc(2, sizeof(char));
-for(int k = 0; k < 256; k++) {
+for(int k = 0; k < 129; k++) {
   FILE* fp = fopen(ruta_bin, "rb+");
   fseek(fp, 1023 , SEEK_SET);
   b[0] = k;
@@ -35,6 +35,9 @@ for(int k = 0; k < 256; k++) {
   printf("posiciion; %i\n", bitmap_get_free());
 }
 free(b);
+
+printf("%i\n", bitmap_is_free(1023));
+printf("%i\n", bitmap_is_free(1024));
 
 
   return 0;
