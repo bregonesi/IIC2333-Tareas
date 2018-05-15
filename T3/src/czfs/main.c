@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[])
 {
-  if(argc != 1)
+  if(argc != 2)
 	{
 		printf("Modo de uso: %s <disk_file>\n", argv[0]);
 		return 1;
@@ -11,5 +11,7 @@ int main(int argc, char *argv[])
 
   ruta_bin = argv[1];
 
+  cz_ls();
+  
   return 0;
 }

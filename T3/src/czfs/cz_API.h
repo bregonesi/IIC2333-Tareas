@@ -1,6 +1,8 @@
 #include <stdio.h>
+#include <stdlib.h>
 
-char* ruta_bin = NULL;
+
+char* ruta_bin;
 
 typedef struct cz_FILE
 {
@@ -11,3 +13,5 @@ typedef struct cz_FILE
   int direccion_punteros;
   int next_bloque;
 } czFILE;
+
+void cz_ls();
