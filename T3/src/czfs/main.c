@@ -32,7 +32,9 @@ for(int k = 0; k < 256; k++) {
   //b[0] = k;
   //fwrite(b, 1, 1, fp);
   fclose(fp);
-  printf("posiciion; %i\n", bitmap_get_free());
+  int posicion_fisica_des = set_first();
+  printf("bit fisico ocupado: %i\n", posicion_fisica_des);
+  printf("numero de bloque ocupado: %i\n", posicion_fisica_des - 1023 );
 }
 //free(b);
 
