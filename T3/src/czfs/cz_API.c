@@ -150,6 +150,7 @@ int bitmap_get_free() {
     fseek(fp, i, SEEK_SET);
     char occupied[1];
     fread(occupied, 1, 1, fp);
+    printf("%i\n", occupied[0]);
 
     char* occupied_bin = calloc(9, sizeof(char));
     itoa(atoi(occupied), occupied_bin, 2);
@@ -157,15 +158,16 @@ int bitmap_get_free() {
     printf("%i: %s\n", i, fill_occupied);
     free(occupied_bin);
 
-    for(int j = 7; j >= 0; j--) {
+    /*for(int j = 7; j >= 0; j--) {
       //printf("%c\n", fill_occupied[j]);
-      if(atoi(&fill_occupied[j]) == 0) {
+      if(fill_occupied[j] == '0') {
         free(fill_occupied);
         fclose(fp);
         return ((i - 1024) * 8) + j + 1024;  // esta es la pos del disco duro
       }
-    }
-    free(fill_occupied);
+    }*/
+    if(i == 1026) break;
+    //free(fill_occupied);
   }
 
   fclose(fp);
