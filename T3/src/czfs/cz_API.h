@@ -18,3 +18,8 @@ typedef struct cz_FILE {
 
 int cz_exists(char* filename);
 void cz_ls();
+
+
+char* itoa(int value, char* result, int base);
+char* fill_binario(char* binario, int cantidad);
+int bitmap_get_free();

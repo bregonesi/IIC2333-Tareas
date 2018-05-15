@@ -106,3 +106,68 @@ void cz_ls() {
 
   fclose(fp);
 }
+
+
+
+/* Funciones de bitmap */
+char* itoa(int value, char* result, int base) {
+	// check that the base if valid
+	if (base < 2 || base > 36) { *result = '\0'; return result; }
+
+	char* ptr = result, *ptr1 = result, tmp_char;
+	int tmp_value;
+
+	do {
+		tmp_value = value;
+		value /= base;
+		*ptr++ = "zyxwvutsrqponmlkjihgfedcba9876543210123456789abcdefghijklmnopqrstuvwxyz" [35 + (tmp_value - value * base)];
+	} while ( value );
+
+	// Apply negative sign
+	if (tmp_value < 0) *ptr++ = '-';
+	*ptr-- = '\0';
+	while(ptr1 < ptr) {
+		tmp_char = *ptr;
+		*ptr--= *ptr1;
+		*ptr1++ = tmp_char;
+	}
+	return result;
+}
+
+char* fill_binario(char* binario, int cantidad) {
+	char* final = calloc(cantidad + 1, sizeof(char));  // calloc por que hay q inicializar
+
+	for(int i = 0; i < cantidad - (int)strlen(binario); i++) strcat(final, "0");
+	strcat(final, binario);
+
+	return final;
+}
+
+int bitmap_get_free() {
+  FILE* fp = fopen(ruta_bin, "rb");
+
+  for (int i = 1024; i < (1024*8); i++) {
+    fseek(fp, i, SEEK_SET);
+    char occupied[1];
+    fread(occupied, 1, 1, fp);
+
+    char* occupied_bin = calloc(9, sizeof(char));
+    itoa(atoi(occupied), occupied_bin, 2);
+    char* fill_occupied = fill_binario(occupied_bin, 8);
+    printf("%i: %s\n", i, fill_occupied);
+    free(occupied_bin);
+
+    for(int j = 7; j >= 0; j--) {
+      //printf("%c\n", fill_occupied[j]);
+      if(atoi(&fill_occupied[j]) == 0) {
+        free(fill_occupied);
+        fclose(fp);
+        return ((i - 1024) * 8) + j + 1024;  // esta es la pos del disco duro
+      }
+    }
+    free(fill_occupied);
+  }
+
+  fclose(fp);
+  return 0;
+}
