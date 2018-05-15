@@ -16,10 +16,14 @@ czFILE* cz_open(char* filename, char mode) {
 
       if(atoi(valid) && strcmp(name, filename) == 0) {  // falta chequear si el bitmap esta ocupado // si existe
         file = malloc(sizeof(czFILE));
+
+        file->direccion_directorio = i;
+        file->direccion_bloque = atoi(indice);
+
         file->nombre = malloc(sizeof(char) * 11);
         strcpy(file->nombre, name);
 
-        fseek(fp, atoi(indice), SEEK_SET);
+        fseek(fp, atoi(indice), SEEK_SET);  // nos vemos al archivo
         char tamano[4];
         fread(tamano, 4, 1, fp);
         file->tamano = atoi(tamano);
@@ -29,12 +33,9 @@ czFILE* cz_open(char* filename, char mode) {
         char modificacion[4];
         fread(modificacion, 4, 1, fp);
         file->modificacion = atoi(modificacion);
-        char direccion_puntero[1];
-        fread(direccion_puntero, 1, 1, fp);
-        file->direccion_punteros = atoi(direccion_puntero);
         char next_bloque[4];
-        fseek(fp, 1007, SEEK_CUR);  // 1007 + 1 = 1008
-        fread(next_bloque, 4, 1, fp);
+        fseek(fp, 1008, SEEK_CUR);
+        fread(next_bloque, 4, 1, fp);  // nos saltamos la data
         file->next_bloque = atoi(next_bloque);
 
         fclose(fp);

@@ -3,13 +3,15 @@
 #include <string.h>
 
 char* ruta_bin;
+unsigned int T;  // tiempo del sistema
 
 typedef struct cz_FILE {
+	int direccion_directorio;
+	int direccion_bloque;
 	char* nombre;
   int tamano;
   int creacion;
   int modificacion;
-  int direccion_punteros;
   int next_bloque;
 	char modo;  // 'r' o 'w' dependiendo del modo de lectura
 } czFILE;
