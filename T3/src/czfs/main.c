@@ -23,7 +23,8 @@ fwrite("1", 1, 1, fp);
 char a[4] = "hola";
 fwrite(a, sizeof(char), 4, fp);
 fclose(fp);*/
-  cz_ls();
+cz_ls();
+printf("existe 'input.txt'?: %i\n", cz_exists("input.txt"));
 
 //char* b = calloc(2, sizeof(char));
 for(int k = 0; k < 256; k++) {

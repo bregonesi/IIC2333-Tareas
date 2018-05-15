@@ -63,8 +63,8 @@ czFILE* cz_open(char* filename, char mode) {
 int cz_exists(char* filename) {
   FILE* fp = fopen(ruta_bin, "rb");
 
-  int i = 0;
-  while(i < 1024) {
+  int i = 1023*9; //primeros 9 no son archivos
+  while(i < 65536000) { //total de bytes en el archivo
     char valid[1];
     fread(valid, 1, 1, fp);
     char name[11];
@@ -77,7 +77,7 @@ int cz_exists(char* filename) {
       return 1;
     }
 
-    i += 16;
+    i += 1023; //avanza al siguiente bloque
   }
 
   fclose(fp);
