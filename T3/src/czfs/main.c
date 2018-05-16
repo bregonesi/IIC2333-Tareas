@@ -27,16 +27,7 @@ cz_ls();
 printf("existe 'input.txt'?: %i\n", cz_exists("input.txt"));
 
 //char* b = calloc(2, sizeof(char));
-for(int k = 0; k < 200; k++) {
-  FILE* fp = fopen(ruta_bin, "rb+");
-  fseek(fp, 1024 , SEEK_SET);
-  //b[0] = k;
-  //fwrite(b, 1, 1, fp);
-  fclose(fp);
-  int posicion_fisica_des = bitmap_set_first();
-  printf("bit fisico ocupado: %i\n", posicion_fisica_des);
-  printf("numero de bloque ocupado: %i\n", posicion_fisica_des - 1024 );
-}
+
 //free(b);
 czFILE* file_new = NULL;
 file_new = cz_open("test.txt", 'w');

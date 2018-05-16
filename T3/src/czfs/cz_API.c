@@ -158,17 +158,20 @@ int cz_exists(char* filename) {
 int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
   if(file_desc->modo == 'w' && !file_desc->closed) {
     int bytes_escribir = MIN((252 + 256) * 1024 - file_desc->tamano_datos, nbytes);  // maximo que puede escribir
+    printf("vamos a escribir %i bytes\n", bytes_escribir);
 
     int tamano_restante_ultimo_bloque = file_desc->tamano_datos % 1024;
     int cantidad_bloques_nuevos = (bytes_escribir - tamano_restante_ultimo_bloque)/1024;
+    if(file_desc->tamano_datos == 0)
+      cantidad_bloques_nuevos += 1;
+    printf("tamano restante %i, bloques nuevos %i\n", tamano_restante_ultimo_bloque, cantidad_bloques_nuevos);
 
     file_desc->tamano += bytes_escribir + 4 * cantidad_bloques_nuevos;
     file_desc->modificacion = T;  // T es nuestra variable global
 
     FILE* fp = fopen(ruta_bin, "rb+");
-    fseek(fp, 0, SEEK_SET);
 
-    //fseek(fp, file_desc->direccion_directorio + 1, SEEK_SET);  // nos vamos al file name
+    fseek(fp, file_desc->direccion_bloque, SEEK_SET);
     char* tamano = calloc(5, sizeof(char));
     itoa(file_desc->tamano, tamano, 10);
     printf("%s\n", tamano);
@@ -187,21 +190,36 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     int bytes_escritos;
     int sum_bytes_escritos = 0;
     void* buffer_sobra = buffer;
-    while(bytes_escribir >= 0) {  // en realidad != 0
+    while(bytes_escribir > 0) {  // en realidad != 0
+      printf("faltan %i bytes para terminar\n", bytes_escribir);
       direccion_bloque = file_desc->direccion_bloque + 12 + n_bloque * 4;
       if(n_bloque > 251)  // del 0 al 251 va en el espacio de 1008 bytes, del 252 en adelante van en direccionamiento indirecto
         direccion_bloque = file_desc->next_bloque + (n_bloque - 251) * 4;  // le sumo los 1008 + el inicio del otro bloque
 
-      if(tamano_restante_ultimo_bloque >= 0) {  // rellenamos ultimo bloque
+      if(tamano_restante_ultimo_bloque > 0) {  // rellenamos ultimo bloque
         //bytes_escritos = cz_write_bloque(direccion_bloque, buffer_sobra, tamano_restante_ultimo_bloque);
         bytes_escritos = tamano_restante_ultimo_bloque;
         fseek(fp, direccion_bloque, SEEK_SET);
+        int direccion_bloque_dato = (bitmap_set_first() - 1024) * 1024;
+        char* direccion_bloque_dato_dec = calloc(4, sizeof(char));
+        itoa(direccion_bloque_dato, direccion_bloque_dato_dec, 10);
+        fwrite(direccion_bloque_dato_dec, 4, 1, fp);
+        free(direccion_bloque_dato_dec);
+        fseek(fp, direccion_bloque_dato, SEEK_SET);
         fwrite(buffer_sobra, tamano_restante_ultimo_bloque, 1, fp);
       } else {
         int bytes_escribir_bloque_n = MIN(1024, bytes_escribir);
+        printf("ddddd %i\n", bytes_escribir_bloque_n);
         //bytes_escritos = cz_write_bloque(direccion_bloque, buffer_sobra, bytes_escribir_bloque_n);
         bytes_escritos = bytes_escribir_bloque_n;
         fseek(fp, direccion_bloque, SEEK_SET);
+        int direccion_bloque_dato = (bitmap_set_first() - 1024) * 1024;
+        char* direccion_bloque_dato_dec = calloc(5, sizeof(char));
+        itoa(direccion_bloque_dato, direccion_bloque_dato_dec, 10);
+        printf("jfslkdjflk %i\n", direccion_bloque_dato);
+        fwrite(direccion_bloque_dato_dec, 4, 1, fp);
+        free(direccion_bloque_dato_dec);
+        fseek(fp, direccion_bloque_dato, SEEK_SET);
         fwrite(buffer_sobra, bytes_escribir_bloque_n, 1, fp);
       }
       //buffer_sobra = buffer_desde(buffer, bytes_escritos);
@@ -221,6 +239,7 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
         printf("hay que setear direccion para direccionamiento indirecto y incrementar tamaño del archivo\n");
       }
     }
+    // hacer fwrite del nuevo tamaño
 
     fclose(fp);
 
@@ -243,7 +262,6 @@ void cz_ls() {
     char* indice = calloc(6, sizeof(char));
     fread(indice, 4, 1, fp);
 
-    printf("%i\n", valid[0]);
     if(valid[0] == 1 && !bitmap_entry_is_free(atoi(indice)))
       printf("%s\n", name);
 
@@ -259,6 +277,10 @@ void cz_ls() {
 
 void cz_mount(char* diskfileName) {
   ruta_bin = diskfileName;
+
+  for(int k = 0; k < 3; k++) {
+    bitmap_set_first();
+  }
 }
 
 int cz_write_bloque(int direccion_bloque, void* buffer, int tamano_restante_ultimo_bloque) {
