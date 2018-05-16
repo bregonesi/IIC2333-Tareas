@@ -19,12 +19,14 @@ typedef struct cz_FILE {
   int modificacion;
   int next_bloque;
 	char modo;  // 'r' o 'w' dependiendo del modo de lectura
+	bool closed;  // para no poder volver a escribir
 } czFILE;
 
 /* Funciones de tarea */
 int cz_exists(char* filename);
 void cz_ls();
 czFILE* cz_open(char* filename, char mode);
+void cz_mount(char* diskfileName);
 
 /* Funciones de bitmap */
 int bitmap_get_free();

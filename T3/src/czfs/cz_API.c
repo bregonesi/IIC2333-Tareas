@@ -41,6 +41,7 @@ czFILE* cz_open(char* filename, char mode) {
         file->next_bloque = atoi(next_bloque);
         fclose(fp);
         file->modo = 'r';
+        file->closed = true;
 
         return file;
       }
@@ -94,6 +95,7 @@ czFILE* cz_open(char* filename, char mode) {
         file->nombre = malloc(sizeof(char) * 11);
         strcpy(file->nombre, filename);
         file->modo = 'w';
+        file->closed = false;
         file->tamano = 12; //solamente el metadata
         file->creacion = T;
         file->modificacion = T;
@@ -140,7 +142,7 @@ int cz_exists(char* filename) {
 }
 
 int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
-  if(file_desc->modo == 'w') {
+  if(file_desc->modo == 'w' && !file_desc->closed) {
     int bytes_escribir = MIN(2048 - file_desc->tamano, nbytes);  // 2048 bytes es lo maximo que puede ser
     file_desc->tamano += bytes_escribir;
     file_desc->modificacion = T;  // T es nuestra variable global
@@ -184,6 +186,10 @@ void cz_ls() {
   }
 
   fclose(fp);
+}
+
+void cz_mount(char* diskfileName) {
+  ruta_bin = diskfileName;
 }
 
 

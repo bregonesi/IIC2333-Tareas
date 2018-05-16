@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-  ruta_bin = argv[1];
+  cz_mount(argv[1]);
 
   if (!(ruta_bin)) {
     printf("Archivo %s no existe.\n", ruta_bin);
