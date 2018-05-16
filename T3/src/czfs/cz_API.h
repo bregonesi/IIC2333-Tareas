@@ -15,6 +15,7 @@ typedef struct cz_FILE {
 	int direccion_bloque;
 	char* nombre;
   int tamano;
+	int tamano_datos;
   int creacion;
   int modificacion;
   int next_bloque;
@@ -26,6 +27,7 @@ typedef struct cz_FILE {
 int cz_exists(char* filename);
 void cz_ls();
 czFILE* cz_open(char* filename, char mode);
+int cz_write(czFILE* file_desc, void* buffer, int nbytes);
 void cz_mount(char* diskfileName);
 
 /* Funciones de bitmap */

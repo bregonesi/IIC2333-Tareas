@@ -40,6 +40,10 @@ for(int k = 0; k < 200; k++) {
 //free(b);
 czFILE* file_new = NULL;
 file_new = cz_open("test.txt", 'w');
+
+
+cz_write(file_new, "hola", 4);
+
 free(file_new->nombre);
 free(file_new);
 bitmap_de_bloque(1029);

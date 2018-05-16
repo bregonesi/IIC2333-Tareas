@@ -14,13 +14,12 @@ czFILE* cz_open(char* filename, char mode) {
       fread(name, 11, 1, fp);
       char indice[4];
       fread(indice, 4, 1, fp);
-      int bitmap = bitmap_de_bloque(atoi(indice));
 
-      if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(bitmap)) { // si existe
+      if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) { // si existe
         file = malloc(sizeof(czFILE));
 
         file->direccion_directorio = i;
-        file->direccion_bloque = atoi(indice);
+        file->direccion_bloque = atoi(indice) * 1024;
 
         file->nombre = malloc(sizeof(char) * 11);
         strcpy(file->nombre, name);
@@ -29,6 +28,7 @@ czFILE* cz_open(char* filename, char mode) {
         char tamano[4];
         fread(tamano, 4, 1, fp);
         file->tamano = atoi(tamano);
+        //file->tamano_datos = 0;
         char creacion[4];
         fread(creacion, 4, 1, fp);
         file->creacion = atoi(creacion);
@@ -70,7 +70,7 @@ czFILE* cz_open(char* filename, char mode) {
         fwrite(filename, 11, 1, fp);  // guardamos el name
 
         char indice[4]; //numero del bloque donde se encuentra
-        int n_bloque = (bitmap_set_first() - 1024) * 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
+        int n_bloque = bitmap_set_first() - 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
         itoa(n_bloque, indice, 10);
         fwrite(indice, 4, 1, fp);  // guardamos el indice
 
@@ -91,12 +91,13 @@ czFILE* cz_open(char* filename, char mode) {
 
         file = malloc(sizeof(czFILE));
         file->direccion_directorio = i;
-        file->direccion_bloque = atoi(indice);
+        file->direccion_bloque = atoi(indice) * 1024;
         file->nombre = malloc(sizeof(char) * 11);
         strcpy(file->nombre, filename);
         file->modo = 'w';
         file->closed = false;
         file->tamano = 12; //solamente el metadata
+        file->tamano_datos = 0; // 0 punteros escritos
         file->creacion = T;
         file->modificacion = T;
 
@@ -126,9 +127,8 @@ int cz_exists(char* filename) {
     fread(name, 11, 1, fp);
     char indice[4];
     fread(indice, 4, 1, fp);
-    int bitmap = bitmap_de_bloque(atoi(indice));
 
-    if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(bitmap)) {
+    if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) {
       fclose(fp);
 
       return 1;
@@ -143,8 +143,12 @@ int cz_exists(char* filename) {
 
 int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
   if(file_desc->modo == 'w' && !file_desc->closed) {
-    int bytes_escribir = MIN(2048 - file_desc->tamano, nbytes);  // 2048 bytes es lo maximo que puede ser
-    file_desc->tamano += bytes_escribir;
+    int bytes_escribir = MIN((252 + 256) * 1024 - file_desc->tamano_datos, nbytes);  // maximo que puede escribir
+
+    int tamano_restante_ultimo_bloque = file_desc->tamano_datos % 1024;
+    int cantidad_bloques_nuevos = (bytes_escribir - tamano_restante_ultimo_bloque)/1024;
+
+    file_desc->tamano += bytes_escribir + 4 * cantidad_bloques_nuevos;
     file_desc->modificacion = T;  // T es nuestra variable global
 
     FILE* fp = fopen(ruta_bin, "rb+");
@@ -154,10 +158,12 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     itoa(file_desc->tamano, tamano, 10);
     fwrite(tamano, 4, 1, fp);
 
-    fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
+    //fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
     char modificacion[4];
     itoa(file_desc->modificacion, modificacion, 10);  // T es nuestra varaible global
     fwrite(modificacion, 4, 1, fp);
+
+    printf("%s\n", buffer);
 
     fclose(fp);
   }
@@ -177,9 +183,8 @@ void cz_ls() {
     fread(name, 11, 1, fp);
     char indice[4];
     fread(indice, 4, 1, fp);
-    int bitmap = bitmap_de_bloque(atoi(indice));
 
-    if(atoi(valid) && !bitmap_entry_is_free(bitmap))
+    if(atoi(valid) && !bitmap_entry_is_free(atoi(indice)))
       printf("%s\n", name);
 
     i += 16;
