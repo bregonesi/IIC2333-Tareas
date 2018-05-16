@@ -8,37 +8,39 @@ czFILE* cz_open(char* filename, char mode) {
 
     int i = 0;
     while(i < 1024) {
-      char valid[1];
+      char* valid = calloc(2, sizeof(char));
       fread(valid, 1, 1, fp);
-      char name[11];
+      char* name = calloc(12, sizeof(char));
       fread(name, 11, 1, fp);
-      char indice[4];
+      char* indice = calloc(5, sizeof(char));
       fread(indice, 4, 1, fp);
 
-      if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) { // si existe
+      if(valid[0] == 1 && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) { // si existe
         file = malloc(sizeof(czFILE));
 
         file->indice_en_directorio = i;
         file->direccion_bloque = atoi(indice) * 1024;
 
-        file->nombre = malloc(sizeof(char) * 11);
-        strcpy(file->nombre, name);
+        file->nombre = name;
 
         fseek(fp, atoi(indice), SEEK_SET);  // nos vemos al archivo
-        char tamano[4];
+        char* tamano = calloc(5, sizeof(char));
         fread(tamano, 4, 1, fp);
         file->tamano = atoi(tamano);
-        //file->tamano_datos = 0;
-        char creacion[4];
+        free(tamano);
+        char* creacion = calloc(5, sizeof(char));
         fread(creacion, 4, 1, fp);
         file->creacion = atoi(creacion);
-        char modificacion[4];
+        free(creacion);
+        char* modificacion = calloc(5, sizeof(char));
         fread(modificacion, 4, 1, fp);
         file->modificacion = atoi(modificacion);
-        char next_bloque[4];
+        free(modificacion);
+        char* next_bloque = calloc(5, sizeof(char));
         fseek(fp, 1008, SEEK_CUR);
         fread(next_bloque, 4, 1, fp);  // nos saltamos la data
         file->next_bloque = atoi(next_bloque);
+        free(next_bloque);
         fclose(fp);
         file->modo = 'r';
         file->closed = true;
@@ -63,20 +65,18 @@ czFILE* cz_open(char* filename, char mode) {
       char valid[1];
       fseek(fp, i, SEEK_SET);
       fread(valid, 1, 1, fp);
-      if(!atoi(valid)) { // si hay espacio libre en esta parte del dir
+      if(valid[0] == 0) { // si hay espacio libre en esta parte del dir
         fseek(fp, i, SEEK_SET);  // devolvemos para escribir en el directorio
 
-        fwrite("1", 1, 1, fp);  // ahora es valid
-        printf("escribiendo valid en i %i\n", i);
-        fseek(fp, i, SEEK_SET);
-        char validdd[2];
-        fread(validdd, 1, 1, fp);
-        printf("valid %s\n", validdd);
-        fwrite(filename, 11, 1, fp);  // guardamos el name
-        fseek(fp, i+1, SEEK_SET);
-        char namee[11];
-        fread(namee, 11, 1, fp);
-        printf("name %s\n", namee);
+        char* valid_ch = calloc(2, sizeof(char));
+        valid_ch[0] = 1;
+        fwrite(valid_ch, 1, 1, fp);  // ahora es valid
+        free(valid_ch);
+
+        char* filename_11 = calloc(12, sizeof(char));
+        strcpy(filename_11, filename);
+        fwrite(filename_11, 11, 1, fp);  // guardamos el name
+        free(filename_11);
 
         char* indice = calloc(5, sizeof(char)); //numero del bloque donde se encuentra
         int n_bloque = bitmap_set_first() - 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
@@ -86,15 +86,15 @@ czFILE* cz_open(char* filename, char mode) {
         /* Nos metemos al bloque del archivo */
         fseek(fp, n_bloque * 1024, SEEK_SET);
 
-        char tamano[4];
+        char* tamano = calloc(5, sizeof(char));
         itoa(12, tamano, 10);  // 12 bytes de metadata
         fwrite(tamano, 4, 1, fp);
 
-        char creacion[4];
+        char* creacion = calloc(5, sizeof(char));
         itoa(T, creacion, 10);  // T es nuestra varaible global
         fwrite(creacion, 4, 1, fp);
 
-        char modificacion[4];
+        char* modificacion = calloc(5, sizeof(char));
         itoa(T, modificacion, 10);  // T es nuestra varaible global
         fwrite(modificacion, 4, 1, fp);
 
@@ -109,6 +109,11 @@ czFILE* cz_open(char* filename, char mode) {
         file->tamano_datos = 0; // 0 punteros escritos
         file->creacion = T;
         file->modificacion = T;
+
+        free(indice);
+        free(creacion);
+        free(modificacion);
+        free(tamano);
 
         printf("archivo %s creado en bloque %i\n", filename, n_bloque);
 
@@ -136,8 +141,8 @@ int cz_exists(char* filename) {
     fread(name, 11, 1, fp);
     char indice[4];
     fread(indice, 4, 1, fp);
-
-    if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) {
+    printf("indice: %i\n", atoi(indice));
+    if(valid[0] == 1 && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) {
       fclose(fp);
 
       return 1;
@@ -213,8 +218,6 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
 void cz_ls() {
   FILE* fp = fopen(ruta_bin, "rb");
 
-  printf("Haciendo ls de %s\n", ruta_bin);
-
   int i = 0;
   while(i < 1024) {
     char* valid = calloc(2, sizeof(char));
@@ -224,7 +227,7 @@ void cz_ls() {
     char* indice = calloc(6, sizeof(char));
     fread(indice, 4, 1, fp);
 
-    if(atoi(valid) && !bitmap_entry_is_free(atoi(indice)))
+    if(valid[0] == 1 && !bitmap_entry_is_free(atoi(indice)))
       printf("%s\n", name);
 
     free(valid);

@@ -41,15 +41,16 @@ for(int k = 0; k < 200; k++) {
 czFILE* file_new = NULL;
 file_new = cz_open("test.txt", 'w');
 
-buffer_desde("hola", 3);
+//buffer_desde("hola", 3);
 //cz_write(file_new, "hola", 4);
 
 printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
+cz_exists("test.txt");
 
 free(file_new->nombre);
 free(file_new);
-bitmap_de_bloque(1029);
+//bitmap_de_bloque(1029);
 
 
   return 0;
