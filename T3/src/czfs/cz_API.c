@@ -16,7 +16,7 @@ czFILE* cz_open(char* filename, char mode) {
       fread(indice, 4, 1, fp);
       int bitmap = bitmap_de_bloque(atoi(indice));
 
-      if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_is_free(bitmap)) { // si existe
+      if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(bitmap)) { // si existe
         file = malloc(sizeof(czFILE));
 
         file->direccion_directorio = i;
@@ -75,7 +75,7 @@ int cz_exists(char* filename) {
     fread(indice, 4, 1, fp);
     int bitmap = bitmap_de_bloque(atoi(indice));
 
-    if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_is_free(bitmap)) {
+    if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(bitmap)) {
       fclose(fp);
 
       return 1;
@@ -83,8 +83,8 @@ int cz_exists(char* filename) {
 
     i += 16; //avanza al siguiente bloque
   }
-
   fclose(fp);
+
   return 0;
 }
 
@@ -103,7 +103,7 @@ void cz_ls() {
     fread(indice, 4, 1, fp);
     int bitmap = bitmap_de_bloque(atoi(indice));
 
-    if(atoi(valid) && !bitmap_is_free(bitmap))
+    if(atoi(valid) && !bitmap_entry_is_free(bitmap))
       printf("%s\n", name);
 
     i += 16;
@@ -191,7 +191,7 @@ int bitmap_set_first() {
   return 0;
 }
 
-bool bitmap_is_free(int pos) {  // pos corresponde a una posicion en el disco
+bool bitmap_entry_is_free(int pos) {  // pos corresponde a una posicion en el disco
   if(pos >= 1024 && pos < 1024*8) {
     int offset = pos % 1024;
     int bloque = pos - offset;

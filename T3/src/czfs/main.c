@@ -39,9 +39,6 @@ for(int k = 0; k < 129; k++) {
 }
 //free(b);
 
-printf("%i\n", bitmap_is_free(1023));
-printf("%i\n", bitmap_is_free(1024));
-printf("%i\n", bitmap_is_free(1024*153454));
 bitmap_de_bloque(1029);
 
 
