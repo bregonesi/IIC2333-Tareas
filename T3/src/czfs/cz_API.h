@@ -4,6 +4,9 @@
 #include <math.h>
 #include <stdbool.h>
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+
 char* ruta_bin;
 unsigned int T;  // tiempo del sistema
 

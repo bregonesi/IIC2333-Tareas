@@ -39,56 +39,58 @@ czFILE* cz_open(char* filename, char mode) {
         fseek(fp, 1008, SEEK_CUR);
         fread(next_bloque, 4, 1, fp);  // nos saltamos la data
         file->next_bloque = atoi(next_bloque);
-        file->modo = 'r';
         fclose(fp);
+        file->modo = 'r';
 
         return file;
       }
 
       i += 16;
     }
-
-    return file;
     fclose(fp);
-
   }
+
   if(mode == 'w') {
     //ver si existe, y abrirlo en modo w y retornar NULL
-    FILE* fp = fopen(ruta_bin, "rb");
-    if (cz_exists(filename)) {
-      fclose(fp);
+    if (cz_exists(filename))
       return NULL;
-    }
+
+    FILE* fp = fopen(ruta_bin, "rb");
 
     int i = 0;
     while(i < 1024) { //iteramos en el dir
       char valid[1];
       fread(valid, 1, 1, fp);
-      char name[11];
-      char indice[4]; //numero del bloque donde se encuentra
 
       if(!atoi(valid)) { // si hay espacio libre en esta parte del dir
-        strcpy(name, filename);
-        int n_bloque = (bitmap_set_first() - 1024); //setea en bitmap el bloque a usar
-        itoa(n_bloque, indice, 10);
-        char valid_new[1] = "1";
-        fseek(fp, i, SEEK_SET);
-        fwrite(valid_new, 1, 1, fp);
-        fwrite(name, 11, 1, fp);
-        fwrite(indice, 4, 1, fp);
+        fseek(fp, i, SEEK_SET);  // devolvemos para escribir en el directorio
 
+        fwrite("1", 1, 1, fp);  // ahora es valid
+        fwrite(filename, 11, 1, fp);  // guardamos el name
+
+        char indice[4]; //numero del bloque donde se encuentra
+        int n_bloque = (bitmap_set_first() - 1024) * 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
+        itoa(n_bloque, indice, 10);
+        fwrite(indice, 4, 1, fp);  // guardamos el indice
+
+        /* Nos metemos al bloque del archivo */
         fseek(fp, n_bloque * 1024, SEEK_SET);
+
         char tamano[4];
-        itoa(12, tamano, 10);
+        itoa(12, tamano, 10);  // 12 bytes de metadata
         fwrite(tamano, 4, 1, fp);
+
         char creacion[4];
-        itoa(T, creacion, 10);
+        itoa(T, creacion, 10);  // T es nuestra varaible global
         fwrite(creacion, 4, 1, fp);
+
         char modificacion[4];
-        itoa(T, modificacion, 10);
+        itoa(T, modificacion, 10);  // T es nuestra varaible global
         fwrite(modificacion, 4, 1, fp);
 
         file = malloc(sizeof(czFILE));
+        file->direccion_directorio = i;
+        file->direccion_bloque = atoi(indice);
         file->nombre = malloc(sizeof(char) * 11);
         strcpy(file->nombre, filename);
         file->modo = 'w';
@@ -99,7 +101,7 @@ czFILE* cz_open(char* filename, char mode) {
         printf("archivo %s creado en bloque %i\n", filename, n_bloque);
 
         fclose(fp);
-        
+
         return file;
       }
       i += 16;
@@ -108,7 +110,7 @@ czFILE* cz_open(char* filename, char mode) {
     fclose(fp);
   }
 
-  return NULL; //directorio ya esta lleno, no se como poner otra cosa que no sea NULL para decir esto
+  return file; //directorio ya esta lleno, no se como poner otra cosa que no sea NULL para decir esto
 }
 
 int cz_exists(char* filename) {
@@ -135,6 +137,29 @@ int cz_exists(char* filename) {
   fclose(fp);
 
   return 0;
+}
+
+int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
+  if(file_desc->modo == 'w') {
+    int bytes_escribir = MIN(2048 - file_desc->tamano, nbytes);  // 2048 bytes es lo maximo que puede ser
+    file_desc->tamano += bytes_escribir;
+    file_desc->modificacion = T;  // T es nuestra variable global
+
+    FILE* fp = fopen(ruta_bin, "rb+");
+
+    fseek(fp, file_desc->direccion_directorio + 1, SEEK_SET);  // nos vamos al file name
+    char tamano[4];
+    itoa(file_desc->tamano, tamano, 10);
+    fwrite(tamano, 4, 1, fp);
+
+    fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
+    char modificacion[4];
+    itoa(file_desc->modificacion, modificacion, 10);  // T es nuestra varaible global
+    fwrite(modificacion, 4, 1, fp);
+
+    fclose(fp);
+  }
+  return -1;
 }
 
 void cz_ls() {
