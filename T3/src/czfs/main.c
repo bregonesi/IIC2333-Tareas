@@ -29,7 +29,7 @@ printf("existe 'input.txt'?: %i\n", cz_exists("input.txt"));
 //char* b = calloc(2, sizeof(char));
 for(int k = 0; k < 200; k++) {
   FILE* fp = fopen(ruta_bin, "rb+");
-  fseek(fp, 1023 , SEEK_SET);
+  fseek(fp, 1024 , SEEK_SET);
   //b[0] = k;
   //fwrite(b, 1, 1, fp);
   fclose(fp);
@@ -42,14 +42,15 @@ czFILE* file_new = NULL;
 file_new = cz_open("test.txt", 'w');
 
 //buffer_desde("hola", 3);
-//cz_write(file_new, "hola", 4);
+cz_write(file_new, "hola", 4);
 
 printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
+printf("existe test? %i\n", cz_exists("test.txt"));
 
 free(file_new->nombre);
 free(file_new);
-bitmap_de_bloque(1029);
+//bitmap_de_bloque(1029);
 
 
   return 0;
