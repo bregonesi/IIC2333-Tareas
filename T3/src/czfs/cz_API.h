@@ -29,6 +29,7 @@ void cz_ls();
 czFILE* cz_open(char* filename, char mode);
 int cz_write(czFILE* file_desc, void* buffer, int nbytes);
 void cz_mount(char* diskfileName);
+int cz_write_bloque(int direccion_bloque, void* buffer, int tamano_restante_ultimo_bloque);
 
 /* Funciones de bitmap */
 int bitmap_get_free();
@@ -40,3 +41,4 @@ int bitmap_de_bloque(int bloque);
 char* itoa(int value, char* result, int base);
 char* fill_binario(char* binario, int cantidad);
 int bin_to_dec(char* bin);
+void* buffer_desde(void* buffer_original, int tamano);

@@ -152,20 +152,50 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     file_desc->modificacion = T;  // T es nuestra variable global
 
     FILE* fp = fopen(ruta_bin, "rb+");
+    fseek(fp, 0, SEEK_SET);
 
-    fseek(fp, file_desc->direccion_directorio + 1, SEEK_SET);  // nos vamos al file name
-    char tamano[4];
+    //fseek(fp, file_desc->direccion_directorio + 1, SEEK_SET);  // nos vamos al file name
+    char* tamano = calloc(5, sizeof(char));
     itoa(file_desc->tamano, tamano, 10);
     fwrite(tamano, 4, 1, fp);
+    free(tamano);
 
-    //fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
-    char modificacion[4];
+    fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
+    char* modificacion = calloc(5, sizeof(char));
     itoa(file_desc->modificacion, modificacion, 10);  // T es nuestra varaible global
     fwrite(modificacion, 4, 1, fp);
+    free(modificacion);
 
     printf("%s\n", buffer);
+    int n_bloque = (file_desc->tamano_datos - tamano_restante_ultimo_bloque)/1024;
+    int direccion_bloque;
+    int bytes_escritos;
+    int sum_bytes_escritos = 0;
+    while(bytes_escribir >= 0) {  // en realidad != 0
+      direccion_bloque = file_desc->direccion_bloque + 12 + n_bloque * 4;
+      if(n_bloque > 251)  // del 0 al 251 va en el espacio de 1008 bytes, del 252 en adelante van en direccionamiento indirecto
+        direccion_bloque = file_desc->next_bloque + (n_bloque - 251) * 4;  // le sumo los 1008 + el inicio del otro bloque
+
+      if(tamano_restante_ultimo_bloque >= 0) {  // rellenamos ultimo bloque
+        void* buffer_escribir = buffer_desde(buffer, bytes_escritos);
+        bytes_escritos = cz_write_bloque(direccion_bloque, buffer_escribir, tamano_restante_ultimo_bloque);
+      } else {
+        int bytes_escribir_bloque_n = MIN(1024, bytes_escribir);
+        bytes_escritos = cz_write_bloque(direccion_bloque, buffer, bytes_escribir_bloque_n);
+      }
+      sum_bytes_escritos += bytes_escritos;
+      bytes_escribir -= bytes_escritos;
+      file_desc->tamano_datos += bytes_escritos;
+      tamano_restante_ultimo_bloque -= bytes_escritos;
+      if(tamano_restante_ultimo_bloque == 0) {
+        n_bloque++;
+        tamano_restante_ultimo_bloque = 1024;
+      }
+    }
 
     fclose(fp);
+
+    return sum_bytes_escritos;  // cambiar a retornar bytes escritos
   }
   return -1;
 }
@@ -197,6 +227,9 @@ void cz_mount(char* diskfileName) {
   ruta_bin = diskfileName;
 }
 
+int cz_write_bloque(int direccion_bloque, void* buffer, int tamano_restante_ultimo_bloque) {
+  return 0;
+}
 
 /* Funciones de bitmap */
 int bitmap_get_free() {
@@ -360,4 +393,11 @@ int bin_to_dec(char* bin) {
 	}
 
 	return dec;
+}
+
+void* buffer_desde(void* buffer_original, int tamano) {
+  void* buffer_salida = NULL;
+  printf("size %lu\n", sizeof(void*));
+
+  return buffer_salida;
 }
