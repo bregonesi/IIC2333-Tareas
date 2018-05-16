@@ -69,7 +69,7 @@ czFILE* cz_open(char* filename, char mode) {
         fwrite("1", 1, 1, fp);  // ahora es valid
         printf("escribiendo valid en i %i\n", i);
         fseek(fp, i, SEEK_SET);
-        char validdd[1];
+        char validdd[2];
         fread(validdd, 1, 1, fp);
         printf("valid %s\n", validdd);
         fwrite(filename, 11, 1, fp);  // guardamos el name
@@ -78,7 +78,7 @@ czFILE* cz_open(char* filename, char mode) {
         fread(namee, 11, 1, fp);
         printf("name %s\n", namee);
 
-        char indice[4]; //numero del bloque donde se encuentra
+        char* indice = calloc(5, sizeof(char)); //numero del bloque donde se encuentra
         int n_bloque = bitmap_set_first() - 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
         itoa(n_bloque, indice, 10);
         fwrite(indice, 4, 1, fp);  // guardamos el indice
@@ -217,19 +217,19 @@ void cz_ls() {
 
   int i = 0;
   while(i < 1024) {
-    char valid[1];
+    char* valid = calloc(2, sizeof(char));
     fread(valid, 1, 1, fp);
-    char name[11];
+    char* name = calloc(12, sizeof(char));
     fread(name, 11, 1, fp);
-    char indice[4];
+    char* indice = calloc(6, sizeof(char));
     fread(indice, 4, 1, fp);
-
-    printf("%i\n", atoi(valid));
 
     if(atoi(valid) && !bitmap_entry_is_free(atoi(indice)))
       printf("%s\n", name);
-    if(atoi(valid))
-      printf("%s\n", name);
+
+    free(valid);
+    free(name);
+    free(indice);
 
     i += 16;
   }
