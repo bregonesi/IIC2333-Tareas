@@ -39,7 +39,7 @@ czFILE* cz_open(char* filename, char mode) {
         fseek(fp, 1008, SEEK_CUR);
         fread(next_bloque, 4, 1, fp);  // nos saltamos la data
         file->next_bloque = atoi(next_bloque);
-
+        file->modo = 'r';
         fclose(fp);
 
         return file;
@@ -48,18 +48,67 @@ czFILE* cz_open(char* filename, char mode) {
       i += 16;
     }
 
+    return file;
     fclose(fp);
 
   }
   if(mode == 'w') {
-    file = malloc(sizeof(czFILE));
-    file->nombre = malloc(sizeof(char) * 11);
-    strcpy(file->nombre, filename);
+    //ver si existe, y abrirlo en modo w y retornar NULL
+    FILE* fp = fopen(ruta_bin, "rb");
+    if (cz_exists(filename)) {
+      fclose(fp);
+      return NULL;
+    }
 
-    // falta direccion de los demas dependiendo de la direccion disponible en memoria
+    int i = 0;
+    while(i < 1024) { //iteramos en el dir
+      char valid[1];
+      fread(valid, 1, 1, fp);
+      char name[11];
+      char indice[4]; //numero del bloque donde se encuentra
+
+      if(!atoi(valid)) { // si hay espacio libre en esta parte del dir
+        strcpy(name, filename);
+        int n_bloque = (bitmap_set_first() - 1024); //setea en bitmap el bloque a usar
+        itoa(n_bloque, indice, 10);
+        char valid_new[1] = "1";
+        fseek(fp, i, SEEK_SET);
+        fwrite(valid_new, 1, 1, fp);
+        fwrite(name, 11, 1, fp);
+        fwrite(indice, 4, 1, fp);
+
+        fseek(fp, n_bloque * 1024, SEEK_SET);
+        char tamano[4];
+        itoa(12, tamano, 10);
+        fwrite(tamano, 4, 1, fp);
+        char creacion[4];
+        itoa(T, creacion, 10);
+        fwrite(creacion, 4, 1, fp);
+        char modificacion[4];
+        itoa(T, modificacion, 10);
+        fwrite(modificacion, 4, 1, fp);
+
+        file = malloc(sizeof(czFILE));
+        file->nombre = malloc(sizeof(char) * 11);
+        strcpy(file->nombre, filename);
+        file->modo = 'w';
+        file->tamano = 12; //solamente el metadata
+        file->creacion = T;
+        file->modificacion = T;
+
+        printf("archivo %s creado en bloque %i\n", filename, n_bloque);
+
+        fclose(fp);
+        
+        return file;
+      }
+      i += 16;
+    }
+
+    fclose(fp);
   }
 
-  return file;
+  return NULL; //directorio ya esta lleno, no se como poner otra cosa que no sea NULL para decir esto
 }
 
 int cz_exists(char* filename) {
@@ -180,7 +229,7 @@ int bitmap_set_first() {
         fclose(fp);
         free(b);
 
-        return ((i - 1024) * 8) + j + 1024;
+        return ((i - 1024) * 8) + j + 1024; //la posicion fisica exacta del bit
       }
     }
     free(filled_byte_bin);

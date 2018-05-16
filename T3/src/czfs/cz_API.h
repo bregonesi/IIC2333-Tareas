@@ -21,6 +21,7 @@ typedef struct cz_FILE {
 /* Funciones de tarea */
 int cz_exists(char* filename);
 void cz_ls();
+czFILE* cz_open(char* filename, char mode);
 
 /* Funciones de bitmap */
 int bitmap_get_free();
