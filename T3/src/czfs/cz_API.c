@@ -181,18 +181,25 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     int direccion_bloque;
     int bytes_escritos;
     int sum_bytes_escritos = 0;
+    void* buffer_sobra = buffer;
     while(bytes_escribir >= 0) {  // en realidad != 0
       direccion_bloque = file_desc->direccion_bloque + 12 + n_bloque * 4;
       if(n_bloque > 251)  // del 0 al 251 va en el espacio de 1008 bytes, del 252 en adelante van en direccionamiento indirecto
         direccion_bloque = file_desc->next_bloque + (n_bloque - 251) * 4;  // le sumo los 1008 + el inicio del otro bloque
 
       if(tamano_restante_ultimo_bloque >= 0) {  // rellenamos ultimo bloque
-        void* buffer_escribir = buffer_desde(buffer, bytes_escritos);
-        bytes_escritos = cz_write_bloque(direccion_bloque, buffer_escribir, tamano_restante_ultimo_bloque);
+        //bytes_escritos = cz_write_bloque(direccion_bloque, buffer_sobra, tamano_restante_ultimo_bloque);
+        bytes_escritos = tamano_restante_ultimo_bloque;
+        fseek(fp, direccion_bloque, SEEK_SET);
+        fwrite(buffer_sobra, tamano_restante_ultimo_bloque, 1, fp);
       } else {
         int bytes_escribir_bloque_n = MIN(1024, bytes_escribir);
-        bytes_escritos = cz_write_bloque(direccion_bloque, buffer, bytes_escribir_bloque_n);
+        //bytes_escritos = cz_write_bloque(direccion_bloque, buffer_sobra, bytes_escribir_bloque_n);
+        bytes_escritos = bytes_escribir_bloque_n;
+        fseek(fp, direccion_bloque, SEEK_SET);
+        fwrite(buffer_sobra, bytes_escribir_bloque_n, 1, fp);
       }
+      //buffer_sobra = buffer_desde(buffer, bytes_escritos);
       sum_bytes_escritos += bytes_escritos;
       bytes_escribir -= bytes_escritos;
       file_desc->tamano_datos += bytes_escritos;
@@ -200,6 +207,13 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
       if(tamano_restante_ultimo_bloque == 0) {
         n_bloque++;
         tamano_restante_ultimo_bloque = 1024;
+      }
+      if(n_bloque == 251) {
+        file_desc->tamano += 4;
+        // hacer fwrite del tamano
+        //file_desc->direccion_bloque
+        // hacer fwrite del bloque
+        printf("hay que setear direccion para direccionamiento indirecto y incrementar tamaño del archivo\n");
       }
     }
 
@@ -224,7 +238,7 @@ void cz_ls() {
     char* indice = calloc(6, sizeof(char));
     fread(indice, 4, 1, fp);
 
-    if(atoi(valid) && !bitmap_entry_is_free(atoi(indice)))
+    if(valid[0] == 1 && !bitmap_entry_is_free(atoi(indice)))
       printf("%s\n", name);
 
     free(valid);
@@ -242,6 +256,7 @@ void cz_mount(char* diskfileName) {
 }
 
 int cz_write_bloque(int direccion_bloque, void* buffer, int tamano_restante_ultimo_bloque) {
+
   return 0;
 }
 
@@ -409,9 +424,22 @@ int bin_to_dec(char* bin) {
 	return dec;
 }
 
-void* buffer_desde(void* buffer_original, int tamano) {
-  void* buffer_salida = NULL;
-  printf("size %lu\n", sizeof(void*));
+/*void* buffer_desde(void* buffer_original, int tamano) {
+  int tamano_real = MIN(strlen(buffer_original), tamano);
+  void* buffer_salida = calloc(tamano_real + 1, sizeof(char));
+
+  for(int i = 0; i < strlen(buffer_original) - tamano_real; i++)
+    buffer_salida[i] = buffer_original[strlen(buffer_original) + i];
 
   return buffer_salida;
 }
+
+char* cut_string(char* string, int inicio, int final) {
+	char* string_final = malloc(sizeof(char) * (final - inicio + 1));
+	for(int i = 0; i < (final - inicio); i++) {
+		string_final[i] = string[inicio + i];
+	}
+	string_final[final - inicio] = '\0';
+
+	return string_final;
+}*/
