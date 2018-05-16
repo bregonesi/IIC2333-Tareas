@@ -42,7 +42,10 @@ czFILE* file_new = NULL;
 file_new = cz_open("test.txt", 'w');
 
 
-cz_write(file_new, "hola", 4);
+//cz_write(file_new, "hola", 4);
+
+printf("TODOS LOS ARCHIVOS: \n");
+cz_ls();
 
 free(file_new->nombre);
 free(file_new);
