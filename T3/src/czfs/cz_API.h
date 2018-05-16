@@ -11,7 +11,7 @@ char* ruta_bin;
 unsigned int T;  // tiempo del sistema
 
 typedef struct cz_FILE {
-	int direccion_directorio;
+	int indice_en_directorio;
 	int direccion_bloque;
 	char* nombre;
   int tamano;

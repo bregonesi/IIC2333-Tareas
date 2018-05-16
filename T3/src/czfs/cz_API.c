@@ -18,7 +18,7 @@ czFILE* cz_open(char* filename, char mode) {
       if(atoi(valid) && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) { // si existe
         file = malloc(sizeof(czFILE));
 
-        file->direccion_directorio = i;
+        file->indice_en_directorio = i;
         file->direccion_bloque = atoi(indice) * 1024;
 
         file->nombre = malloc(sizeof(char) * 11);
@@ -56,18 +56,27 @@ czFILE* cz_open(char* filename, char mode) {
     if (cz_exists(filename))
       return NULL;
 
-    FILE* fp = fopen(ruta_bin, "rb");
+    FILE* fp = fopen(ruta_bin, "rb+");
 
     int i = 0;
     while(i < 1024) { //iteramos en el dir
       char valid[1];
+      fseek(fp, i, SEEK_SET);
       fread(valid, 1, 1, fp);
-
       if(!atoi(valid)) { // si hay espacio libre en esta parte del dir
         fseek(fp, i, SEEK_SET);  // devolvemos para escribir en el directorio
 
         fwrite("1", 1, 1, fp);  // ahora es valid
+        printf("escribiendo valid en i %i\n", i);
+        fseek(fp, i, SEEK_SET);
+        char validdd[1];
+        fread(validdd, 1, 1, fp);
+        printf("valid %s\n", validdd);
         fwrite(filename, 11, 1, fp);  // guardamos el name
+        fseek(fp, i+1, SEEK_SET);
+        char namee[11];
+        fread(namee, 11, 1, fp);
+        printf("name %s\n", namee);
 
         char indice[4]; //numero del bloque donde se encuentra
         int n_bloque = bitmap_set_first() - 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
@@ -90,7 +99,7 @@ czFILE* cz_open(char* filename, char mode) {
         fwrite(modificacion, 4, 1, fp);
 
         file = malloc(sizeof(czFILE));
-        file->direccion_directorio = i;
+        file->indice_en_directorio = i;
         file->direccion_bloque = atoi(indice) * 1024;
         file->nombre = malloc(sizeof(char) * 11);
         strcpy(file->nombre, filename);
@@ -157,6 +166,7 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     //fseek(fp, file_desc->direccion_directorio + 1, SEEK_SET);  // nos vamos al file name
     char* tamano = calloc(5, sizeof(char));
     itoa(file_desc->tamano, tamano, 10);
+    printf("%s\n", tamano);
     fwrite(tamano, 4, 1, fp);
     free(tamano);
 
@@ -214,7 +224,11 @@ void cz_ls() {
     char indice[4];
     fread(indice, 4, 1, fp);
 
+    printf("%i\n", atoi(valid));
+
     if(atoi(valid) && !bitmap_entry_is_free(atoi(indice)))
+      printf("%s\n", name);
+    if(atoi(valid))
       printf("%s\n", name);
 
     i += 16;
