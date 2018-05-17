@@ -38,6 +38,10 @@ cz_write(file_new, "hola", 4);
 printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
 printf("existe test? %i\n", cz_exists("test.txt"));
+cz_mv("test.txt", "otro.txt");
+printf("TODOS LOS ARCHIVOS: \n");
+cz_ls();
+printf("existe test? %i\n", cz_exists("test.txt"));
 
 free(file_new->nombre);
 free(file_new);
