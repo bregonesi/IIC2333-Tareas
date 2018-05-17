@@ -173,8 +173,9 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     void* buffer_sobra = buffer;
     while(bytes_escribir > 0) {  // en realidad != 0
       printf("faltan %i bytes para terminar\n", bytes_escribir);
-      direccion_bloque = file_desc->direccion_bloque + 12 + n_bloque * 4;
-      if(n_bloque > 251)  // del 0 al 251 va en el espacio de 1008 bytes, del 252 en adelante van en direccionamiento indirecto
+      if(n_bloque <= 251)  // del 0 al 251 va en el espacio de 1008 bytes
+        direccion_bloque = file_desc->direccion_bloque + 12 + n_bloque * 4;
+      else // del 252 en adelante van en direccionamiento indirecto
         direccion_bloque = file_desc->next_bloque + (n_bloque - 251) * 4;  // le sumo los 1008 + el inicio del otro bloque
 
       if(tamano_restante_ultimo_bloque > 0) {  // rellenamos ultimo bloque
