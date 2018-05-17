@@ -1,5 +1,4 @@
 #include "cz_API.h"
-#include <time.h>
 
 int main(int argc, char *argv[])
 {
@@ -54,6 +53,7 @@ fseek(fp, 12, SEEK_SET);
 fread(&n_bloque, sizeof(int), 1, fp);
 printf("n_bloque leido: %i\n", n_bloque);
 fclose(fp);
+
 
   return 0;
 }

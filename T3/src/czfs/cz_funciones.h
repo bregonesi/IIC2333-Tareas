@@ -3,13 +3,12 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 
-char* ruta_bin;
+char* ruta_bin;  // ruta del binario
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
 #define MAX(a,b) (((a)>(b))?(a):(b))
-
-unsigned int T;  // tiempo del sistema
 
 typedef struct cz_FILE {
 	int indice_en_directorio;
@@ -17,8 +16,8 @@ typedef struct cz_FILE {
 	char* nombre;
   int tamano;
 	int tamano_datos;
-  int creacion;
-  int modificacion;
+  time_t creacion;
+  time_t modificacion;
   int next_bloque;
 	char modo;  // 'r' o 'w' dependiendo del modo de lectura
 	bool closed;  // para no poder volver a escribir

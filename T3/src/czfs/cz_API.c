@@ -28,14 +28,10 @@ czFILE* cz_open(char* filename, char mode) {
         fread(tamano, 4, 1, fp);
         file->tamano = atoi(tamano);
         free(tamano);
-        char* creacion = calloc(5, sizeof(char));
-        fread(creacion, 4, 1, fp);
-        file->creacion = atoi(creacion);
-        free(creacion);
-        char* modificacion = calloc(5, sizeof(char));
-        fread(modificacion, 4, 1, fp);
-        file->modificacion = atoi(modificacion);
-        free(modificacion);
+
+        fread(&file->creacion, 4, 1, fp);
+        fread(&file->modificacion, 4, 1, fp);
+
         char* next_bloque = calloc(5, sizeof(char));
         fseek(fp, 1008, SEEK_CUR);
         fread(next_bloque, 4, 1, fp);  // nos saltamos la data
@@ -79,21 +75,17 @@ czFILE* cz_open(char* filename, char mode) {
         free(filename_11);
 
         int n_bloque = bitmap_set_first() - 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
-        fwrite((const void*) & n_bloque,sizeof(int),1,fp);
+        fwrite((const void*) & n_bloque, 4, 1, fp);
 
         /* Nos metemos al bloque del archivo */
         fseek(fp, n_bloque * 1024, SEEK_SET);
 
         int tamano = 12;  // 12 bytes de metadata
-        fwrite((const void*) & tamano,sizeof(int),1,fp);
+        fwrite((const void*) &tamano, 4, 1, fp);
 
-        char* creacion = calloc(5, sizeof(char));
-        itoa(T, creacion, 10);  // T es nuestra varaible global
-        fwrite(creacion, 4, 1, fp);
-
-        char* modificacion = calloc(5, sizeof(char));
-        itoa(T, modificacion, 10);  // T es nuestra varaible global
-        fwrite(modificacion, 4, 1, fp);
+        time_t t_creacion = time(NULL);
+        fwrite((const void*) &t_creacion, 4, 4, fp);  // T creacion
+        fwrite((const void*) &t_creacion, 4, 4, fp);  // T modificacion
 
         file = malloc(sizeof(czFILE));
         file->indice_en_directorio = i;
@@ -104,11 +96,8 @@ czFILE* cz_open(char* filename, char mode) {
         file->closed = false;
         file->tamano = 12; //solamente el metadata
         file->tamano_datos = 0; // 0 punteros escritos
-        file->creacion = T;
-        file->modificacion = T;
-
-        free(creacion);
-        free(modificacion);
+        file->creacion = t_creacion;
+        file->modificacion = t_creacion;
 
         printf("archivo %s creado en bloque %i\n", filename, n_bloque);
 
@@ -162,20 +151,19 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     printf("tamano restante %i, bloques nuevos %i\n", tamano_restante_ultimo_bloque, cantidad_bloques_nuevos);
 
     file_desc->tamano += bytes_escribir + 4 * cantidad_bloques_nuevos;
-    file_desc->modificacion = T;  // T es nuestra variable global
+    time_t t_modificacion = time(NULL);
+    file_desc->modificacion = t_modificacion;
+    int modificacion_int = (int)file_desc->modificacion;
 
     FILE* fp = fopen(ruta_bin, "rb+");
 
     fseek(fp, file_desc->direccion_bloque, SEEK_SET);
     int tamano = file_desc->tamano;
     printf("%i\n", tamano);
-    fwrite((const void*) & tamano,sizeof(int),1,fp);
-
+    fwrite((const void*) &tamano, 4, 1,fp);
     fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
-    char* modificacion = calloc(5, sizeof(char));
-    itoa(file_desc->modificacion, modificacion, 10);  // T es nuestra varaible global
-    fwrite(modificacion, 4, 1, fp);
-    free(modificacion);
+    // ESTA MALO esto de abajo
+    fwrite((const void*) &modificacion_int, 4, 4, fp);  // T modificacion
 
     printf("%s\n", buffer);
     int n_bloque = (file_desc->tamano_datos - tamano_restante_ultimo_bloque)/1024;
@@ -264,7 +252,7 @@ void cz_ls() {
 void cz_mount(char* diskfileName) {
   ruta_bin = diskfileName;
 
-  for(int k = 0; k < 3; k++) {
+  for(int k = 0; k < 9; k++) {
     bitmap_set_first();
   }
 }
