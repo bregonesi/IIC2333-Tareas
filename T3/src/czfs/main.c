@@ -43,6 +43,13 @@ free(file_new->nombre);
 free(file_new);
 //bitmap_de_bloque(1029);
 
+FILE* fp = fopen(ruta_bin, "rb+");
+
+int n_bloque;
+fseek(fp, 12, SEEK_SET);
+fread(&n_bloque, sizeof(int), 1, fp);
+printf("n_bloque leido: %i\n", n_bloque);
+fclose(fp);
 
   return 0;
 }
