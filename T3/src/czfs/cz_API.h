@@ -9,3 +9,4 @@ void cz_mount(char* diskfileName);
 int cz_write_bloque(int direccion_bloque, void* buffer, int tamano_restante_ultimo_bloque);
 int cz_close(czFILE* file_desc);
 int cz_mv(char* orig, char *dest);
+int cz_read(czFILE* file_desc, void* buffer, int nbytes);

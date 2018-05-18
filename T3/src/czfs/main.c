@@ -36,7 +36,17 @@ printf("-------\n");
 cz_write(file_new, "hola", 4);
 cz_write(file_new, "chaoooooooo", 11);
 cz_write(file_new, "asdf", 4);
+
+//cz_close(file_new);
+//file_new = cz_open("test.txt", 'r');
+
+void* buffer_lectura = malloc(22);
+int bytes_leidos = cz_read(file_new, buffer_lectura, 22);
+//printf("Read: %s\n", buffer_lectura); //tira error
+printf("Bytes leidos: %i\n", bytes_leidos);
 printf("-------\n");
+
+free(buffer_lectura);
 
 /*printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();

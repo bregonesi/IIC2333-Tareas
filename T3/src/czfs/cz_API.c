@@ -39,7 +39,7 @@ czFILE* cz_open(char* filename, char mode) {
         free(next_bloque);
         fclose(fp);
         file->modo = 'r';
-        file->closed = true;
+        file->closed = 0;
 
         return file;
       }
@@ -419,6 +419,59 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     fclose(fp);
 
     return sum_bytes_escritos;  // retornando los bytes que se escribieron
+  }
+  return -1;
+}
+
+
+int cz_read(czFILE* file_desc, void* buffer, int nbytes){
+  //if (file_desc->modo == 'w' || file_desc->closed) {
+  //  return -1;
+  //}
+
+  int bytes_leer;
+  bytes_leer = MIN(file_desc->tamano_datos, nbytes);
+
+  printf("entrando a leer\n");
+  int sum_bytes_leidos = 0;
+  int datos_restantes = file_desc->tamano_datos;  //del archivo entero
+  if(file_desc->modo == 'w' && !file_desc->closed) {  //porque open read no esta listo
+    printf("vamos a leer %i bytes\n", bytes_leer);
+    int direccion_bloque_actual = file_desc->direccion_bloque + 12;
+    int direccion_bloque_datos;
+    int cantidad_a_leer_en_bloque;
+    FILE* fp = fopen(ruta_bin, "rb+");
+    while (sum_bytes_leidos < bytes_leer) {
+      printf("entrando a while\n");
+      fseek(fp, direccion_bloque_actual, SEEK_SET);
+      fread(&direccion_bloque_datos, sizeof(int), 1, fp);
+      printf("direccion exacta de datos a leer: %i\n", direccion_bloque_datos);
+      fseek(fp, direccion_bloque_datos, SEEK_SET);
+      if (datos_restantes < 1024) {
+        cantidad_a_leer_en_bloque = MIN(bytes_leer, datos_restantes);
+        printf("cantidad_a_leer_en_bloque: %i\n", cantidad_a_leer_en_bloque);
+        fread(buffer + sum_bytes_leidos, 1, cantidad_a_leer_en_bloque, fp);
+        sum_bytes_leidos += cantidad_a_leer_en_bloque;
+        //printf("buffer actual: %s\n", buffer); //errores
+      }
+      else{
+        cantidad_a_leer_en_bloque = MIN(bytes_leer, 1024);
+        printf("cantidad_a_leer_en_bloque: %i\n", cantidad_a_leer_en_bloque);
+        fread(buffer + sum_bytes_leidos, 1, cantidad_a_leer_en_bloque, fp);
+        sum_bytes_leidos += cantidad_a_leer_en_bloque;
+        datos_restantes -= cantidad_a_leer_en_bloque;
+        direccion_bloque_actual += 4;
+        //printf("buffer actual: %s\n", buffer); //errores
+      }
+      if (direccion_bloque_actual == 12 + (252*4) + file_desc->direccion_bloque && datos_restantes != 0) {  //posicion del puntero indirecto
+        int dir_bloque_datos_indir = file_desc->next_bloque;
+        direccion_bloque_actual = dir_bloque_datos_indir;
+      }
+    }
+
+    fclose(fp);
+
+    return sum_bytes_leidos;  // retornando los bytes que se escribieron
   }
   return -1;
 }
