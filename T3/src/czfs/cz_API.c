@@ -253,7 +253,7 @@ void cz_ls() {
 void cz_mount(char* diskfileName) {
   ruta_bin = diskfileName;
 
-  for(int k = 0; k < 9; k++) {
+  for(int k = 0; k < 9; k++) {  // los primeros 9 son directorio y bitmap
     bitmap_set_first();
   }
 }
@@ -264,18 +264,15 @@ int cz_write_bloque(int direccion_bloque, void* buffer, int tamano_restante_ulti
 }
 
 int cz_close(czFILE* file_desc) {
-  file_desc -> closed = 1;
+  file_desc->closed = true;
   return 0;
 }
 
-int cz_mv(char* orig, char *dest){
-  //ver si dest ya existe, si existe ret 1
-  if (cz_exists(dest)) {
+int cz_mv(char* orig, char *dest) {
+  if (!cz_exists(orig) || cz_exists(dest)) {  // ver si orig existe y si dest no existe
     return 1;
   }
-  else if (!cz_exists(orig)) { //por si orig no existe
-    return 1;
-  }
+
   // en caso de que dest no existe y orig si existe:
   FILE* fp = fopen(ruta_bin, "rb+");
 
@@ -290,11 +287,13 @@ int cz_mv(char* orig, char *dest){
 
     if(valid[0] == 1 && !bitmap_entry_is_free(indice) && (strcmp(orig, name) == 0)){
       printf("antiguo: '%s', cambiado a: '%s'\n", orig, dest);
-      fseek(fp, i + 1, SEEK_SET);
+      fseek(fp, i + 1, SEEK_SET);  // nos movemos al nombre
       fwrite(dest, 11, 1, fp);
+
       free(valid);
       free(name);
       fclose(fp);
+
       return 0;
     }
 
@@ -308,7 +307,6 @@ int cz_mv(char* orig, char *dest){
   return 0;
 }
 
-
 int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
   printf("entrando a escribir\n");
   int sum_bytes_escritos = 0;
@@ -318,16 +316,17 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
 
     int tamano_restante_ultimo_bloque;
     int restante = file_desc->tamano_datos;
-    int encontramos_ultimo = 0;
-    while (!encontramos_ultimo) {
+    bool encontramos_ultimo = false;
+    while(!encontramos_ultimo) {
       if (restante <= 1024) {
-        tamano_restante_ultimo_bloque = 1024 - file_desc->tamano_datos;
-        encontramos_ultimo = 1;
+        tamano_restante_ultimo_bloque = 1024 - restante;
+        encontramos_ultimo = true;
       }
       else {
         restante -= 1024;
       }
     }
+
     printf("tamaño restante en ultimo bloque: %i\n", tamano_restante_ultimo_bloque);
     int cantidad_bloques_nuevos;
     if (tamano_restante_ultimo_bloque > bytes_escribir) {
