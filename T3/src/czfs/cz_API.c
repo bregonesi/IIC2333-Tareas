@@ -75,7 +75,7 @@ czFILE* cz_open(char* filename, char mode) {
         free(filename_11);
 
         int n_bloque = bitmap_set_first() - 1024; // setea en bitmap el bloque a usar y se guarda la posicion en disco asignada
-        fwrite((const void*) & n_bloque, 4, 1, fp);
+        fwrite((const void*) &n_bloque, 4, 1, fp);
 
         /* Nos metemos al bloque del archivo */
         fseek(fp, n_bloque * 1024, SEEK_SET);
@@ -349,17 +349,15 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     printf("bytes a escribir: %i\n", bytes_escribir);
     time_t t_modificacion = time(NULL);
     file_desc->modificacion = t_modificacion;
-    //int modificacion_int = (int)file_desc->modificacion;
 
     FILE* fp = fopen(ruta_bin, "rb+");
 
-    fseek(fp, file_desc->direccion_bloque, SEEK_SET);
-    int tamano = file_desc->tamano;
-    printf("write de tamano: %i\n", tamano);
-    fwrite((const void*) &tamano, 4, 1,fp);
-    //fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
-    // ESTA MALO esto de abajo
-    //fwrite((const void*) &tamano, 4, 1, fp);  // T modificacion, puse tamano por mientras
+    printf("escribimos tamano %i y t modificacion %i\n", file_desc->tamano, (int)file_desc->modificacion);
+    fseek(fp, file_desc->direccion_bloque, SEEK_SET);  // vamos a la direcion en directorio
+    fwrite((const void*) &file_desc->tamano, 4, 1,fp);
+    fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
+    fwrite((const void*) &file_desc->modificacion, 4, 1, fp);  // T modificacion
+
     printf("escibiendo: %s\n", buffer);
     int bloque_actual = n_bloque; //se refiere al bloque del puntero a un bloque de datos
     printf("bloque_actual: %i\n", bloque_actual);

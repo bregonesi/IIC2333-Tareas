@@ -28,8 +28,7 @@ fclose(fp);*/
 //char* b = calloc(2, sizeof(char));
 
 //free(b);
-czFILE* file_new = NULL;
-file_new = cz_open("test.txt", 'w');
+czFILE* file_new = cz_open("test.txt", 'w');
 
 //buffer_desde("hola", 3);
 printf("-------\n");
@@ -39,7 +38,7 @@ cz_write(file_new, "asdf", 4);
 
 //cz_close(file_new);
 //file_new = cz_open("test.txt", 'r');
-
+/*
 void* buffer_lectura = malloc(22);
 int bytes_leidos = cz_read(file_new, buffer_lectura, 22);
 //printf("Read: %s\n", buffer_lectura); //tira error
@@ -47,7 +46,7 @@ printf("Bytes leidos: %i\n", bytes_leidos);
 printf("-------\n");
 
 free(buffer_lectura);
-
+*/
 /*printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
 printf("existe test? %i\n", cz_exists("test.txt"));
@@ -59,7 +58,7 @@ printf("existe test? %i\n", cz_exists("test.txt"));*/
 free(file_new->nombre);
 free(file_new);
 //bitmap_de_bloque(1029);
-
+/*
 FILE* fp = fopen(ruta_bin, "rb+");
 
 int n_bloque;
@@ -67,6 +66,7 @@ fseek(fp, 12, SEEK_SET);
 fread(&n_bloque, sizeof(int), 1, fp);
 printf("n_bloque leido: %i\n", n_bloque);
 fclose(fp);
+*/
 
 
   return 0;
