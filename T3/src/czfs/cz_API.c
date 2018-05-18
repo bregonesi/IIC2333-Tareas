@@ -335,7 +335,7 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     int encontramos_ultimo = 0;
     while (!encontramos_ultimo) {
       if (restante <= 1024) {
-        tamano_restante_ultimo_bloque = 1024 - file_desc->tamano_datos;
+        tamano_restante_ultimo_bloque = 1024 - restante;
         encontramos_ultimo = 1;
       }
       else {
