@@ -12,22 +12,22 @@ czFILE* cz_open(char* filename, char mode) {
       fread(valid, 1, 1, fp);
       char* name = calloc(12, sizeof(char));
       fread(name, 11, 1, fp);
-      char* indice = calloc(5, sizeof(char));
-      fread(indice, 4, 1, fp);
+      int indice;
+      fread(&indice, 4, 1, fp);
 
-      if(valid[0] == 1 && strcmp(name, filename) == 0 && !bitmap_entry_is_free(atoi(indice))) { // si existe
+      if(valid[0] == 1 && strcmp(name, filename) == 0 && !bitmap_entry_is_free(indice)) { // si existe
         file = malloc(sizeof(czFILE));
 
         file->indice_en_directorio = i;
-        file->direccion_bloque = atoi(indice) * 1024;
+        file->direccion_bloque = indice * 1024; //direccion del bloque indice
 
         file->nombre = name;
 
-        fseek(fp, atoi(indice), SEEK_SET);  // nos vemos al archivo
-        char* tamano = calloc(5, sizeof(char));
-        fread(tamano, 4, 1, fp);
-        file->tamano = atoi(tamano);
-        free(tamano);
+        printf("indice en directorio: %i\n", indice);
+        fseek(fp, file->direccion_bloque, SEEK_SET);  // nos vemos al archivo
+        int tamano;
+        fread(&tamano, 4, 1, fp);
+        file->tamano = tamano;
 
         fread(&file->creacion, 4, 1, fp);
         fread(&file->modificacion, 4, 1, fp);
@@ -37,14 +37,28 @@ czFILE* cz_open(char* filename, char mode) {
         fread(next_bloque, 4, 1, fp);  // nos saltamos la data
         file->next_bloque = atoi(next_bloque);
         free(next_bloque);
-        fclose(fp);
+        //fclose(fp);
         file->modo = 'r';
         file->closed = 0;
 
+        printf("tamano archivo: %i\n", file->tamano);
+        int tamano_datos = file->tamano - 12; //incluye los punteros
+        if (tamano_datos == 0) {
+          file->tamano_datos = tamano_datos;
+        }
+        else {
+          int cantidad_bloques = ((tamano_datos - 1) / 1028) + 1;
+          printf("cantidad de bloques: %i\n", cantidad_bloques);
+          file->tamano_datos = tamano_datos - (4 * cantidad_bloques);
+        }
+        printf("---tamano datos: %i\n", file->tamano_datos);
+        fclose(fp);
+        free(valid);
         return file;
       }
-
       i += 16;
+      free(name);
+      free(valid);
     }
     fclose(fp);
   }
@@ -341,7 +355,8 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
       cantidad_bloques_nuevos += 1;
     printf("tamano restante ultimo bloque %i, bloques nuevos %i\n", tamano_restante_ultimo_bloque, cantidad_bloques_nuevos);
     printf("tamano antes: %i\n", file_desc->tamano);
-    file_desc->tamano += (4 * cantidad_bloques_nuevos) + (1024 * cantidad_bloques_nuevos); //el archivo se reserva todo el bloque
+    //file_desc->tamano += (4 * cantidad_bloques_nuevos) + (1024 * cantidad_bloques_nuevos); //el archivo se reserva todo el bloque
+    file_desc->tamano += (4 * cantidad_bloques_nuevos) + (bytes_escribir); //no considero tamano desperdiciado
     printf("tamano despues: %i\n", file_desc->tamano);
     printf("tamano solo datos antes: %i\n", file_desc->tamano_datos);
     int n_bloque = (file_desc->tamano_datos)/1024;
@@ -425,9 +440,9 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
 
 
 int cz_read(czFILE* file_desc, void* buffer, int nbytes){
-  //if (file_desc->modo == 'w' || file_desc->closed) {
-  //  return -1;
-  //}
+  if (file_desc->modo == 'w' || file_desc->closed) {
+    return -1;
+  }
 
   int bytes_leer;
   bytes_leer = MIN(file_desc->tamano_datos, nbytes);
@@ -435,7 +450,7 @@ int cz_read(czFILE* file_desc, void* buffer, int nbytes){
   printf("entrando a leer\n");
   int sum_bytes_leidos = 0;
   int datos_restantes = file_desc->tamano_datos;  //del archivo entero
-  if(file_desc->modo == 'w' && !file_desc->closed) {  //porque open read no esta listo
+  if(file_desc->modo == 'r' && !file_desc->closed) {  //porque open read no esta listo
     printf("vamos a leer %i bytes\n", bytes_leer);
     int direccion_bloque_actual = file_desc->direccion_bloque + 12;
     int direccion_bloque_datos;
