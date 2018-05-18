@@ -34,7 +34,8 @@ file_new = cz_open("test.txt", 'w');
 //buffer_desde("hola", 3);
 printf("-------\n");
 cz_write(file_new, "hola", 4);
-cz_write(file_new, "chaoooooooo", 4);
+cz_write(file_new, "chaoooooooo", 11);
+cz_write(file_new, "asdf", 4);
 printf("-------\n");
 
 /*printf("TODOS LOS ARCHIVOS: \n");
