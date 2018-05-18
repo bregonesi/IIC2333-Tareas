@@ -22,8 +22,8 @@ fwrite("1", 1, 1, fp);
 char a[4] = "hola";
 fwrite(a, sizeof(char), 4, fp);
 fclose(fp);*/
-cz_ls();
-printf("existe 'input.txt'?: %i\n", cz_exists("input.txt"));
+//cz_ls();
+//printf("existe 'input.txt'?: %i\n", cz_exists("input.txt"));
 
 //char* b = calloc(2, sizeof(char));
 
@@ -32,15 +32,18 @@ czFILE* file_new = NULL;
 file_new = cz_open("test.txt", 'w');
 
 //buffer_desde("hola", 3);
+printf("-------\n");
 cz_write(file_new, "hola", 4);
+cz_write(file_new, "chaoooooooo", 4);
+printf("-------\n");
 
-printf("TODOS LOS ARCHIVOS: \n");
+/*printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
 printf("existe test? %i\n", cz_exists("test.txt"));
 cz_mv("test.txt", "otro.txt");
 printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
-printf("existe test? %i\n", cz_exists("test.txt"));
+printf("existe test? %i\n", cz_exists("test.txt"));*/
 
 free(file_new->nombre);
 free(file_new);

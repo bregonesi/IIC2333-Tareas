@@ -139,7 +139,7 @@ int cz_exists(char* filename) {
   return 0;
 }
 
-int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
+/*int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
   if(file_desc->modo == 'w' && !file_desc->closed) {
     int bytes_escribir = MIN((252 + 256) * 1024 - file_desc->tamano_datos, nbytes);  // maximo que puede escribir
     printf("vamos a escribir %i bytes\n", bytes_escribir);
@@ -222,7 +222,7 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
     return sum_bytes_escritos;  // cambiar a retornar bytes escritos
   }
   return -1;
-}
+}*/
 
 void cz_ls() {
   FILE* fp = fopen(ruta_bin, "rb");
@@ -306,4 +306,115 @@ int cz_mv(char* orig, char *dest){
 
   fclose(fp);
   return 0;
+}
+
+
+int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
+  printf("entrando a escribir\n");
+  int sum_bytes_escritos = 0;
+  if(file_desc->modo == 'w' && !file_desc->closed) {
+    int bytes_escribir = MIN((252 + 256) * 1024 - file_desc->tamano_datos, nbytes);  // maximo que puede escribir
+    printf("vamos a escribir %i bytes\n", bytes_escribir);
+
+    int tamano_restante_ultimo_bloque;
+    int restante = file_desc->tamano_datos;
+    int encontramos_ultimo = 0;
+    while (!encontramos_ultimo) {
+      if (restante <= 1024) {
+        tamano_restante_ultimo_bloque = 1024 - file_desc->tamano_datos;
+        encontramos_ultimo = 1;
+      }
+      else {
+        restante -= 1024;
+      }
+    }
+    int cantidad_bloques_nuevos;
+    if (tamano_restante_ultimo_bloque > bytes_escribir) {
+      cantidad_bloques_nuevos = 0;
+    }
+    else {
+      cantidad_bloques_nuevos = (bytes_escribir - tamano_restante_ultimo_bloque)/1024;
+    }
+    if(file_desc->tamano_datos == 0)
+      cantidad_bloques_nuevos += 1;
+    printf("tamano restante ultimo bloque %i, bloques nuevos %i\n", tamano_restante_ultimo_bloque, cantidad_bloques_nuevos);
+    printf("tamano antes: %i\n", file_desc->tamano);
+    file_desc->tamano += (4 * cantidad_bloques_nuevos); //el archivo se reserva todo el bloque
+    printf("tamano despues: %i\n", file_desc->tamano);
+    printf("tamano solo datos antes: %i\n", file_desc->tamano_datos);
+    int n_bloque = (file_desc->tamano_datos)/1024;
+    file_desc->tamano_datos += bytes_escribir;
+    printf("tamano solo datos despues: %i\n", file_desc->tamano_datos);
+    printf("bloque a escribir: %i\n", bytes_escribir);
+    time_t t_modificacion = time(NULL);
+    file_desc->modificacion = t_modificacion;
+    //int modificacion_int = (int)file_desc->modificacion;
+
+    FILE* fp = fopen(ruta_bin, "rb+");
+
+    fseek(fp, file_desc->direccion_bloque, SEEK_SET);
+    int tamano = file_desc->tamano;
+    printf("write de tamano: %i\n", tamano);
+    fwrite((const void*) &tamano, 4, 1,fp);
+    fseek(fp, 4, SEEK_CUR);  // nos saltamos la creacion
+    // ESTA MALO esto de abajo
+    fwrite((const void*) &tamano, 4, 1, fp);  // T modificacion, puse tamano por mientras
+    printf("escibiendo: %s\n", buffer);
+    int bloque_actual = n_bloque; //se refiere al bloque del puntero a un bloque de datos
+    printf("bloque_actual: %i\n", bloque_actual);
+    int direccion_bloque_actual;
+    if (bloque_actual >= 252) {
+      direccion_bloque_actual= file_desc->next_bloque + ((n_bloque - 251) * 4);
+    }
+    else{
+      direccion_bloque_actual = 12 + (bloque_actual*4) + file_desc->direccion_bloque;
+    }
+    printf("direccion bloque actual datos a escribir: %i\n", direccion_bloque_actual);
+    int bytes_restantes = nbytes;
+    int direccion_bloque_datos;
+    int escribiendo = 1;
+    while (escribiendo) {
+      int bytes_a_escribir = MIN(tamano_restante_ultimo_bloque, bytes_restantes);
+      fseek(fp, direccion_bloque_actual, SEEK_SET);
+      if (direccion_bloque_actual == 12 + (252*4) + file_desc->direccion_bloque) {
+        int dir_bloque_datos_indir = (bitmap_set_first() - 1024)*1024;
+        printf("direccion de datos indirecto : %i\n", dir_bloque_datos_indir);
+        fwrite((const void*) &dir_bloque_datos_indir, 4, 1, fp);
+        file_desc->next_bloque = dir_bloque_datos_indir; //no se si esto se guarda al terminar la funcion
+        tamano_restante_ultimo_bloque = 1024;
+        fseek(fp, dir_bloque_datos_indir, SEEK_SET);
+        direccion_bloque_actual = dir_bloque_datos_indir;
+      }
+      if (tamano_restante_ultimo_bloque == 1024) { // primera escritura
+        int dir_bloque_datos_nuevo = (bitmap_set_first() - 1024)*1024;
+        printf("direccion de datos nuevos : %i\n", dir_bloque_datos_nuevo);
+        fwrite((const void*) &dir_bloque_datos_nuevo, 4, 1, fp);
+      }
+      fseek(fp, direccion_bloque_actual, SEEK_SET);
+      fread(&direccion_bloque_datos, sizeof(int), 1, fp);
+      printf("direccion exacta de bloque datos %i\n", direccion_bloque_datos);
+      fseek(fp, direccion_bloque_datos, SEEK_SET);
+      fseek(fp, (1024-tamano_restante_ultimo_bloque), SEEK_CUR);
+      //escribiendo aca
+      fwrite(buffer, bytes_a_escribir, 1, fp);
+      buffer = buffer + bytes_a_escribir;
+      printf("buffer: %s\n", buffer);
+      //
+      sum_bytes_escritos += bytes_a_escribir;
+      bytes_restantes -= bytes_a_escribir;
+      if (bloque_actual > 506 || bytes_restantes == 0) {
+        escribiendo = 0;
+      }
+      else{
+        direccion_bloque_actual += 4;
+        tamano_restante_ultimo_bloque = 1024;
+        bloque_actual += 1;
+      }
+    }
+
+    fclose(fp);
+
+    return sum_bytes_escritos;  // retornando los bytes que se escribieron
+  }
+  return -1;
 }
