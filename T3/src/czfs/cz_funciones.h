@@ -22,6 +22,7 @@ typedef struct cz_FILE {
   int next_bloque;
 	char modo;  // 'r' o 'w' dependiendo del modo de lectura
 	bool closed;  // para no poder volver a escribir
+	int ultimo_byte_leido;  // para cz_read y guardar ultimo byte leido
 } czFILE;
 
 /* Manejo de numeros */

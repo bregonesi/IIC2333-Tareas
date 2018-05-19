@@ -9,3 +9,5 @@ void cz_mount(char* diskfileName);
 int cz_close(czFILE* file_desc);
 int cz_mv(char* orig, char *dest);
 int cz_read(czFILE* file_desc, void* buffer, int nbytes);
+int cz_cp(char* orig, char* dest);
+void cz_free(czFILE* file);

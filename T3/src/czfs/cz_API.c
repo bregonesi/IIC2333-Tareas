@@ -16,7 +16,7 @@ czFILE* cz_open(char* filename, char mode) {
       fread(&indice, 4, 1, fp);
 
       if(valid[0] == 1 && strcmp(name, filename) == 0 && !bitmap_entry_is_free(indice)) { // si existe
-        printf("indice en directorio: %i\n", indice);
+        //printf("indice en directorio: %i\n", indice);
 
         file = malloc(sizeof(czFILE));
 
@@ -35,20 +35,18 @@ czFILE* cz_open(char* filename, char mode) {
         fread(&file->next_bloque, 4, 1, fp);
 
         file->modo = 'r';
-        file->closed = true;
+        file->closed = false;
+        file->ultimo_byte_leido = 0;
 
-        printf("tamano archivo: %i\n", file->tamano);
         int tamano_datos = file->tamano - 12; //incluye los punteros
         if(tamano_datos >= 252 * (4 + 1024))  // es decir, si tiene direccionamiento indirecto
           tamano_datos -= 4;  // le quitamos los bytes donde esta la tabla de direccionamiento indirecto
 
-        printf("tamano datos con punteros %i\n", tamano_datos);
         int offset_datos = tamano_datos % 1028;  // sacamos el ultimo bloque
         int cantidad_bloques = (tamano_datos - offset_datos) / 1028;  // esto nos dice cuantos bloques estan al 100%
-        printf("cantidad de bloques llenos %i\n", cantidad_bloques);
-
+        if(cantidad_bloques == 0 && tamano_datos != 0)  // es decir, si solo tenemos el primer bloque un poco usado
+          offset_datos -= 4;
         file->tamano_datos = (1024 * cantidad_bloques) + offset_datos;
-        printf("---tamano datos: %i\n", file->tamano_datos);
 
         fclose(fp);
         free(valid);
@@ -107,13 +105,14 @@ czFILE* cz_open(char* filename, char mode) {
         strcpy(file->nombre, filename);
         file->modo = 'w';
         file->closed = false;
+        file->ultimo_byte_leido = 0;
         file->tamano = 12; //solamente el metadata
         file->tamano_datos = 0; // 0 punteros escritos
         file->creacion = t_creacion;
         file->modificacion = t_creacion;
         file->next_bloque = 0;
 
-        printf("archivo %s creado en bloque %i\n", filename, n_bloque);
+        //printf("archivo %s creado en bloque %i\n", filename, n_bloque);
 
         fclose(fp);
 
@@ -156,7 +155,7 @@ int cz_exists(char* filename) {
 void cz_ls() {
   FILE* fp = fopen(ruta_bin, "rb");
 
-  printf("Printeando ls\n");
+  //printf("Printeando ls\n");
 
   int i = 0;
   while(i < 1024) {
@@ -209,7 +208,7 @@ int cz_mv(char* orig, char *dest) {
     int indice;
     fread(&indice, sizeof(int), 1, fp);
 
-    if(valid[0] == 1 && !bitmap_entry_is_free(indice) && (strcmp(orig, name) == 0)){
+    if(valid[0] == 1 && !bitmap_entry_is_free(indice) && (strcmp(orig, name) == 0)) {
       printf("antiguo: '%s', cambiado a: '%s'\n", orig, dest);
       fseek(fp, i + 1, SEEK_SET);  // nos movemos al nombre
       fwrite(dest, 11, 1, fp);
@@ -350,48 +349,80 @@ int cz_read(czFILE* file_desc, void* buffer, int nbytes) {
     return -1;
   }
 
-  int bytes_leer = MIN(file_desc->tamano_datos, nbytes);
 
-  printf("entrando a leer\n");
-  int sum_bytes_leidos = 0;
-  int datos_restantes = file_desc->tamano_datos;  //del archivo entero
-  if(file_desc->modo == 'r' && !file_desc->closed) {  //porque open read no esta listo
+  if(file_desc->modo == 'r' && !file_desc->closed) {
+    printf("entrando a leer\n");
+
+    int bytes_leer = MIN(file_desc->tamano_datos - file_desc->ultimo_byte_leido, nbytes);
     printf("vamos a leer %i bytes\n", bytes_leer);
-    int direccion_bloque_actual = file_desc->direccion_bloque + 12;
+
+    int sum_bytes_leidos = 0;
+    int datos_restantes = file_desc->tamano_datos - file_desc->ultimo_byte_leido;  //del archivo entero
+    int bytes_leer_restantes = bytes_leer;
+
+    int offset_bloque;
+    int n_bloque;
+    int direccion_bloque;
     int direccion_bloque_datos;
     int cantidad_a_leer_en_bloque;
-    FILE* fp = fopen(ruta_bin, "rb+");
-    while (sum_bytes_leidos < bytes_leer) {
-      printf("entrando a while\n");
-      fseek(fp, direccion_bloque_actual, SEEK_SET);
-      fread(&direccion_bloque_datos, sizeof(int), 1, fp);
+
+    FILE* fp = fopen(ruta_bin, "rb");
+    while(bytes_leer_restantes > 0 || datos_restantes <= 0) {
+      printf("entrando al while. bytes leer restantes %i\n", bytes_leer_restantes);
+
+      offset_bloque = file_desc->ultimo_byte_leido % 1024;
+      n_bloque = (file_desc->ultimo_byte_leido - offset_bloque) / 1024;
+
+      if(n_bloque < 252)  // si leemos en los bloques directos
+        direccion_bloque = file_desc->direccion_bloque + 12 + (n_bloque * 4);
+      else  // si leemos en los bloques indirectos
+        direccion_bloque = file_desc->next_bloque + ((n_bloque - 252) * 4);
+
+      fseek(fp, direccion_bloque, SEEK_SET);  // buscamos la direccion del bloque
+      fread(&direccion_bloque_datos, 4, 1, fp);
+      fseek(fp, direccion_bloque_datos, SEEK_SET);  // nos vamos a la direccion del bloque
       printf("direccion exacta de datos a leer: %i\n", direccion_bloque_datos);
-      fseek(fp, direccion_bloque_datos, SEEK_SET);
-      if (datos_restantes < 1024) {
-        cantidad_a_leer_en_bloque = MIN(bytes_leer, datos_restantes);
-        printf("cantidad_a_leer_en_bloque: %i\n", cantidad_a_leer_en_bloque);
-        fread(buffer + sum_bytes_leidos, 1, cantidad_a_leer_en_bloque, fp);
-        sum_bytes_leidos += cantidad_a_leer_en_bloque;
-        //printf("buffer actual: %s\n", buffer); //errores
-      }
-      else{
+
+      fseek(fp, offset_bloque, SEEK_CUR);  // nos movemos en el offset
+      printf("offset: %i\n", offset_bloque);
+
+      if(datos_restantes < 1024)
+        cantidad_a_leer_en_bloque = MIN(bytes_leer_restantes, datos_restantes);
+      else
         cantidad_a_leer_en_bloque = MIN(bytes_leer, 1024);
-        printf("cantidad_a_leer_en_bloque: %i\n", cantidad_a_leer_en_bloque);
-        fread(buffer + sum_bytes_leidos, 1, cantidad_a_leer_en_bloque, fp);
-        sum_bytes_leidos += cantidad_a_leer_en_bloque;
-        datos_restantes -= cantidad_a_leer_en_bloque;
-        direccion_bloque_actual += 4;
-        //printf("buffer actual: %s\n", buffer); //errores
-      }
-      if (direccion_bloque_actual == 12 + (252*4) + file_desc->direccion_bloque && datos_restantes != 0) {  //posicion del puntero indirecto
-        int dir_bloque_datos_indir = file_desc->next_bloque;
-        direccion_bloque_actual = dir_bloque_datos_indir;
-      }
+
+      printf("cantidad_a_leer_en_bloque: %i\n", cantidad_a_leer_en_bloque);
+
+      fread(buffer + sum_bytes_leidos, 1, cantidad_a_leer_en_bloque, fp);
+      sum_bytes_leidos += cantidad_a_leer_en_bloque;
+      file_desc->ultimo_byte_leido += cantidad_a_leer_en_bloque;
+      bytes_leer_restantes -= cantidad_a_leer_en_bloque;
+
     }
+
 
     fclose(fp);
 
     return sum_bytes_leidos;  // retornando los bytes que se escribieron
   }
   return -1;
+}
+
+int cz_cp(char* orig, char* dest) {
+  // vamos a leer por bloque y escribir por bloque
+
+  if (!cz_exists(orig) || cz_exists(dest)) {  // ver si orig existe y si dest no existe
+    return 1;
+  }
+
+  czFILE* file_orig = cz_open(orig, 'r');
+  czFILE* file_dest = cz_open(dest, 'w');
+
+
+  return 0;
+}
+
+void cz_free(czFILE* file) {
+  free(file->nombre);
+  free(file);
 }
