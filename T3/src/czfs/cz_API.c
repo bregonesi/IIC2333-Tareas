@@ -345,13 +345,12 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
 }
 
 
-int cz_read(czFILE* file_desc, void* buffer, int nbytes){
-  if (file_desc->modo == 'w' || file_desc->closed) {
+int cz_read(czFILE* file_desc, void* buffer, int nbytes) {
+  if(file_desc->modo == 'w' || file_desc->closed) {  // esta un poco demas este if, pero mejor que este para asegurarse
     return -1;
   }
 
-  int bytes_leer;
-  bytes_leer = MIN(file_desc->tamano_datos, nbytes);
+  int bytes_leer = MIN(file_desc->tamano_datos, nbytes);
 
   printf("entrando a leer\n");
   int sum_bytes_leidos = 0;

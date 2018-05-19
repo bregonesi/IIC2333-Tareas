@@ -45,7 +45,7 @@ printf("cantidad de datos %i\n", file_new->tamano_datos);
 
 cz_close(file_new);
 czFILE* file_new_2 = cz_open("test.txt", 'r');
-/*
+
 void* buffer_lectura = malloc(22);
 int bytes_leidos = cz_read(file_new_2, buffer_lectura, 22);
 //printf("Read: %s\n", buffer_lectura); //tira error
@@ -53,7 +53,7 @@ printf("Bytes leidos: %i\n", bytes_leidos);
 printf("-------\n");
 
 free(buffer_lectura);
-*/
+
 /*printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
 printf("existe test? %i\n", cz_exists("test.txt"));
