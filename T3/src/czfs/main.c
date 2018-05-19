@@ -33,11 +33,11 @@ czFILE* file_new = cz_open("test.txt", 'w');
 //buffer_desde("hola", 3);
 printf("-------\n");
 cz_write(file_new, "hola", 4);
-sleep(1);  // para q cambie el t de modificacion
-//for(int i = 0; i < 23459; i++)  // asi escribimos infinitas weas
-//for(int i = 0; i < 23458; i++)  // asi escribimos infinitas weas
-//  cz_write(file_new, "chaoooooooo", 11);
-sleep(1);  // para q cambie el t de modificacion
+//sleep(1);  // para q cambie el t de modificacion
+//for(int i = 0; i < 100; i++)  // asi escribimos infinitas weas
+for(int i = 0; i < 23458; i++)  // asi escribimos infinitas weas
+  cz_write(file_new, "chao1234567", 11);
+//sleep(1);  // para q cambie el t de modificacion
 cz_write(file_new, "asdf", 4);
 cz_write(file_new, "asdf", 4);
 
@@ -56,9 +56,17 @@ printf("-------\n");
 printf("%s\n", buffer_lectura);
 bytes_leidos = cz_read(file_new_2, buffer_lectura, 4);
 printf("%s\n", buffer_lectura);
-
 free(buffer_lectura);
 
+
+
+buffer_lectura = calloc(101, sizeof(void));
+bytes_leidos = cz_read(file_new_2, buffer_lectura, 100);
+//printf("Read: %s\n", buffer_lectura); //tira error
+printf("Bytes leidos: %i\n", bytes_leidos);
+printf("-------\n");
+printf("%s\n", buffer_lectura);
+free(buffer_lectura);
 /*printf("TODOS LOS ARCHIVOS: \n");
 cz_ls();
 printf("existe test? %i\n", cz_exists("test.txt"));
@@ -68,6 +76,14 @@ cz_ls();
 printf("existe test? %i\n", cz_exists("test.txt"));*/
 
 cz_free(file_new_2);
+
+printf("orig %i\n", cz_exists("test.txt"));
+printf("dest %i\n", cz_exists("hola.txt"));
+int a = cz_cp("test.txt", "hola.txt");
+printf("a %i\n", a);
+
+cz_mv("test.txt", "shola.txt");
+cz_rm("shola.txt");
 //bitmap_de_bloque(1029);
 /*
 FILE* fp = fopen(ruta_bin, "rb+");
