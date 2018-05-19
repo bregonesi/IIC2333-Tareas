@@ -352,12 +352,9 @@ int cz_read(czFILE* file_desc, void* buffer, int nbytes) {
   if(file_desc->modo == 'r' && !file_desc->closed) {
     //printf("entrando a leer\n");
 
-    int bytes_leer = MIN(file_desc->tamano_datos - file_desc->ultimo_byte_leido, nbytes);
-    //printf("vamos a leer %i bytes\n", bytes_leer);
-
     int sum_bytes_leidos = 0;
     int datos_restantes = file_desc->tamano_datos - file_desc->ultimo_byte_leido;  //del archivo entero
-    int bytes_leer_restantes = bytes_leer;
+    int bytes_leer_restantes = MIN(file_desc->tamano_datos - file_desc->ultimo_byte_leido, nbytes);;
 
     int offset_bloque;
     int n_bloque;
@@ -450,6 +447,21 @@ int cz_rm(char* filename) {
   fwrite(valid, 1, 1, fp);  // dejamos valid en 0 en directorio
   free(valid);
 
+  int n_bloques = (file->tamano_datos - file->tamano_datos % 1024)/1024;
+  int direccion_bloque;
+  int direccion_bloque_datos;
+  for(int i = 0; i <= n_bloques; i++) {  // va del 0 al n_bloque (incluyendo n_bloque)
+    printf("i %i\n", i);
+    if(i < 252)
+      direccion_bloque = file->direccion_bloque + 12 + 4 * i;
+    else
+      direccion_bloque = file->next_bloque + 4 * (i - 252);
+
+    fseek(fp, direccion_bloque, SEEK_SET);  // vamos al bloque
+    fread(&direccion_bloque_datos, 4, 1, fp);  // direccion de datos
+    printf("direccion bloque %i, direccion de datos %i\n", direccion_bloque, direccion_bloque_datos);
+  }
+  printf("numero de bloques %i\n", n_bloques);
   fclose(fp);
   cz_free(file);
   return 0;
