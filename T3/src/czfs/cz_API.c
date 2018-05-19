@@ -112,6 +112,7 @@ czFILE* cz_open(char* filename, char mode) {
         file->tamano_datos = 0; // 0 punteros escritos
         file->creacion = t_creacion;
         file->modificacion = t_creacion;
+        file->next_bloque = 0;
 
         printf("archivo %s creado en bloque %i\n", filename, n_bloque);
 
@@ -317,7 +318,7 @@ int cz_mv(char* orig, char *dest) {
 }
 
 int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
-  printf("entrando a escribir\n");
+  printf("entrando a escribi -------------------r\n");
   if(file_desc->modo == 'w' && !file_desc->closed) {
     int bytes_escribir = MIN((252 + 256) * 1024 - file_desc->tamano_datos, nbytes);  // maximo que puede escribir
     printf("vamos a escribir %i bytes\n", bytes_escribir);
@@ -358,18 +359,26 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
 
     printf("escibiendo: %s\n", buffer);
     int direccion_bloque;
-    if(n_bloque < 251)  // si escribimos en los bloques directos
+    if(n_bloque < 252)  // si escribimos en los bloques directos
       direccion_bloque = file_desc->direccion_bloque + 12 + (n_bloque * 4);
     else  // si escribimos en los bloques indirectos | si next_bloque no esta seteado se setea cuando se entra al while y se recalcula direccion_bloque
-      direccion_bloque = file_desc->next_bloque + ((n_bloque - 251) * 4);
+      direccion_bloque = file_desc->next_bloque + ((n_bloque - 252) * 4);
     printf("direccion bloque datos a escribir: %i\n", direccion_bloque);
 
     int bytes_restantes = nbytes;
     int sum_bytes_escritos = 0;
     while(bytes_restantes > 0 && n_bloque < 508) {  // el primero va de 0 a 251 y el segundo de 252 a 252 + 256 = 508
+      if(tamano_restante_ultimo_bloque == 0) {  // si se nos acaba bloque hay que hacer uno nuevo
+          n_bloque++;
+          direccion_bloque += 4;
+          tamano_restante_ultimo_bloque = 1024;
+          // el encargado de hacer el ultimo bloque y guardarlo es un if de mas abajo
+      }
+
+      printf("n bloque %i next bloque %i\n", n_bloque, file_desc->next_bloque);
       if(n_bloque >= 252 && file_desc->next_bloque == 0) {  // seteamos la direccion de punteros indirectos
         file_desc->next_bloque = (bitmap_set_first() - 1024) * 1024;
-        direccion_bloque = file_desc->next_bloque + ((n_bloque - 251) * 4);
+        direccion_bloque = file_desc->next_bloque + ((n_bloque - 252) * 4);
 
         fseek(fp, file_desc->direccion_bloque, SEEK_SET);  // vamos al tamano del archivo
         file_desc->tamano += 4;  // le sumamos los bytes de direccion del bloque indirecto
@@ -378,6 +387,7 @@ int cz_write(czFILE* file_desc, void* buffer, int nbytes) {
         fseek(fp, 12 - 4 + 1008, SEEK_CUR);  // vamos a la direccion del bloque indirecto
         fwrite((const void*) &file_desc->next_bloque, 4, 1, fp);
         printf("Guardando direccion de bloque indirecto. Nuevo tamano archivo %i, direccion %i\n", file_desc->tamano, (int)file_desc->next_bloque);
+        printf("Seteando direccion bloque a %i\n", direccion_bloque);
       }
 
       int direccion_bloque_datos;

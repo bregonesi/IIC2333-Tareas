@@ -34,8 +34,11 @@ czFILE* file_new = cz_open("test.txt", 'w');
 printf("-------\n");
 cz_write(file_new, "hola", 4);
 sleep(1);  // para q cambie el t de modificacion
-cz_write(file_new, "chaoooooooo", 11);
+//for(int i = 0; i < 23459; i++)  // asi escribimos infinitas weas
+for(int i = 0; i < 23458; i++)  // asi escribimos infinitas weas
+  cz_write(file_new, "chaoooooooo", 11);
 sleep(1);  // para q cambie el t de modificacion
+cz_write(file_new, "asdf", 4);
 cz_write(file_new, "asdf", 4);
 
 /*

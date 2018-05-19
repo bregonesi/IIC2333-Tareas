@@ -79,6 +79,9 @@ int bitmap_set_first() {
 }
 
 bool bitmap_entry_is_free(int pos) {  // pos corresponde a una posicion en el disco
+  if(pos >= 0 && pos <= 9)
+    return false;
+    
   if(pos >= 1024 && pos < 1024*8) {
     int offset = pos % 1024;
     int bloque = pos - offset;
