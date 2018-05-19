@@ -33,7 +33,9 @@ czFILE* file_new = cz_open("test.txt", 'w');
 //buffer_desde("hola", 3);
 printf("-------\n");
 cz_write(file_new, "hola", 4);
+sleep(1);  // para q cambie el t de modificacion
 cz_write(file_new, "chaoooooooo", 11);
+sleep(1);  // para q cambie el t de modificacion
 cz_write(file_new, "asdf", 4);
 
 /*

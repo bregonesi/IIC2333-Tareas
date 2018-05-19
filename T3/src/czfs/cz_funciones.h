@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <time.h>
+#include <unistd.h>
 
 char* ruta_bin;  // ruta del binario
 
