@@ -81,9 +81,11 @@ printf("orig %i\n", cz_exists("test.txt"));
 printf("dest %i\n", cz_exists("hola.txt"));
 int a = cz_cp("test.txt", "hola.txt");
 printf("a %i\n", a);
-
+cz_ls();
 cz_mv("test.txt", "shola.txt");
+cz_ls();
 cz_rm("shola.txt");
+cz_ls();
 //bitmap_de_bloque(1029);
 /*
 FILE* fp = fopen(ruta_bin, "rb+");

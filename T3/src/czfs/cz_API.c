@@ -438,7 +438,7 @@ int cz_rm(char* filename) {
 
   czFILE* file = cz_open(filename, 'r');
 
-  printf("indice directorio %i\n", file->indice_en_directorio);
+  //printf("indice directorio %i\n", file->indice_en_directorio);
 
   FILE* fp = fopen(ruta_bin, "rb+");
   fseek(fp, file->indice_en_directorio, SEEK_SET);  // vamos al directorio
@@ -450,8 +450,8 @@ int cz_rm(char* filename) {
   int n_bloques = (file->tamano_datos - file->tamano_datos % 1024)/1024;
   int direccion_bloque;
   int direccion_bloque_datos;
+  int* bloques_liberar = malloc(sizeof(int) * (n_bloques + 1));  // voy a guardar las direcciones en un arreglo para tener solo una vez el archivo abierto
   for(int i = 0; i <= n_bloques; i++) {  // va del 0 al n_bloque (incluyendo n_bloque)
-    printf("i %i\n", i);
     if(i < 252)
       direccion_bloque = file->direccion_bloque + 12 + 4 * i;
     else
@@ -459,10 +459,19 @@ int cz_rm(char* filename) {
 
     fseek(fp, direccion_bloque, SEEK_SET);  // vamos al bloque
     fread(&direccion_bloque_datos, 4, 1, fp);  // direccion de datos
-    printf("direccion bloque %i, direccion de datos %i\n", direccion_bloque, direccion_bloque_datos);
+    bloques_liberar[i] = direccion_bloque_datos;
   }
-  printf("numero de bloques %i\n", n_bloques);
   fclose(fp);
+
+  for(int i = 0; i <= n_bloques; i++)
+    bitmap_free(bloques_liberar[i]);
+  free(bloques_liberar);
+
+  bitmap_free(file->direccion_bloque);
+
+  if(file->next_bloque)
+    bitmap_free(file->next_bloque);
+
   cz_free(file);
   return 0;
 }
