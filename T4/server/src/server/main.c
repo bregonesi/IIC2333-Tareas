@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
   sleep(1);  // si no espero se acoplan mensajes
 
   int pot[2] = {1000, 1000};
-  pot[0] = 1;
+  pot[0] = 11;
   printf("%i %i\n", pot[0], pot[1]);
   /* Envio pots */
   char* pot_string = malloc(sizeof(char*));
@@ -135,5 +135,57 @@ int main(int argc, char *argv[]) {
   free(pot_string);
 
   sleep(1);
+
+  mensaje_enviar = codificar(game_start, "Game start");
+  send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+  mensaje_enviar = codificar(game_start, "Game start");
+  send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+
+  sleep(1);
+
+  int jugando = 1;
+  int ganador = -1;
+  while (jugando == 1) {
+    if (pot[0] < 10) {
+      ganador = 1;
+      jugando = 0;
+    }
+    else if (pot[1] < 10) {
+      ganador = 0;
+      jugando = 0;
+    }
+    else {
+      pot[0] -= 10;
+      pot[1] -= 10; //por mientras para evitar loops infinitos
+      mensaje_enviar = codificar(start_round, "New round");
+      send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      mensaje_enviar = codificar(start_round, "New round");
+      send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      sleep(1);
+      mensaje_enviar = codificar(initial_bet, "Apuesta inicial de $10");
+      send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      mensaje_enviar = codificar(initial_bet, "Apuesta inicial de $10");
+      send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      sleep(1);
+      // se juega la ronda
+    }
+  }
+
+  mensaje_enviar = codificar(game_end, "Game over");
+  send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+  mensaje_enviar = codificar(game_end, "Game over");
+  send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+
+  sleep(1);
+  //enviar imagenes
+
   return 0;
 }
