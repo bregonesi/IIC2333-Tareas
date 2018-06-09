@@ -120,15 +120,32 @@ int main(int argc, char *argv[]) {
   printf("%s\n", mensaje_recibir[2]);
   free_decodificacion(mensaje_recibir);
 
-  read(sock, buffer, 2057);
-  mensaje_recibir = decodificar(buffer);
-  if(atoi(mensaje_recibir[0]) != start_round && atoi(mensaje_recibir[0]) != game_end) {
-    // quizas estos errores hay que manejarlos diferente
-    perror("no se recibio inicio de ronda");
-    exit(EXIT_FAILURE);
+  int jugando = 1;
+  while (jugando == 1) {
+    read(sock, buffer, 2057);
+    mensaje_recibir = decodificar(buffer);
+    if(atoi(mensaje_recibir[0]) != start_round && atoi(mensaje_recibir[0]) != game_end) {
+      // quizas estos errores hay que manejarlos diferente
+      perror("no se recibio inicio de ronda");
+      exit(EXIT_FAILURE);
+    }
+    if (atoi(mensaje_recibir[0]) == game_end) {
+      jugando = 0;
+      printf("%s\n", mensaje_recibir[2]);
+      free_decodificacion(mensaje_recibir);
+    }
+    else{
+      read(sock, buffer, 2057);
+      mensaje_recibir = decodificar(buffer);
+      if(atoi(mensaje_recibir[0]) != initial_bet) {
+        // quizas estos errores hay que manejarlos diferente
+        perror("no se recibio initial bet");
+        exit(EXIT_FAILURE);
+      }
+      printf("%s\n", mensaje_recibir[2]);
+      free_decodificacion(mensaje_recibir);
+    }
   }
-  printf("%s\n", mensaje_recibir[2]);
-  free_decodificacion(mensaje_recibir);
 
   return 0;
 }
