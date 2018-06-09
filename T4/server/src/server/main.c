@@ -110,6 +110,30 @@ int main(int argc, char *argv[]) {
   }
   printf("tengo nickname %s y %s\n", nicknames[0], nicknames[1]);
 
+  /* Envio oponentes */
+  mensaje_enviar = codificar(opponent_found, nicknames[1]);
+  send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+  mensaje_enviar = codificar(opponent_found, nicknames[0]);
+  send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+  sleep(1);  // si no espero se acoplan mensajes
 
+  int pot[2] = {1000, 1000};
+  pot[0] = 1;
+  printf("%i %i\n", pot[0], pot[1]);
+  /* Envio pots */
+  char* pot_string = malloc(sizeof(char*));
+  itoa(pot[0], pot_string, 10);
+  mensaje_enviar = codificar(initial_pot, pot_string);
+  send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+  itoa(pot[1], pot_string, 10);
+  mensaje_enviar = codificar(initial_pot, pot_string);
+  send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+  free_codificacion(mensaje_enviar);
+  free(pot_string);
+
+  sleep(1);
   return 0;
 }

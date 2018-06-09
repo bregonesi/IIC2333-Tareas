@@ -90,6 +90,25 @@ int main(int argc, char *argv[]) {
   send(sock, mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
 
+  read(sock, buffer, 2057);
+  mensaje_recibir = decodificar(buffer);
+  if(atoi(mensaje_recibir[0]) != opponent_found) {
+    // quizas estos errores hay que manejarlos diferente
+    perror("no se recibio mensaje de opponent found");
+    exit(EXIT_FAILURE);
+  }
+  printf("%s %s\n", mensajes[atoi(mensaje_recibir[0])], mensaje_recibir[2]);
+  free_decodificacion(mensaje_recibir);
+
+  read(sock, buffer, 2057);
+  mensaje_recibir = decodificar(buffer);
+  if(atoi(mensaje_recibir[0]) != initial_pot) {
+    // quizas estos errores hay que manejarlos diferente
+    perror("no se recibio mensaje de initial pot");
+    exit(EXIT_FAILURE);
+  }
+  printf("%s %s\n", mensajes[atoi(mensaje_recibir[0])], mensaje_recibir[2]);
+  free_decodificacion(mensaje_recibir);
 
   return 0;
 }
