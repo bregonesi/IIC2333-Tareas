@@ -8,8 +8,15 @@
 
 #include "mensajes.h"
 #include "funciones.h"
+#include "cartas.h"
 
 int main(int argc, char *argv[]) {
+  Mazo* mazo_juego = crear_mazo();
+  print_mazo(*mazo_juego);
+  int* carta = sacar_carta(mazo_juego);
+  free(carta);
+  print_mazo(*mazo_juego);
+
   if(argc != 5) {
     printf("Modo de uso: %s [-i <ip_address>] [-p <tcp-port>]\n", argv[0]);
     return 1;
