@@ -12,7 +12,7 @@ typedef struct DecMazo {
 
 /* Net code and decode */
 char* codificar(int mensaje_id, char* mensaje);
-char* ccodificar_cartas(int mensaje_id, int** cartas, int cantidad_cartas);
+char* codificar_cartas(int mensaje_id, int** cartas, int cantidad_cartas);
 char** decodificar(char* codificado);
 Decodificar_Mazo* decodificar_cartas(char* codificado);
 void free_codificacion(char* codificado);
