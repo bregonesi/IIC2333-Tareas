@@ -121,7 +121,7 @@ int main(int argc, char *argv[]) {
   sleep(1);  // si no espero se acoplan mensajes
 
   int pot[2] = {1000, 1000};
-  pot[0] = 11;
+  //pot[0] = 11;
   printf("%i %i\n", pot[0], pot[1]);
   /* Envio pots */
   char* pot_string = malloc(sizeof(char*));
@@ -291,109 +291,147 @@ int main(int argc, char *argv[]) {
         free_codificacion(mensaje_enviar);
         sleep(1);
 
-        int* bets = malloc(5*sizeof(int));
-        bets[0] = 1;
-        bets[1] = 2;
-        bets[2] = 3;
-        bets[3] = 4;
-        bets[4] = 5;
-        mensaje_enviar = codificar_ints(get_bet, bets, 5);
+        int* bets = malloc(4*sizeof(int));
+        bets[0] = 2;
+        bets[1] = 3;
+        bets[2] = 4;
+        bets[3] = 5;
+        mensaje_enviar = codificar_ints(get_bet, bets, 4);
+        //printf("%s\n", mensaje_enviar);
         send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
 
         read(clientes[0], buffer, 2057);
+        printf("%s\n", buffer);
         mensaje_recibir = decodificar(buffer);
         if(atoi(mensaje_recibir[0]) != return_bet) {
           // quizas estos errores hay que manejarlos diferente
           perror("no se recibio mensaje de retornar bet");
           exit(EXIT_FAILURE);
         }
-        int n_bet = atoi(mensaje_recibir[2]);
+        int n_bet = mensaje_recibir[2][0];
+        printf("bet recibido: %i\n", n_bet);
         int bet_error = 1;
         while (bet_error == 1) {
-          for (int i = 0; i < bets; i++) {
-            //
+          for (int i = 0; i < 5; i++) {
+            if (bets[i] == n_bet) {
+              bet_error = 0;
+            }
           }
-          bet_error = 0;
-        }
-      }
-      /*
-      if (primer_jugador == 1) {  //se comenta
-        printf("parte jugador 1\n");
-        send(clientes[0], "000010110000000100000010", 24, 0);
-        send(clientes[1], "000010110000000100000001", 24, 0);
-        sleep(1);
+          if (bet_error == 1) {
+            mensaje_enviar = codificar(error_bet, "");
+            send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+            free_codificacion(mensaje_enviar);
+            sleep(1);
 
-        mensaje_enviar = codificar(get_cards_to_cange, "");
-        send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+            mensaje_enviar = codificar_ints(get_bet, bets, 5);
+            send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+            free_codificacion(mensaje_enviar);
+            sleep(1);
+
+            read(clientes[0], buffer, 2057);
+            mensaje_recibir = decodificar(buffer);
+            if(atoi(mensaje_recibir[0]) != return_bet) {
+              // quizas estos errores hay que manejarlos diferente
+              perror("no se recibio mensaje de retornar bet");
+              exit(EXIT_FAILURE);
+            }
+            n_bet = mensaje_recibir[2][0];
+          }
+        }
+        sleep(1);
+        mensaje_enviar = codificar(ok_bet, "");
+        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
 
-        Decodificar_Mazo* mensaje_recibir_cartas;  // estructura
+        //bet 2
+
+        int* bets2 = malloc(5*sizeof(int));
+        int n_tot;
+        if (n_bet == 2) {
+          bets2[0] = 1;
+          bets2[1] = 2;
+          bets2[2] = 3;
+          bets2[3] = 4;
+          bets2[4] = 5;
+          n_tot = 5;
+        }
+        if (n_bet == 3) {
+          bets2[0] = 1;
+          bets2[1] = 3;
+          bets2[2] = 4;
+          bets2[3] = 5;
+          n_tot = 4;
+        }
+        if (n_bet == 4) {
+          bets2[0] = 1;
+          bets2[1] = 4;
+          bets2[2] = 5;
+          n_tot = 3;
+        }
+        if (n_bet == 5) {
+          bets2[0] = 1;
+          bets2[1] = 5;
+          n_tot = 2;
+        }
+        mensaje_enviar = codificar_ints(get_bet, bets2, n_tot);
+        send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
 
         read(clientes[1], buffer, 2057);
-        mensaje_recibir_cartas = decodificar_cartas(buffer);
-        if(atoi(mensaje_recibir_cartas->mensaje_id) != return_cards_to_change) {
+        mensaje_recibir = decodificar(buffer);
+        if(atoi(mensaje_recibir[0]) != return_bet) {
           // quizas estos errores hay que manejarlos diferente
-          perror("no se recibio cartas a cambiar");
+          perror("no se recibio mensaje de retornar bet");
           exit(EXIT_FAILURE);
         }
-        printf("cartas a cambiar de jugador 1:\n");
-        for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
-          printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
-          for (int i = 0; i < 5; i++) {
-            if (cartas_j2[i][0] == mensaje_recibir_cartas->cartas[k][0] &&
-            cartas_j2[i][1] == mensaje_recibir_cartas->cartas[k][1]) {
-              cartas_j2[i] = sacar_carta(mazo);
+        n_bet = mensaje_recibir[2][0];
+        bet_error = 1;
+        while (bet_error == 1) {
+          for (int i = 0; i < n_tot; i++) {
+            if (bets2[i] == n_bet) {
+              bet_error = 0;
             }
           }
+          if (bet_error == 1) {
+            mensaje_enviar = codificar(error_bet, "");
+            send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+            free_codificacion(mensaje_enviar);
+            sleep(1);
+
+            mensaje_enviar = codificar_ints(get_bet, bets2, n_tot);
+            send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+            free_codificacion(mensaje_enviar);
+            sleep(1);
+
+            read(clientes[1], buffer, 2057);
+            mensaje_recibir = decodificar(buffer);
+            if(atoi(mensaje_recibir[0]) != return_bet) {
+              // quizas estos errores hay que manejarlos diferente
+              perror("no se recibio mensaje de retornar bet");
+              exit(EXIT_FAILURE);
+            }
+            n_bet = mensaje_recibir[2][0];
+          }
         }
-        printf("cartas nuevas jugador 1: \n");
-        for(int k = 0; k < 5; k++) {
-          printf("[%i]: %i %i\n", k + 1, cartas_j2[k][0], cartas_j2[k][1]);
-        }
-        mensaje_enviar = codificar_cartas(five_cards, cartas_j2, 5);
+        sleep(1);
+        mensaje_enviar = codificar(ok_bet, "");
         send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
 
-        //se alterna jugador
-        mensaje_enviar = codificar(get_cards_to_cange, "");
-        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
-        free_codificacion(mensaje_enviar);
-        sleep(1);
+        printf("bet seteado en: %i\n", n_bet);
 
-        read(clientes[0], buffer, 2057);
-        mensaje_recibir_cartas = decodificar_cartas(buffer);
-        if(atoi(mensaje_recibir_cartas->mensaje_id) != return_cards_to_change) {
-          // quizas estos errores hay que manejarlos diferente
-          perror("no se recibio cartas a cambiar");
-          exit(EXIT_FAILURE);
-        }
-        printf("cartas a cambiar de jugador 0:\n");
-        for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
-          printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
-          for (int i = 0; i < 5; i++) {
-            if (cartas_j1[i][0] == mensaje_recibir_cartas->cartas[k][0] &&
-            cartas_j1[i][1] == mensaje_recibir_cartas->cartas[k][1]) {
-              cartas_j1[i] = sacar_carta(mazo);
-            }
-          }
-        }
-        printf("cartas nuevas jugador 0: \n");
-        for(int k = 0; k < 5; k++) {
-          printf("[%i]: %i %i\n", k + 1, cartas_j1[k][0], cartas_j1[k][1]);
-        }
+        break; //no tenemos el resto, forzamos salida
 
-        mensaje_enviar = codificar_cartas(five_cards, cartas_j1, 5);
-        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
-        free_codificacion(mensaje_enviar);
-        sleep(1);
-      } */
+      }
     }
   }
 
+  sleep(1);
   mensaje_enviar = codificar(game_end, "");
   send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
