@@ -161,23 +161,29 @@ int main(int argc, char *argv[]) {
       pot[0] -= 10;
       pot[1] -= 10; //por mientras para evitar loops infinitos
 
-      mensaje_enviar = codificar(start_round, "");
+      itoa(pot[0], pot_string, 10);
+      mensaje_enviar = codificar(start_round, pot_string);
       send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
-      mensaje_enviar = codificar(start_round, "");
+      itoa(pot[1], pot_string, 10);
+      mensaje_enviar = codificar(start_round, pot_string);
       send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
-
+      free(pot_string);
       sleep(1);
 
-      mensaje_enviar = codificar(initial_bet, "Apuesta inicial de $10");
+      itoa(10, pot_string, 10);
+      mensaje_enviar = codificar(initial_bet, pot_string);
       send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
-      mensaje_enviar = codificar(initial_bet, "Apuesta inicial de $10");
+      itoa(10, pot_string, 10);
+      mensaje_enviar = codificar(initial_bet, pot_string);
       send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
+      free(pot_string);
       sleep(1);
       // se juega la ronda
+
     }
   }
 
