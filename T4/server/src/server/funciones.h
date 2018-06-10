@@ -23,3 +23,4 @@ typedef struct DecMazo {
 } Decodificar_Mazo;
 
 Decodificar_Mazo* decodificar_cartas(char* codificado);
+char* codificar_ints(int mensaje_id, int* valores, int cantidad);

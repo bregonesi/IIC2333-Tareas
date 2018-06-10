@@ -1,5 +1,35 @@
 #include "funciones.h"
 
+char* codificar_ints(int mensaje_id, int* valores, int cantidad) {
+	char* retornar = calloc(2057, sizeof(char));  // 8 + 8 + 8*255 + 1
+
+	char* mensaje_id_binario = calloc(9, sizeof(char));
+	itoa(mensaje_id, mensaje_id_binario, 2);
+	mensaje_id_binario = fill_binario(mensaje_id_binario, 8);
+
+	char* payload_size_binario = calloc(9, sizeof(char));
+	itoa(cantidad, payload_size_binario, 2);
+	payload_size_binario = fill_binario(payload_size_binario, 8);
+
+	char* payload = calloc(2041, sizeof(char));
+	for(int i = 0; i < cantidad; i++) {
+		char* caracter = calloc(9, sizeof(char));
+		itoa(valores[i], caracter, 2);
+		caracter = fill_binario(caracter, 8);
+		strcat(payload, caracter);
+		free(caracter);
+	}
+
+	strcat(retornar, mensaje_id_binario);
+	free(mensaje_id_binario);
+	strcat(retornar, payload_size_binario);
+	free(payload_size_binario);
+	strcat(retornar, payload);
+	free(payload);
+
+	return retornar;
+}
+
 Decodificar_Mazo* decodificar_cartas(char* codificado) {
 	char* mensaje_id_binario = calloc(9, sizeof(char));
 	char* payload_size_binario = calloc(9, sizeof(char));

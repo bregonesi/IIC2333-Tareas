@@ -217,7 +217,8 @@ int main(int argc, char *argv[]) {
       srand(time(NULL));
       int primer_jugador = rand() % 2;
       primer_jugador = rand() % 2;
-      if (primer_jugador == 0) {
+      primer_jugador = 0;
+      if (primer_jugador == 0) {  //parte jugador 0 -------------
         printf("parte jugador 0\n");
         send(clientes[0], "000010110000000100000001", 24, 0);
         send(clientes[1], "000010110000000100000010", 24, 0);
@@ -289,8 +290,36 @@ int main(int argc, char *argv[]) {
         send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
+
+        int* bets = malloc(5*sizeof(int));
+        bets[0] = 1;
+        bets[1] = 2;
+        bets[2] = 3;
+        bets[3] = 4;
+        bets[4] = 5;
+        mensaje_enviar = codificar_ints(get_bet, bets, 5);
+        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+
+        read(clientes[0], buffer, 2057);
+        mensaje_recibir = decodificar(buffer);
+        if(atoi(mensaje_recibir[0]) != return_bet) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio mensaje de retornar bet");
+          exit(EXIT_FAILURE);
+        }
+        int n_bet = atoi(mensaje_recibir[2]);
+        int bet_error = 1;
+        while (bet_error == 1) {
+          for (int i = 0; i < bets; i++) {
+            //
+          }
+          bet_error = 0;
+        }
       }
-      if (primer_jugador == 1) {
+      /*
+      if (primer_jugador == 1) {  //se comenta
         printf("parte jugador 1\n");
         send(clientes[0], "000010110000000100000010", 24, 0);
         send(clientes[1], "000010110000000100000001", 24, 0);
@@ -361,7 +390,7 @@ int main(int argc, char *argv[]) {
         send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
-      }
+      } */
     }
   }
 
