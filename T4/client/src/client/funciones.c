@@ -31,7 +31,7 @@ char* codificar(int mensaje_id, char* mensaje) {
 	return retornar;
 }
 
-char* codificar_mazo(int mensaje_id, int** cartas, int cantidad_cartas) {
+char* codificar_cartas(int mensaje_id, int** cartas, int cantidad_cartas) {
 	char* retornar = calloc(2057, sizeof(char));  // 8 + 8 + 8*255 + 1
 
 	char* mensaje_id_binario = calloc(9, sizeof(char));
