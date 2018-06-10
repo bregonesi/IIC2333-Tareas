@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
   mensaje_enviar = codificar(initial_pot, pot_string);
   send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
-  free(pot_string);
+  //free(pot_string);
 
   sleep(1);
 
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
 
   int jugando = 1;
   int ganador = -1;
-  while (jugando == 1) {
+  while(jugando == 1) {
     if (pot[0] < 10) {
       ganador = 1;
       jugando = 0;
@@ -158,6 +158,8 @@ int main(int argc, char *argv[]) {
       jugando = 0;
     }
     else {
+      Mazo* mazo = crear_mazo();
+
       pot[0] -= 10;
       pot[1] -= 10; //por mientras para evitar loops infinitos
 
@@ -169,21 +171,81 @@ int main(int argc, char *argv[]) {
       mensaje_enviar = codificar(start_round, pot_string);
       send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
-      free(pot_string);
+      //free(pot_string);
       sleep(1);
 
+      printf("pot string\n");
       itoa(10, pot_string, 10);
+      printf("%s\n", pot_string);
       mensaje_enviar = codificar(initial_bet, pot_string);
       send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
+      //free(pot_string);
+      printf("pot string\n");
       itoa(10, pot_string, 10);
+      printf("%s\n", pot_string);
       mensaje_enviar = codificar(initial_bet, pot_string);
       send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
-      free(pot_string);
+      //free(pot_string);
       sleep(1);
       // se juega la ronda
 
+      /* 5 cartas */
+      int** cartas_j1 = malloc(5 * sizeof(int*));
+      printf("cartas j1: \n");
+      for(int k = 0; k < 5; k++) {
+        cartas_j1[k] = sacar_carta(mazo);
+        printf("%i %i\n", cartas_j1[k][0], cartas_j1[k][1]);
+      }
+      mensaje_enviar = codificar_cartas(five_cards, cartas_j1, 5);
+
+      send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      int** cartas_j2 = malloc(5 * sizeof(int*));
+      printf("cartas j2: \n");
+      for(int k = 0; k < 5; k++) {
+        cartas_j2[k] = sacar_carta(mazo);
+        printf("%i %i\n", cartas_j2[k][0], cartas_j2[k][1]);
+      }
+      mensaje_enviar = codificar_cartas(five_cards, cartas_j2, 5);
+
+      send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      sleep(1);
+
+      srand(time(NULL));
+      int primer_jugador = rand() % 2;
+      if (primer_jugador == 0) {
+        send(clientes[0], "000010110000000100000001", 24, 0);
+        send(clientes[1], "000010110000000100000010", 24, 0);
+        sleep(1);
+
+        mensaje_enviar = codificar(get_cards_to_cange, "");
+        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+      }
+      if (primer_jugador == 1) {
+        send(clientes[0], "000010110000000100000010", 24, 0);
+        send(clientes[1], "000010110000000100000001", 24, 0);
+        sleep(1);
+
+        mensaje_enviar = codificar(get_cards_to_cange, "");
+        send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+      }
+
+
+      mensaje_enviar = codificar(game_start, "");
+      send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+      mensaje_enviar = codificar(game_start, "");
+      send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+
+      sleep(1);
     }
   }
 

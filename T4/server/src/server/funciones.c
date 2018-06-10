@@ -31,6 +31,38 @@ char* codificar(int mensaje_id, char* mensaje) {
 	return retornar;
 }
 
+char* codificar_cartas(int mensaje_id, int** cartas, int cantidad_cartas) {
+	char* retornar = calloc(2057, sizeof(char));  // 8 + 8 + 8*255 + 1
+
+	char* mensaje_id_binario = calloc(9, sizeof(char));
+	itoa(mensaje_id, mensaje_id_binario, 2);
+	mensaje_id_binario = fill_binario(mensaje_id_binario, 8);
+
+	char* payload_size_binario = calloc(9, sizeof(char));
+	itoa(cantidad_cartas*2, payload_size_binario, 2);
+	payload_size_binario = fill_binario(payload_size_binario, 8);
+
+	char* payload = calloc(2041, sizeof(char));
+	for(int i = 0; i < cantidad_cartas; i++) {
+		for (int j = 0; j < 2; j++)	 {
+			char* caracter = calloc(9, sizeof(char));
+			itoa(cartas[i][j], caracter, 2);
+			caracter = fill_binario(caracter, 8);
+			strcat(payload, caracter);
+			//free(caracter);
+		}
+	}
+
+	strcat(retornar, mensaje_id_binario);
+	free(mensaje_id_binario);
+	strcat(retornar, payload_size_binario);
+	free(payload_size_binario);
+	strcat(retornar, payload);
+	free(payload);
+
+	return retornar;
+}
+
 char** decodificar(char* codificado) {
 	char* mensaje_id_binario = calloc(9, sizeof(char));
 	char* payload_size_binario = calloc(9, sizeof(char));
@@ -74,14 +106,14 @@ char** decodificar(char* codificado) {
 }
 
 void free_codificacion(char* codificado) {
-	free(codificado);
+	//free(codificado);
 }
 
 void free_decodificacion(char** decodificado) {
 	free(decodificado[0]);
 	free(decodificado[1]);
 	free(decodificado[2]);
-	free(decodificado);
+	//free(decodificado);
 }
 
 /* Manejo de numeros */

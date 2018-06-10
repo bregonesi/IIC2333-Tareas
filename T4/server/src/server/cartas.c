@@ -8,8 +8,8 @@ Mazo* crear_mazo() {
   for(int pinta = 1; pinta <= 4; pinta++) {
     for(int carta = 1; carta <= 13; carta++) {
       int* carta_mazo = malloc(2 * sizeof(int));
-      carta_mazo[0] = pinta;
-      carta_mazo[1] = carta;
+      carta_mazo[1] = pinta;
+      carta_mazo[0] = carta;
       nuevo_mazo->cartas[(pinta - 1) * 13 + (carta - 1)] = carta_mazo;
     }
   }
@@ -26,12 +26,11 @@ void print_mazo(Mazo mazo) {
 int* sacar_carta(Mazo* mazo) {
   srand(time(NULL));
   int r = rand() % mazo->cantidad_cartas;
-
+  mazo->cantidad_cartas--;
   int* carta = mazo->cartas[r];
   for(int i = r; i < mazo->cantidad_cartas; i++) {
     mazo->cartas[i] = mazo->cartas[i + 1];
   }
-  mazo->cantidad_cartas--;
 
   return carta;
 }

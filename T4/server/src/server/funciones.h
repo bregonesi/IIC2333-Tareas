@@ -5,6 +5,7 @@
 
 /* Net code and decode */
 char* codificar(int mensaje_id, char* mensaje);
+char* codificar_cartas(int mensaje_id, int** cartas, int cantidad_cartas);
 char** decodificar(char* codificado);
 void free_codificacion(char* codificado);
 void free_decodificacion(char** decodificado);
