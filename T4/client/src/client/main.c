@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <time.h>
 
 #include "mensajes.h"
 #include "funciones.h"
@@ -141,6 +142,7 @@ int main(int argc, char *argv[]) {
     else {  // start_round
       free_decodificacion(mensaje_recibir);
 
+      /* Initial bet */
       read(sock, buffer, 2057);
       mensaje_recibir = decodificar(buffer);
       if(atoi(mensaje_recibir[0]) != initial_bet) {
@@ -151,6 +153,7 @@ int main(int argc, char *argv[]) {
       printf("%s\n", mensajes[atoi(mensaje_recibir[0])]);
       free_decodificacion(mensaje_recibir);
 
+      /* Recibo cartas originales */
       read(sock, buffer, 2057);
       mensaje_recibir_cartas = decodificar_cartas(buffer);
       if(atoi(mensaje_recibir_cartas->mensaje_id) != five_cards) {
@@ -159,6 +162,7 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
       }
 
+      /* whos first */
       read(sock, buffer, 2057);
       mensaje_recibir = decodificar(buffer);
       if(atoi(mensaje_recibir[0]) != whos_first) {
@@ -174,6 +178,7 @@ int main(int argc, char *argv[]) {
       }
       free_decodificacion(mensaje_recibir);
 
+      /* Espero mi turno */
       read(sock, buffer, 2057);
       mensaje_recibir = decodificar(buffer);
       if(atoi(mensaje_recibir[0]) != get_cards_to_cange) {
@@ -182,14 +187,16 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
       }
 
+      /* Printeo opciones de cartas a eliminar */
       printf("%s\n", mensajes[atoi(mensaje_recibir_cartas->mensaje_id)]);
       for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
         printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
       }
-      printf("Escoja cartas a eliminar ('end' para terminar):\n");
+      printf("Escoja numeros de carta a eliminar ('end' para terminar):\n");
       int** cartas_eliminar = malloc(5 * sizeof(int*));
       int cantidad_cartas_eliminar = 0;
       char input_text[4];
+      printf("djskladjklssssa\n");
       while(fgets(input_text, 4, stdin)) {
         //input_text[strlen(input_text) - 1] = '\0';  // sino queda con \n el final
 
@@ -201,10 +208,38 @@ int main(int argc, char *argv[]) {
         if(strcmp(input_text, "end") == 0)
           break;
       }
-      for(int k = 0; k < cantidad_cartas_eliminar; k++)
-        printf("%i %i\n", cartas_eliminar[k][0], cartas_eliminar[k][1]);
 
+      /* Envio cartas a elimiar */
+      mensaje_enviar = codificar_cartas(return_cards_to_change, cartas_eliminar, cantidad_cartas_eliminar);
       free_decodificacion_cartas(mensaje_recibir_cartas);
+      send(sock, mensaje_enviar, strlen(mensaje_enviar), 0);
+      free_codificacion(mensaje_enviar);
+
+      /* Cartas definitivas */
+      read(sock, buffer, 2057);
+      mensaje_recibir_cartas = decodificar_cartas(buffer);
+      if(atoi(mensaje_recibir_cartas->mensaje_id) != five_cards) {
+        // quizas estos errores hay que manejarlos diferente
+        perror("no se recibio cinco cartas");
+        exit(EXIT_FAILURE);
+      }
+      printf("%s\n", mensajes[atoi(mensaje_recibir_cartas->mensaje_id)]);
+      for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
+        printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
+      }
+
+      int bet = 1;
+      while(bet == 1) {
+        /* Espero mi turno */
+        read(sock, buffer, 2057);
+        mensaje_recibir = decodificar(buffer);
+        if(atoi(mensaje_recibir[0]) != get_cards_to_cange) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio get cards to change");
+          exit(EXIT_FAILURE);
+        }
+      }
+
     }
   }
 
