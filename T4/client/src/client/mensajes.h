@@ -12,15 +12,46 @@ int const initial_pot = 6;
 int const game_start = 7;
 int const start_round = 8;
 int const initial_bet = 9;
+int const five_cards = 10;
+int const whos_first = 11;
+int const get_cards_to_cange = 12;
+int const return_cards_to_change = 13;
+int const get_bet = 14;
+int const return_bet = 15;
+int const error_bet = 16;
+int const ok_bet = 17;
+int const end_round = 18;
+int const show_opponent_cards = 19;
+int const winner_loser = 20;
+int const update_pot = 21;
 int const game_end = 22;
-// falta rellenar el resto
+int const image = 23;
+int const error_not_implemented = 24;
 
-static char mensajes[7][256] = {
+static char mensajes[25][256] = {
   "",  // 0
   "",  // 1
   "",  // 2
   "Ingrese nickname",  // 3
   "",  // 4
   "Nickname del oponente:",  // 5
-  "Tienes un pot de:"  // 5
+  "Tienes un pot de:",  // 6
+  "Game start",  // 7
+  "New round",  // 8
+  "",  // 9
+  "",  // 10
+  "",  // 11
+  "",  // 12
+  "",  // 13
+  "",  // 14
+  "",  // 15
+  "",  // 16
+  "",  // 17
+  "",  // 18
+  "",  // 19
+  "",  // 20
+  "",  // 21
+  "Game over", // 22
+  "", // 23
+  "" // 24
 };

@@ -11,12 +11,6 @@
 #include "cartas.h"
 
 int main(int argc, char *argv[]) {
-  Mazo* mazo_juego = crear_mazo();
-  print_mazo(*mazo_juego);
-  int* carta = sacar_carta(mazo_juego);
-  free(carta);
-  print_mazo(*mazo_juego);
-
   if(argc != 5) {
     printf("Modo de uso: %s [-i <ip_address>] [-p <tcp-port>]\n", argv[0]);
     return 1;
@@ -143,10 +137,10 @@ int main(int argc, char *argv[]) {
 
   sleep(1);
 
-  mensaje_enviar = codificar(game_start, "Game start");
+  mensaje_enviar = codificar(game_start, "");
   send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
-  mensaje_enviar = codificar(game_start, "Game start");
+  mensaje_enviar = codificar(game_start, "");
   send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
 
@@ -166,13 +160,16 @@ int main(int argc, char *argv[]) {
     else {
       pot[0] -= 10;
       pot[1] -= 10; //por mientras para evitar loops infinitos
-      mensaje_enviar = codificar(start_round, "New round");
+
+      mensaje_enviar = codificar(start_round, "");
       send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
-      mensaje_enviar = codificar(start_round, "New round");
+      mensaje_enviar = codificar(start_round, "");
       send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
+
       sleep(1);
+
       mensaje_enviar = codificar(initial_bet, "Apuesta inicial de $10");
       send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
       free_codificacion(mensaje_enviar);
@@ -184,10 +181,10 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  mensaje_enviar = codificar(game_end, "Game over");
+  mensaje_enviar = codificar(game_end, "");
   send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
-  mensaje_enviar = codificar(game_end, "Game over");
+  mensaje_enviar = codificar(game_end, "");
   send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
   free_codificacion(mensaje_enviar);
 
