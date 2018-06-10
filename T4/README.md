@@ -21,3 +21,4 @@ Se utilizaron funciones para codificar y decodificar el protocolo mencionado en 
 # Cartas
 Para esto se creo una estructura `Mazo` que contiene un arreglo de arreglos de `ints` y un contador de cuantas cartas quedan disponibles.
 Para escoger cartas se creo la funcion `crear_mazo` que escoge un numero al azar entre 1 y la cantidad de cartas restantes.
+Para cambiar las cartas en el jugador, estas se muestran enumeradas desde 1 a 5, para cambiarlas el jugador tiene que ingresar los números de a 1 e ingresar un "end" cuando quiere para de agregar cartas al cambio.
