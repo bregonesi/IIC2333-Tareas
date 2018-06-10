@@ -1,5 +1,51 @@
 #include "funciones.h"
 
+Decodificar_Mazo* decodificar_cartas(char* codificado) {
+	char* mensaje_id_binario = calloc(9, sizeof(char));
+	char* payload_size_binario = calloc(9, sizeof(char));
+	char* mensaje_binario = calloc(2041, sizeof(char));
+
+	for(int i = 0; i < strlen(codificado); i++)  // like python :D (sin {})
+		if(i >= 0 && i < 8)
+			mensaje_id_binario[i] = codificado[i];
+		else if(i >= 8 && i < 16)
+			payload_size_binario[i - 8] = codificado[i];
+	 	else
+			mensaje_binario[i - 16] = codificado[i];
+
+	int mensaje_id = bin_to_dec(mensaje_id_binario);
+	free(mensaje_id_binario);
+	int payload_size = bin_to_dec(payload_size_binario);
+	free(payload_size_binario);
+
+	int** cartas = malloc(255 * sizeof(int*));
+	for(int i = 0; i < payload_size/2; i++) {
+		int* carta = malloc(2 * sizeof(int));
+		for(int k = 0; k < 2; k++) {
+			char* caracter_binario = calloc(9, sizeof(char));
+			for(int j = 0; j < 8; j++)
+				caracter_binario[j] = mensaje_binario[i * 16 + k * 8 + j];
+			int caracter = bin_to_dec(caracter_binario);
+			free(caracter_binario);
+			carta[k] = caracter;
+		}
+		cartas[i] = carta;
+	}
+
+	char* mensaje_id_char = calloc(2, sizeof(char));
+	itoa(mensaje_id, mensaje_id_char, 10);
+	char* payload_size_char = calloc(2, sizeof(char));
+	itoa(payload_size, payload_size_char, 10);
+
+	Decodificar_Mazo* ret = malloc(sizeof(Decodificar_Mazo));
+	ret->mensaje_id = mensaje_id_char;
+	ret->payload_size = payload_size_char;
+	ret->cantidad_cartas = payload_size/2;
+	ret->cartas = cartas;
+
+	return ret;
+}
+
 /* Net code and decode */
 char* codificar(int mensaje_id, char* mensaje) {
 	char* retornar = calloc(2057, sizeof(char));  // 8 + 8 + 8*255 + 1

@@ -216,7 +216,9 @@ int main(int argc, char *argv[]) {
 
       srand(time(NULL));
       int primer_jugador = rand() % 2;
+      primer_jugador = rand() % 2;
       if (primer_jugador == 0) {
+        printf("parte jugador 0\n");
         send(clientes[0], "000010110000000100000001", 24, 0);
         send(clientes[1], "000010110000000100000010", 24, 0);
         sleep(1);
@@ -225,8 +227,71 @@ int main(int argc, char *argv[]) {
         send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
+
+        Decodificar_Mazo* mensaje_recibir_cartas;  // estructura
+
+        read(clientes[0], buffer, 2057);
+        mensaje_recibir_cartas = decodificar_cartas(buffer);
+        if(atoi(mensaje_recibir_cartas->mensaje_id) != return_cards_to_change) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio cartas a cambiar");
+          exit(EXIT_FAILURE);
+        }
+        printf("cartas a cambiar de jugador 0:\n");
+        for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
+          printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
+          for (int i = 0; i < 5; i++) {
+            if (cartas_j1[i][0] == mensaje_recibir_cartas->cartas[k][0] &&
+            cartas_j1[i][1] == mensaje_recibir_cartas->cartas[k][1]) {
+              cartas_j1[i] = sacar_carta(mazo);
+            }
+          }
+        }
+        printf("cartas nuevas jugador 0: \n");
+        for(int k = 0; k < 5; k++) {
+          printf("[%i]: %i %i\n", k + 1, cartas_j1[k][0], cartas_j1[k][1]);
+        }
+
+        mensaje_enviar = codificar_cartas(five_cards, cartas_j1, 5);
+        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+
+        // se cambia con el otro jugador
+        mensaje_enviar = codificar(get_cards_to_cange, "");
+        send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+
+        read(clientes[1], buffer, 2057);
+        mensaje_recibir_cartas = decodificar_cartas(buffer);
+        if(atoi(mensaje_recibir_cartas->mensaje_id) != return_cards_to_change) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio cartas a cambiar");
+          exit(EXIT_FAILURE);
+        }
+        printf("cartas a cambiar de jugador 1:\n");
+        for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
+          printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
+          for (int i = 0; i < 5; i++) {
+            if (cartas_j2[i][0] == mensaje_recibir_cartas->cartas[k][0] &&
+            cartas_j2[i][1] == mensaje_recibir_cartas->cartas[k][1]) {
+              cartas_j2[i] = sacar_carta(mazo);
+            }
+          }
+        }
+        printf("cartas nuevas jugador 1: \n");
+        for(int k = 0; k < 5; k++) {
+          printf("[%i]: %i %i\n", k + 1, cartas_j2[k][0], cartas_j2[k][1]);
+        }
+
+        mensaje_enviar = codificar_cartas(five_cards, cartas_j2, 5);
+        send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
       }
       if (primer_jugador == 1) {
+        printf("parte jugador 1\n");
         send(clientes[0], "000010110000000100000010", 24, 0);
         send(clientes[1], "000010110000000100000001", 24, 0);
         sleep(1);
@@ -235,17 +300,68 @@ int main(int argc, char *argv[]) {
         send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
         free_codificacion(mensaje_enviar);
         sleep(1);
+
+        Decodificar_Mazo* mensaje_recibir_cartas;  // estructura
+
+        read(clientes[1], buffer, 2057);
+        mensaje_recibir_cartas = decodificar_cartas(buffer);
+        if(atoi(mensaje_recibir_cartas->mensaje_id) != return_cards_to_change) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio cartas a cambiar");
+          exit(EXIT_FAILURE);
+        }
+        printf("cartas a cambiar de jugador 1:\n");
+        for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
+          printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
+          for (int i = 0; i < 5; i++) {
+            if (cartas_j2[i][0] == mensaje_recibir_cartas->cartas[k][0] &&
+            cartas_j2[i][1] == mensaje_recibir_cartas->cartas[k][1]) {
+              cartas_j2[i] = sacar_carta(mazo);
+            }
+          }
+        }
+        printf("cartas nuevas jugador 1: \n");
+        for(int k = 0; k < 5; k++) {
+          printf("[%i]: %i %i\n", k + 1, cartas_j2[k][0], cartas_j2[k][1]);
+        }
+        mensaje_enviar = codificar_cartas(five_cards, cartas_j2, 5);
+        send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+
+        //se alterna jugador
+        mensaje_enviar = codificar(get_cards_to_cange, "");
+        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
+
+        read(clientes[0], buffer, 2057);
+        mensaje_recibir_cartas = decodificar_cartas(buffer);
+        if(atoi(mensaje_recibir_cartas->mensaje_id) != return_cards_to_change) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio cartas a cambiar");
+          exit(EXIT_FAILURE);
+        }
+        printf("cartas a cambiar de jugador 0:\n");
+        for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
+          printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
+          for (int i = 0; i < 5; i++) {
+            if (cartas_j1[i][0] == mensaje_recibir_cartas->cartas[k][0] &&
+            cartas_j1[i][1] == mensaje_recibir_cartas->cartas[k][1]) {
+              cartas_j1[i] = sacar_carta(mazo);
+            }
+          }
+        }
+        printf("cartas nuevas jugador 0: \n");
+        for(int k = 0; k < 5; k++) {
+          printf("[%i]: %i %i\n", k + 1, cartas_j1[k][0], cartas_j1[k][1]);
+        }
+
+        mensaje_enviar = codificar_cartas(five_cards, cartas_j1, 5);
+        send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+        sleep(1);
       }
-
-
-      mensaje_enviar = codificar(game_start, "");
-      send(clientes[0], mensaje_enviar, strlen(mensaje_enviar), 0);
-      free_codificacion(mensaje_enviar);
-      mensaje_enviar = codificar(game_start, "");
-      send(clientes[1], mensaje_enviar, strlen(mensaje_enviar), 0);
-      free_codificacion(mensaje_enviar);
-
-      sleep(1);
     }
   }
 

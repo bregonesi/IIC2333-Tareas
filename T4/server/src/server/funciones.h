@@ -14,3 +14,12 @@ void free_decodificacion(char** decodificado);
 char* itoa(int value, char* result, int base);
 char* fill_binario(char* binario, int cantidad);
 int bin_to_dec(char* bin);
+
+typedef struct DecMazo {
+  char* mensaje_id;
+  char* payload_size;
+  int cantidad_cartas;
+	int** cartas;
+} Decodificar_Mazo;
+
+Decodificar_Mazo* decodificar_cartas(char* codificado);
