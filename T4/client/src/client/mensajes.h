@@ -39,7 +39,7 @@ static char mensajes[25][256] = {
   "Game start",  // 7
   "New round",  // 8
   "",  // 9
-  "",  // 10
+  "Tienes las cartas:",  // 10
   "",  // 11
   "",  // 12
   "",  // 13
