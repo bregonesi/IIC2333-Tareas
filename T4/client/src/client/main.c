@@ -227,29 +227,59 @@ int main(int argc, char *argv[]) {
         printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
       }
 
+      read(sock, buffer, 2057);
+      mensaje_recibir = decodificar(buffer);
+      printf("%s\n", buffer);
+      if(atoi(mensaje_recibir[0]) != get_bet) {
+        // quizas estos errores hay que manejarlos diferente
+        perror("no se recibio get bet");
+        exit(EXIT_FAILURE);
+      }
+      printf("Bets (id) disponibles:\n");
+      for(int k = 0; k < atoi(mensaje_recibir[1]); k++) {
+        printf("%i\n", mensaje_recibir[2][k]);
+      }
       int bet = 1;
       while(bet == 1) {
         /* Espero los bets */
-        read(sock, buffer, 2057);
-        mensaje_recibir = decodificar(buffer);
-        if(atoi(mensaje_recibir[0]) != get_bet) {
-          // quizas estos errores hay que manejarlos diferente
-          perror("no se recibio get bet");
-          exit(EXIT_FAILURE);
-        }
-        printf("Bets disponibles:\n");
-        for(int k = 1; k <= atoi(mensaje_recibir[1]); k++) {
-          printf("[%i] %i\n", k, mensaje_recibir[2][k]);
-        }
         printf("Escoja un bet\n");
         char input_text[2];
-        while(fgets(input_text, 2, stdin)) {
-          if(strcmp(input_text, "") != 0 && atoi(input_text) >= 1 && atoi(input_text) <= atoi(mensaje_recibir[1])) {
+        while(1) {
+          fgets(input_text, 2, stdin);
+          if(strcmp(input_text, "") != 0 && strcmp(input_text, "\n") != 0)
+            break;
+
+          /*
+          if(strcmp(input_text, "") != 0 && atoi(input_text) >= mensaje_recibir[2][0] && atoi(input_text) <= mensaje_recibir[2][atoi(mensaje_recibir[1]) - 1]) {
             break;
           }
+          */
+          //printf("Escogiste un bet malo\n");
         }
         printf("Escogiste el bet %s\n", input_text);
 
+        /* Envio bet */
+        int* bets = malloc(sizeof(int));
+        bets[0] = atoi(input_text);
+        mensaje_enviar = codificar_ints(return_bet, bets, 1);
+        printf("%s\n", mensaje_enviar);
+        send(sock, mensaje_enviar, strlen(mensaje_enviar), 0);
+        free_codificacion(mensaje_enviar);
+
+        /* Espero respuesta de bet */
+        read(sock, buffer, 2057);
+        mensaje_recibir = decodificar(buffer);
+        if(atoi(mensaje_recibir[0]) != error_bet && atoi(mensaje_recibir[0]) != ok_bet) {
+          // quizas estos errores hay que manejarlos diferente
+          perror("no se recibio ni error bet ni ok bet");
+          exit(EXIT_FAILURE);
+        }
+
+        if(atoi(mensaje_recibir[0]) == ok_bet) {
+          printf("Se recibio bet bueno. Se finaliza programa ya que no se alcanzo a desarrollar\n");
+          return 0;
+          break;
+        }
       }
 
     }
