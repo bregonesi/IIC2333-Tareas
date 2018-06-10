@@ -196,7 +196,6 @@ int main(int argc, char *argv[]) {
       int** cartas_eliminar = malloc(5 * sizeof(int*));
       int cantidad_cartas_eliminar = 0;
       char input_text[4];
-      printf("djskladjklssssa\n");
       while(fgets(input_text, 4, stdin)) {
         //input_text[strlen(input_text) - 1] = '\0';  // sino queda con \n el final
 
@@ -230,14 +229,27 @@ int main(int argc, char *argv[]) {
 
       int bet = 1;
       while(bet == 1) {
-        /* Espero mi turno */
+        /* Espero los bets */
         read(sock, buffer, 2057);
         mensaje_recibir = decodificar(buffer);
-        if(atoi(mensaje_recibir[0]) != get_cards_to_cange) {
+        if(atoi(mensaje_recibir[0]) != get_bet) {
           // quizas estos errores hay que manejarlos diferente
-          perror("no se recibio get cards to change");
+          perror("no se recibio get bet");
           exit(EXIT_FAILURE);
         }
+        printf("Bets disponibles:\n");
+        for(int k = 1; k <= atoi(mensaje_recibir[1]); k++) {
+          printf("[%i] %i\n", k, mensaje_recibir[2][k]);
+        }
+        printf("Escoja un bet\n");
+        char input_text[2];
+        while(fgets(input_text, 2, stdin)) {
+          if(strcmp(input_text, "") != 0 && atoi(input_text) >= 1 && atoi(input_text) <= atoi(mensaje_recibir[1])) {
+            break;
+          }
+        }
+        printf("Escogiste el bet %s\n", input_text);
+
       }
 
     }
