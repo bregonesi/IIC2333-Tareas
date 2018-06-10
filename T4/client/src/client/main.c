@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
   char buffer[2057];  // 8 + 8 + 8*255 + 1
   char* mensaje_enviar;
   char** mensaje_recibir;  // [mensaje_id, tamano, mensaje]
+  Decodificar_Mazo* mensaje_recibir_cartas;  // estructura
 
   // Enviar mensaje de start conection
   mensaje_enviar = codificar(start_conection, "");
@@ -132,7 +133,7 @@ int main(int argc, char *argv[]) {
 
     if(atoi(mensaje_recibir[0]) == game_end) {
       free_decodificacion(mensaje_recibir);
-      
+
       jugando = 0;
       printf("%s\n", mensajes[atoi(mensaje_recibir[0])]);
       free_decodificacion(mensaje_recibir);
@@ -149,6 +150,61 @@ int main(int argc, char *argv[]) {
       }
       printf("%s\n", mensajes[atoi(mensaje_recibir[0])]);
       free_decodificacion(mensaje_recibir);
+
+      read(sock, buffer, 2057);
+      mensaje_recibir_cartas = decodificar_cartas(buffer);
+      if(atoi(mensaje_recibir_cartas->mensaje_id) != five_cards) {
+        // quizas estos errores hay que manejarlos diferente
+        perror("no se recibio cinco cartas");
+        exit(EXIT_FAILURE);
+      }
+
+      read(sock, buffer, 2057);
+      mensaje_recibir = decodificar(buffer);
+      if(atoi(mensaje_recibir[0]) != whos_first) {
+        // quizas estos errores hay que manejarlos diferente
+        perror("no se recibio whos first");
+        exit(EXIT_FAILURE);
+      }
+
+      if(mensaje_recibir[2][0] == 1)
+        printf("Tu juegas\n");
+      else {
+        printf("Parte el otro. Esperas\n");
+      }
+      free_decodificacion(mensaje_recibir);
+
+      read(sock, buffer, 2057);
+      mensaje_recibir = decodificar(buffer);
+      if(atoi(mensaje_recibir[0]) != get_cards_to_cange) {
+        // quizas estos errores hay que manejarlos diferente
+        perror("no se recibio get cards to change");
+        exit(EXIT_FAILURE);
+      }
+
+      printf("%s\n", mensajes[atoi(mensaje_recibir_cartas->mensaje_id)]);
+      for(int k = 0; k < mensaje_recibir_cartas->cantidad_cartas; k++) {
+        printf("[%i]: %i %i\n", k + 1, mensaje_recibir_cartas->cartas[k][0], mensaje_recibir_cartas->cartas[k][1]);
+      }
+      printf("Escoja cartas a eliminar ('end' para terminar):\n");
+      int** cartas_eliminar = malloc(5 * sizeof(int*));
+      int cantidad_cartas_eliminar = 0;
+      char input_text[4];
+      while(fgets(input_text, 4, stdin)) {
+        //input_text[strlen(input_text) - 1] = '\0';  // sino queda con \n el final
+
+        if(atoi(input_text) > 0 && atoi(input_text) <= 5) {
+          cartas_eliminar[cantidad_cartas_eliminar] = mensaje_recibir_cartas->cartas[atoi(input_text) - 1];
+          cantidad_cartas_eliminar++;
+        }
+
+        if(strcmp(input_text, "end") == 0)
+          break;
+      }
+      for(int k = 0; k < cantidad_cartas_eliminar; k++)
+        printf("%i %i\n", cartas_eliminar[k][0], cartas_eliminar[k][1]);
+
+      free_decodificacion_cartas(mensaje_recibir_cartas);
     }
   }
 
